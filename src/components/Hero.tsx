@@ -11,7 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 
 import heroJcb from "@/assets/hero-jcb.jpg";
+import leyland from "@/assets/leyland-trucks.jpg";
+import switchEv from "@/assets/switch-ev-bus.jpg";
+import usedVehicles from "@/assets/used-vehicles.jpg";
+import { AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 
+const heroImages = [heroJcb, leyland, switchEv, usedVehicles];
 const trustBadges = [
   "Authorized Dealer",
   "Finance Support",
@@ -20,18 +26,35 @@ const trustBadges = [
 ];
 
 export function Hero() {
+  const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImage((prev) => (prev + 1) % heroImages.length);
+    }, 5000); // change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
   return (
     <section className="relative min-h-screen flex items-center pt-20 lg:pt-0">
       {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src={heroJcb}
-          alt="JCB Machine at construction site"
-          className="w-full h-full object-cover"
-        />
+      <div className="absolute inset-0 overflow-hidden">
+        <AnimatePresence>
+          <motion.img
+            key={currentImage}
+            src={heroImages[currentImage]}
+            alt="Hero background"
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+          />
+        </AnimatePresence>
+
+        {/* Gradient Overlay */}
         <div className="absolute inset-0 hero-gradient" />
       </div>
-
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10 py-12 lg:py-0">
         <div className="max-w-3xl">
