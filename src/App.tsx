@@ -11,6 +11,7 @@ import UsedVehiclesPage from "./pages/UsedVehiclesPage";
 import FinancePage from "./pages/FinancePage";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/scrollToTop";
+import CheckCibilScore from "./pages/CheckCibilScore";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/ashok-leyland" element={<AshokLeylandPage />} />
           <Route path="/switch-ev" element={<SwitchEVPage />} />
           <Route path="/used-vehicles" element={<UsedVehiclesPage />} />
+          <Route path="/cibil-score" element={<CheckCibilScore />} />
           <Route path="/finance" element={<FinancePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
