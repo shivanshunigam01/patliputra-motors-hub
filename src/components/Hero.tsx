@@ -1,15 +1,22 @@
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Phone, MessageCircle, FileText, ArrowRight, CheckCircle, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  Phone,
+  MessageCircle,
+  FileText,
+  ArrowRight,
+  CheckCircle,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-import heroJcb from '@/assets/hero-jcb.jpg';
+import heroJcb from "@/assets/hero-jcb.jpg";
 
 const trustBadges = [
-  'Authorized Dealer',
-  'Finance Support',
-  '24/7 Service',
-  'Genuine Parts',
+  "Authorized Dealer",
+  "Finance Support",
+  "24/7 Service",
+  "Genuine Parts",
 ];
 
 export function Hero() {
@@ -46,9 +53,7 @@ export function Hero() {
             transition={{ delay: 0.3 }}
             className="text-4xl md:text-5xl lg:text-7xl font-bold text-primary-foreground mb-6 leading-tight"
           >
-            Bihar का{' '}
-            <span className="text-jcb">Bharosemand</span>{' '}
-            Partner
+            Bihar का <span className="text-jcb">Bharosemand</span> Partner
           </motion.h1>
 
           {/* Subheadline */}
@@ -58,7 +63,8 @@ export function Hero() {
             transition={{ delay: 0.4 }}
             className="text-lg md:text-xl lg:text-2xl text-primary-foreground/80 mb-8 leading-relaxed"
           >
-            JCB Machines | Ashok Leyland Trucks | Switch Electric Vehicles | Certified Used
+            JCB Machines | Ashok Leyland Trucks | Switch Electric Vehicles |
+            Certified Used
           </motion.p>
 
           {/* CTA Buttons */}
@@ -69,19 +75,33 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4 mb-8"
           >
             <a href="tel:+919876543210">
-              <Button size="lg" className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-jcb transition-all">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-jcb transition-all"
+              >
                 <Phone className="h-5 w-5" />
                 Call Karein
               </Button>
             </a>
-            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="w-full sm:w-auto gap-2 bg-success text-success-foreground hover:bg-success/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-ev transition-all">
+            <a
+              href="https://wa.me/919876543210"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                size="lg"
+                className="w-full sm:w-auto gap-2 bg-success text-success-foreground hover:bg-success/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-ev transition-all"
+              >
                 <MessageCircle className="h-5 w-5" />
                 WhatsApp
               </Button>
             </a>
             <Link to="/finance">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold text-base px-8">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold text-base px-8"
+              >
                 <FileText className="h-5 w-5" />
                 Enquiry Karein
               </Button>
@@ -94,7 +114,7 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <Link 
+            <Link
               to="/used-vehicles"
               className="inline-flex items-center gap-2 text-jcb hover:text-jcb/80 font-medium transition-colors group"
             >
@@ -112,7 +132,9 @@ export function Hero() {
           >
             <div className="flex items-center gap-2 px-4 py-3 bg-primary-foreground/10 rounded-full backdrop-blur-sm">
               <Users className="h-5 w-5 text-jcb" />
-              <span className="text-primary-foreground font-semibold">2,500+ Happy Customers</span>
+              <span className="text-primary-foreground font-semibold">
+                2,500+ Happy Customers
+              </span>
             </div>
           </motion.div>
 
@@ -129,7 +151,9 @@ export function Hero() {
                 className="flex items-center gap-2 px-3 py-2 bg-primary-foreground/5 rounded-lg backdrop-blur-sm"
               >
                 <CheckCircle className="h-4 w-4 text-success" />
-                <span className="text-sm text-primary-foreground/80">{badge}</span>
+                <span className="text-sm text-primary-foreground/80">
+                  {badge}
+                </span>
               </div>
             ))}
           </motion.div>
@@ -144,7 +168,9 @@ export function Hero() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:block"
       >
         <div className="flex flex-col items-center gap-2 text-primary-foreground/60">
-          <span className="text-xs tracking-wider uppercase">Scroll to Explore</span>
+          <span className="text-xs tracking-wider uppercase">
+            Scroll to Explore
+          </span>
           <motion.div
             animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}

@@ -1,95 +1,110 @@
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Phone, MessageCircle, ArrowRight, CheckCircle, Shield, Calendar, Gauge, RefreshCcw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
-import { FloatingCTA } from '@/components/FloatingCTA';
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import {
+  Phone,
+  MessageCircle,
+  ArrowRight,
+  CheckCircle,
+  Shield,
+  Calendar,
+  Gauge,
+  RefreshCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { FloatingCTA } from "@/components/FloatingCTA";
 
-import usedVehicles from '@/assets/used-vehicles.jpg';
+import usedVehicles from "@/assets/used-vehicles.jpg";
 
 const vehicles = [
   {
     id: 1,
-    name: 'Ashok Leyland 1616 Tipper',
-    year: '2019',
-    km: '85,000 km',
-    price: '₹12.50 Lakh',
-    emi: '₹28,500/month',
-    badge: 'CERTIFIED',
+    name: "Ashok Leyland 1616 Tipper",
+    year: "2019",
+    km: "85,000 km",
+    price: "₹12.50 Lakh",
+    emi: "₹28,500/month",
+    badge: "CERTIFIED",
     image: usedVehicles,
-    condition: 'Excellent',
-    owner: 'First Owner',
+    condition: "Excellent",
+    owner: "First Owner",
   },
   {
     id: 2,
-    name: 'JCB 3DX Backhoe Loader',
-    year: '2020',
-    km: '3,500 hrs',
-    price: '₹11.80 Lakh',
-    emi: '₹26,800/month',
-    badge: 'TOP PICK',
+    name: "JCB 3DX Backhoe Loader",
+    year: "2020",
+    km: "3,500 hrs",
+    price: "₹11.80 Lakh",
+    emi: "₹26,800/month",
+    badge: "TOP PICK",
     image: usedVehicles,
-    condition: 'Good',
-    owner: 'First Owner',
+    condition: "Good",
+    owner: "First Owner",
   },
   {
     id: 3,
-    name: 'Ashok Leyland 4825 Truck',
-    year: '2018',
-    km: '1,20,000 km',
-    price: '₹18.00 Lakh',
-    emi: '₹41,000/month',
-    badge: 'BEST VALUE',
+    name: "Ashok Leyland 4825 Truck",
+    year: "2018",
+    km: "1,20,000 km",
+    price: "₹18.00 Lakh",
+    emi: "₹41,000/month",
+    badge: "BEST VALUE",
     image: usedVehicles,
-    condition: 'Excellent',
-    owner: 'Second Owner',
+    condition: "Excellent",
+    owner: "Second Owner",
   },
   {
     id: 4,
-    name: 'Tata Prima 4928',
-    year: '2021',
-    km: '65,000 km',
-    price: '₹22.50 Lakh',
-    emi: '₹51,200/month',
-    badge: 'LOW KM',
+    name: "Tata Prima 4928",
+    year: "2021",
+    km: "65,000 km",
+    price: "₹22.50 Lakh",
+    emi: "₹51,200/month",
+    badge: "LOW KM",
     image: usedVehicles,
-    condition: 'Excellent',
-    owner: 'First Owner',
+    condition: "Excellent",
+    owner: "First Owner",
   },
   {
     id: 5,
-    name: 'Ashok Leyland DOST+',
-    year: '2022',
-    km: '35,000 km',
-    price: '₹5.80 Lakh',
-    emi: '₹13,200/month',
-    badge: 'LIKE NEW',
+    name: "Ashok Leyland DOST+",
+    year: "2022",
+    km: "35,000 km",
+    price: "₹5.80 Lakh",
+    emi: "₹13,200/month",
+    badge: "LIKE NEW",
     image: usedVehicles,
-    condition: 'Excellent',
-    owner: 'First Owner',
+    condition: "Excellent",
+    owner: "First Owner",
   },
   {
     id: 6,
-    name: 'JCB JS205 Excavator',
-    year: '2019',
-    km: '5,200 hrs',
-    price: '₹28.00 Lakh',
-    emi: '₹63,700/month',
-    badge: 'INSPECTED',
+    name: "JCB JS205 Excavator",
+    year: "2019",
+    km: "5,200 hrs",
+    price: "₹28.00 Lakh",
+    emi: "₹63,700/month",
+    badge: "INSPECTED",
     image: usedVehicles,
-    condition: 'Good',
-    owner: 'First Owner',
+    condition: "Good",
+    owner: "First Owner",
   },
 ];
 
-const categories = ['All', 'Tipper Trucks', 'Loaders/JCB', 'Buses', 'LCV/Pickup'];
+const categories = [
+  "All",
+  "Tipper Trucks",
+  "Loaders/JCB",
+  "Buses",
+  "LCV/Pickup",
+];
 
 const UsedVehiclesPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main>
         {/* Hero Banner */}
         <section className="relative h-[50vh] lg:h-[60vh] flex items-center pt-20">
@@ -112,24 +127,37 @@ const UsedVehiclesPage = () => {
                 <Shield className="h-4 w-4" />
                 150-Point Inspection Certified
               </div>
-              
+
               <h1 className="text-4xl lg:text-6xl font-bold text-primary-foreground mb-4">
-                <span className="text-jcb">Certified Used</span> Commercial Vehicles
+                <span className="text-jcb">Certified Used</span> Commercial
+                Vehicles
               </h1>
-              
+
               <p className="text-lg text-primary-foreground/80 mb-8">
-                Pre-owned vehicles with warranty. Inspected, certified, and ready for work. Finance available.
+                Pre-owned vehicles with warranty. Inspected, certified, and
+                ready for work. Finance available.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <a href="tel:+919876543210">
-                  <Button size="lg" className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
+                  >
                     <Phone className="h-5 w-5" />
                     Get Best Deals
                   </Button>
                 </a>
-                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold">
+                <a
+                  href="https://wa.me/919876543210"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
+                  >
                     <MessageCircle className="h-5 w-5" />
                     Schedule Inspection
                   </Button>
@@ -145,23 +173,39 @@ const UsedVehiclesPage = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
               <div className="flex flex-col items-center">
                 <Shield className="h-8 w-8 text-success mb-2" />
-                <p className="font-semibold text-foreground">150-Point Inspection</p>
-                <p className="text-sm text-muted-foreground">Thorough quality check</p>
+                <p className="font-semibold text-foreground">
+                  150-Point Inspection
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Thorough quality check
+                </p>
               </div>
               <div className="flex flex-col items-center">
                 <RefreshCcw className="h-8 w-8 text-jcb mb-2" />
-                <p className="font-semibold text-foreground">7-Day Return Policy</p>
-                <p className="text-sm text-muted-foreground">No questions asked</p>
+                <p className="font-semibold text-foreground">
+                  7-Day Return Policy
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  No questions asked
+                </p>
               </div>
               <div className="flex flex-col items-center">
                 <CheckCircle className="h-8 w-8 text-ev mb-2" />
-                <p className="font-semibold text-foreground">Finance Pre-Approved</p>
-                <p className="text-sm text-muted-foreground">Easy loan process</p>
+                <p className="font-semibold text-foreground">
+                  Finance Pre-Approved
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Easy loan process
+                </p>
               </div>
               <div className="flex flex-col items-center">
                 <Calendar className="h-8 w-8 text-leyland mb-2" />
-                <p className="font-semibold text-foreground">Warranty Available</p>
-                <p className="text-sm text-muted-foreground">Up to 1 year coverage</p>
+                <p className="font-semibold text-foreground">
+                  Warranty Available
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Up to 1 year coverage
+                </p>
               </div>
             </div>
           </div>
@@ -175,9 +219,9 @@ const UsedVehiclesPage = () => {
                 <button
                   key={category}
                   className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                    category === 'All'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary'
+                    category === "All"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   }`}
                 >
                   {category}
@@ -227,10 +271,16 @@ const UsedVehiclesPage = () => {
 
                       {/* Condition */}
                       <div className="flex items-center gap-2 mb-4">
-                        <span className="text-sm text-muted-foreground">Condition:</span>
-                        <span className={`text-sm font-medium ${
-                          vehicle.condition === 'Excellent' ? 'text-success' : 'text-jcb'
-                        }`}>
+                        <span className="text-sm text-muted-foreground">
+                          Condition:
+                        </span>
+                        <span
+                          className={`text-sm font-medium ${
+                            vehicle.condition === "Excellent"
+                              ? "text-success"
+                              : "text-jcb"
+                          }`}
+                        >
                           {vehicle.condition}
                         </span>
                       </div>
@@ -248,12 +298,24 @@ const UsedVehiclesPage = () => {
                         </div>
                         <div className="flex gap-2">
                           <a href="tel:+919876543210" className="flex-1">
-                            <Button size="sm" className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90">
+                            <Button
+                              size="sm"
+                              className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90"
+                            >
                               Call Seller
                             </Button>
                           </a>
-                          <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex-1">
-                            <Button size="sm" variant="outline" className="w-full">
+                          <a
+                            href="https://wa.me/919876543210"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1"
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full"
+                            >
                               WhatsApp
                             </Button>
                           </a>
@@ -274,17 +336,25 @@ const UsedVehiclesPage = () => {
               Sell Your Vehicle
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-              Looking to sell your commercial vehicle? Get the best price from Bihar's most trusted dealer.
+              Looking to sell your commercial vehicle? Get the best price from
+              Bihar's most trusted dealer.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href="tel:+919876543210">
-                <Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold">
+                <Button
+                  size="lg"
+                  className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
+                >
                   <Phone className="h-5 w-5" />
                   Get Free Valuation
                 </Button>
               </a>
               <Link to="/finance">
-                <Button size="lg" variant="outline" className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
+                >
                   Used Vehicle Finance
                   <ArrowRight className="h-5 w-5" />
                 </Button>
@@ -293,7 +363,7 @@ const UsedVehiclesPage = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
       <FloatingCTA />
     </div>

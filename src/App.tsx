@@ -10,6 +10,7 @@ import SwitchEVPage from "./pages/SwitchEVPage";
 import UsedVehiclesPage from "./pages/UsedVehiclesPage";
 import FinancePage from "./pages/FinancePage";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/scrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/jcb" element={<JCBPage />} />
