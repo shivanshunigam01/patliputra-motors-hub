@@ -9,30 +9,37 @@ import AshokLeylandPage from "./pages/AshokLeylandPage";
 import SwitchEVPage from "./pages/SwitchEVPage";
 import UsedVehiclesPage from "./pages/UsedVehiclesPage";
 import FinancePage from "./pages/FinancePage";
+import ComparePage from "./pages/ComparePage";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/scrollToTop";
 import CheckCibilScore from "./pages/CheckCibilScore";
+import { CompareProvider } from "./context/CompareContext";
+import { CompareFloatingBar } from "./components/CompareFloatingBar";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/jcb" element={<JCBPage />} />
-          <Route path="/ashok-leyland" element={<AshokLeylandPage />} />
-          <Route path="/switch-ev" element={<SwitchEVPage />} />
-          <Route path="/used-vehicles" element={<UsedVehiclesPage />} />
-          <Route path="/cibil-score" element={<CheckCibilScore />} />
-          <Route path="/finance" element={<FinancePage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <CompareProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/jcb" element={<JCBPage />} />
+            <Route path="/ashok-leyland" element={<AshokLeylandPage />} />
+            <Route path="/switch-ev" element={<SwitchEVPage />} />
+            <Route path="/used-vehicles" element={<UsedVehiclesPage />} />
+            <Route path="/cibil-score" element={<CheckCibilScore />} />
+            <Route path="/finance" element={<FinancePage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <CompareFloatingBar />
+        </BrowserRouter>
+      </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

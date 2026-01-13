@@ -1,20 +1,29 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Calculator, IndianRupee, Phone } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export function EMICalculator() {
-  const [vehiclePrice, setVehiclePrice] = useState([1500000]); // 15 Lakh default
-  const [downPayment, setDownPayment] = useState([300000]); // 3 Lakh default
-  const [tenure, setTenure] = useState([36]); // 36 months default
+  const [vehiclePrice, setVehiclePrice] = useState(1500000); // 15 Lakh default
+  const [downPayment, setDownPayment] = useState(300000); // 3 Lakh default
+  const [tenure, setTenure] = useState(36); // 36 months default
 
   const interestRate = 10.5; // Annual interest rate
 
+  // Constraints
+  const minPrice = 500000;
+  const maxPrice = 5000000;
+  const minDown = 0;
+  const maxDown = 2000000;
+  const minTenure = 12;
+  const maxTenure = 60;
+
   const emiDetails = useMemo(() => {
-    const principal = vehiclePrice[0] - downPayment[0];
+    const principal = vehiclePrice - downPayment;
     const monthlyRate = interestRate / 12 / 100;
-    const n = tenure[0];
+    const n = tenure;
 
     if (principal <= 0 || n <= 0) {
       return { emi: 0, totalInterest: 0, totalAmount: 0 };
@@ -41,6 +50,38 @@ export function EMICalculator() {
     }
   };
 
+  // Handler for input changes with validation
+  const handlePriceInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
+    const clamped = Math.min(Math.max(value, minPrice), maxPrice);
+    setVehiclePrice(clamped);
+    // Adjust down payment if it exceeds new price limit
+    if (downPayment > clamped * 0.5) {
+      setDownPayment(Math.min(clamped * 0.5, maxDown));
+    }
+  }, [downPayment]);
+
+  const handleDownInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
+    const maxAllowed = Math.min(vehiclePrice * 0.5, maxDown);
+    const clamped = Math.min(Math.max(value, minDown), maxAllowed);
+    setDownPayment(clamped);
+  }, [vehiclePrice]);
+
+  const handleTenureInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    const clamped = Math.min(Math.max(value, minTenure), maxTenure);
+    setTenure(clamped);
+  }, []);
+
+  const handlePriceSlider = useCallback((value: number[]) => {
+    setVehiclePrice(value[0]);
+    // Adjust down payment if it exceeds new price limit
+    if (downPayment > value[0] * 0.5) {
+      setDownPayment(Math.min(value[0] * 0.5, maxDown));
+    }
+  }, [downPayment]);
+
   return (
     <section className="py-16 lg:py-24 bg-muted">
       <div className="container mx-auto px-4">
@@ -65,19 +106,28 @@ export function EMICalculator() {
 
           <div className="bg-card rounded-2xl shadow-xl p-6 lg:p-10 border border-border">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-              {/* Sliders */}
+              {/* Sliders + Inputs */}
               <div className="space-y-8">
                 {/* Vehicle Price */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-3">
                     <label className="text-sm font-medium text-foreground">Vehicle Price</label>
-                    <span className="text-lg font-bold text-jcb">{formatCurrency(vehiclePrice[0])}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">₹</span>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={vehiclePrice.toLocaleString('en-IN')}
+                        onChange={handlePriceInput}
+                        className="w-28 h-8 text-right text-sm font-bold text-jcb bg-jcb/5 border-jcb/20"
+                      />
+                    </div>
                   </div>
                   <Slider
-                    value={vehiclePrice}
-                    onValueChange={setVehiclePrice}
-                    min={500000}
-                    max={5000000}
+                    value={[vehiclePrice]}
+                    onValueChange={handlePriceSlider}
+                    min={minPrice}
+                    max={maxPrice}
                     step={50000}
                     className="w-full"
                   />
@@ -89,15 +139,24 @@ export function EMICalculator() {
 
                 {/* Down Payment */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-3">
                     <label className="text-sm font-medium text-foreground">Down Payment</label>
-                    <span className="text-lg font-bold text-ev">{formatCurrency(downPayment[0])}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">₹</span>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={downPayment.toLocaleString('en-IN')}
+                        onChange={handleDownInput}
+                        className="w-28 h-8 text-right text-sm font-bold text-ev bg-ev/5 border-ev/20"
+                      />
+                    </div>
                   </div>
                   <Slider
-                    value={downPayment}
-                    onValueChange={setDownPayment}
-                    min={0}
-                    max={Math.min(vehiclePrice[0] * 0.5, 2000000)}
+                    value={[downPayment]}
+                    onValueChange={(v) => setDownPayment(v[0])}
+                    min={minDown}
+                    max={Math.min(vehiclePrice * 0.5, maxDown)}
                     step={25000}
                     className="w-full"
                   />
@@ -109,15 +168,24 @@ export function EMICalculator() {
 
                 {/* Tenure */}
                 <div>
-                  <div className="flex justify-between items-center mb-4">
+                  <div className="flex justify-between items-center mb-3">
                     <label className="text-sm font-medium text-foreground">Loan Tenure</label>
-                    <span className="text-lg font-bold text-leyland">{tenure[0]} months</span>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        value={tenure}
+                        onChange={handleTenureInput}
+                        className="w-16 h-8 text-right text-sm font-bold text-leyland bg-leyland/5 border-leyland/20"
+                      />
+                      <span className="text-sm text-muted-foreground">months</span>
+                    </div>
                   </div>
                   <Slider
-                    value={tenure}
-                    onValueChange={setTenure}
-                    min={12}
-                    max={60}
+                    value={[tenure]}
+                    onValueChange={(v) => setTenure(v[0])}
+                    min={minTenure}
+                    max={maxTenure}
                     step={6}
                     className="w-full"
                   />
@@ -150,7 +218,7 @@ export function EMICalculator() {
                     <div>
                       <p className="text-xs text-primary-foreground/70 mb-1">Loan Amount</p>
                       <p className="text-lg font-semibold">
-                        {formatCurrency(vehiclePrice[0] - downPayment[0])}
+                        {formatCurrency(vehiclePrice - downPayment)}
                       </p>
                     </div>
                     <div>

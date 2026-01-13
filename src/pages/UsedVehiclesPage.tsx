@@ -7,19 +7,19 @@ import {
   CheckCircle,
   Shield,
   Calendar,
-  Gauge,
   RefreshCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
+import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 
 import usedVehicles from "@/assets/used-vehicles.jpg";
 
 const vehicles = [
   {
-    id: 1,
+    id: "used-1",
     name: "Ashok Leyland 1616 Tipper",
     year: "2019",
     km: "85,000 km",
@@ -29,9 +29,10 @@ const vehicles = [
     image: usedVehicles,
     condition: "Excellent",
     owner: "First Owner",
+    specs: { fuel: "Diesel", capacity: "16T GVW", warranty: "1 Year", application: "Mining, Construction" },
   },
   {
-    id: 2,
+    id: "used-2",
     name: "JCB 3DX Backhoe Loader",
     year: "2020",
     km: "3,500 hrs",
@@ -41,9 +42,10 @@ const vehicles = [
     image: usedVehicles,
     condition: "Good",
     owner: "First Owner",
+    specs: { fuel: "Diesel", capacity: "1.0 m³", warranty: "6 Months", application: "Construction, Farming" },
   },
   {
-    id: 3,
+    id: "used-3",
     name: "Ashok Leyland 4825 Truck",
     year: "2018",
     km: "1,20,000 km",
@@ -53,9 +55,10 @@ const vehicles = [
     image: usedVehicles,
     condition: "Excellent",
     owner: "Second Owner",
+    specs: { fuel: "Diesel", capacity: "49T GVW", warranty: "6 Months", application: "Long Haul Transport" },
   },
   {
-    id: 4,
+    id: "used-4",
     name: "Tata Prima 4928",
     year: "2021",
     km: "65,000 km",
@@ -65,9 +68,10 @@ const vehicles = [
     image: usedVehicles,
     condition: "Excellent",
     owner: "First Owner",
+    specs: { fuel: "Diesel", capacity: "49T GVW", warranty: "1 Year", application: "Heavy Transport" },
   },
   {
-    id: 5,
+    id: "used-5",
     name: "Ashok Leyland DOST+",
     year: "2022",
     km: "35,000 km",
@@ -77,9 +81,10 @@ const vehicles = [
     image: usedVehicles,
     condition: "Excellent",
     owner: "First Owner",
+    specs: { fuel: "Diesel", capacity: "2.5T", warranty: "1 Year", application: "Last Mile Delivery" },
   },
   {
-    id: 6,
+    id: "used-6",
     name: "JCB JS205 Excavator",
     year: "2019",
     km: "5,200 hrs",
@@ -89,6 +94,7 @@ const vehicles = [
     image: usedVehicles,
     condition: "Good",
     owner: "First Owner",
+    specs: { fuel: "Diesel", capacity: "0.9 m³", warranty: "6 Months", application: "Heavy Earthmoving" },
   },
 ];
 
@@ -106,8 +112,8 @@ const UsedVehiclesPage = () => {
       <Navbar />
 
       <main>
-        {/* Hero Banner */}
-        <section className="relative h-[50vh] lg:h-[60vh] flex items-center pt-20">
+        {/* Hero Banner - Fixed height with min-height and padding */}
+        <section className="relative min-h-[55vh] lg:min-h-[65vh] flex items-center pt-24 pb-12 lg:pt-28 lg:pb-16">
           <div className="absolute inset-0">
             <img
               src={usedVehicles}
@@ -253,6 +259,20 @@ const UsedVehiclesPage = () => {
                       />
                       <div className="absolute top-4 left-4 px-3 py-1.5 bg-success text-success-foreground rounded-full text-xs font-bold tracking-wide">
                         🎖️ {vehicle.badge}
+                      </div>
+                      {/* Compare Checkbox */}
+                      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                        <ProductCompareCheckbox
+                          product={{
+                            id: vehicle.id,
+                            name: vehicle.name,
+                            category: `${vehicle.year} • ${vehicle.km}`,
+                            price: vehicle.price,
+                            brand: 'Used Vehicle',
+                            image: vehicle.image,
+                            specs: vehicle.specs,
+                          }}
+                        />
                       </div>
                     </div>
 
