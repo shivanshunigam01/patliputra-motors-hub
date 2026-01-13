@@ -43,32 +43,32 @@ const ComparePage = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
+      <main className="pt-20 sm:pt-24 pb-16">
+        <div className="container mx-auto px-3 sm:px-4">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
             <button
               onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-3 sm:mb-4 transition-colors text-sm sm:text-base"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               Back to Products
             </button>
 
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-1 sm:mb-2">
                   Compare Products
                 </h1>
-                <p className="text-muted-foreground">
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Side-by-side comparison of selected vehicles
                 </p>
               </div>
-              <Button variant="outline" onClick={clearProducts}>
+              <Button variant="outline" size="sm" onClick={clearProducts} className="self-start sm:self-auto">
                 Clear Comparison
               </Button>
             </div>
@@ -79,33 +79,35 @@ const ComparePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-card rounded-2xl border border-border overflow-hidden shadow-lg"
+            className="bg-card rounded-xl sm:rounded-2xl border border-border overflow-hidden shadow-lg"
           >
             {/* Product Headers */}
-            <div className="grid grid-cols-2 gap-4 p-6 bg-muted/50 border-b border-border">
+            <div className={`grid gap-3 sm:gap-4 p-4 sm:p-6 bg-muted/50 border-b border-border ${
+              selectedProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+            }`}>
               {selectedProducts.map((product) => (
                 <div key={product.id} className="relative">
                   <button
                     onClick={() => removeProduct(product.id)}
-                    className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
+                    className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors z-10"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3 w-3 sm:h-4 sm:w-4" />
                   </button>
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden mb-4">
+                  <div className="aspect-[4/3] rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4">
                     <img
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground mb-1">
+                  <h3 className="text-sm sm:text-lg font-bold text-foreground mb-1 line-clamp-2">
                     {product.name}
                   </h3>
-                  <p className="text-2xl font-bold text-jcb">{product.price}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-jcb">{product.price}</p>
                 </div>
               ))}
               {selectedProducts.length === 1 && (
-                <div className="flex items-center justify-center border-2 border-dashed border-border rounded-xl p-8">
+                <div className="hidden sm:flex items-center justify-center border-2 border-dashed border-border rounded-xl p-8">
                   <p className="text-muted-foreground text-center">
                     Select another product to compare
                   </p>
@@ -118,35 +120,31 @@ const ComparePage = () => {
               {comparisonRows.map((row, index) => (
                 <div
                   key={row.key}
-                  className={`grid grid-cols-2 gap-4 p-4 ${
+                  className={`${
                     index % 2 === 0 ? 'bg-background' : 'bg-muted/30'
                   }`}
                 >
-                  {selectedProducts.map((product) => (
-                    <div key={product.id} className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1 lg:hidden">
-                        {row.label}
-                      </p>
-                      <p className="font-medium text-foreground">
-                        {getValue(product, row.key)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            {/* Row Labels (Desktop) */}
-            <div className="hidden lg:block absolute left-0 top-0 w-48 bg-card border-r border-border">
-              <div className="h-[280px] flex items-end p-6 border-b border-border bg-muted/50">
-                <span className="text-sm font-medium text-muted-foreground">Specifications</span>
-              </div>
-              {comparisonRows.map((row, index) => (
-                <div
-                  key={row.key}
-                  className={`p-4 ${index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}`}
-                >
-                  <span className="font-medium text-foreground">{row.label}</span>
+                  {/* Mobile: Label on top */}
+                  <div className="px-4 pt-3 pb-1 sm:hidden">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {row.label}
+                    </p>
+                  </div>
+                  
+                  <div className={`grid gap-3 sm:gap-4 px-4 pb-3 sm:py-4 ${
+                    selectedProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                  }`}>
+                    {selectedProducts.map((product) => (
+                      <div key={product.id} className="sm:text-center">
+                        <p className="hidden sm:block text-xs text-muted-foreground mb-1 lg:hidden">
+                          {row.label}
+                        </p>
+                        <p className="text-sm sm:text-base font-medium text-foreground break-words">
+                          {getValue(product, row.key)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
@@ -157,19 +155,19 @@ const ComparePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-8 bg-gradient-to-br from-primary to-secondary rounded-2xl p-8 text-center"
+            className="mt-6 sm:mt-8 bg-gradient-to-br from-primary to-secondary rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center"
           >
-            <h2 className="text-2xl font-bold text-primary-foreground mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary-foreground mb-3 sm:mb-4">
               Need Help Deciding?
             </h2>
-            <p className="text-primary-foreground/80 mb-6 max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-primary-foreground/80 mb-4 sm:mb-6 max-w-xl mx-auto">
               Our experts can help you choose the right vehicle for your needs. Get personalized recommendations.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <a href="tel:+919876543210" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
+                  className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
                 >
                   <Phone className="h-5 w-5" />
                   Talk to Expert
@@ -179,11 +177,12 @@ const ComparePage = () => {
                 href="https://wa.me/919876543210"
                 target="_blank"
                 rel="noopener noreferrer"
+                className="w-full sm:w-auto"
               >
                 <Button
                   size="lg"
                   variant="outline"
-                  className="gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
+                  className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
                 >
                   <MessageCircle className="h-5 w-5" />
                   WhatsApp Us
