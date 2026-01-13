@@ -13,69 +13,70 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
+import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 
 import leylandTrucks from "@/assets/leyland-trucks.jpg";
 
 const products = [
   {
-    id: 1,
+    id: "leyland-1",
     name: "Ashok Leyland 4825",
     category: "Heavy Truck",
     price: "₹32.00 Lakh*",
     bestFor: "Long Haul Transport",
     badge: "BESTSELLER",
     image: leylandTrucks,
-    specs: { power: "250 HP", capacity: "49T GVW", fuel: "Diesel" },
+    specs: { power: "250 HP", capacity: "49T GVW", fuel: "Diesel", warranty: "2 Years", application: "Long Haul Transport" },
   },
   {
-    id: 2,
+    id: "leyland-2",
     name: "Ashok Leyland 1616",
     category: "Tipper",
     price: "₹18.50 Lakh*",
     bestFor: "Mining, Construction",
     badge: "POPULAR",
     image: leylandTrucks,
-    specs: { power: "160 HP", capacity: "16T GVW", fuel: "Diesel" },
+    specs: { power: "160 HP", capacity: "16T GVW", fuel: "Diesel", warranty: "2 Years", application: "Mining, Construction" },
   },
   {
-    id: 3,
+    id: "leyland-3",
     name: "Ashok Leyland BOSS 1615",
     category: "Intermediate Truck",
     price: "₹16.80 Lakh*",
     bestFor: "City Distribution",
     badge: null,
     image: leylandTrucks,
-    specs: { power: "152 HP", capacity: "16T GVW", fuel: "Diesel" },
+    specs: { power: "152 HP", capacity: "16T GVW", fuel: "Diesel", warranty: "2 Years", application: "City Distribution" },
   },
   {
-    id: 4,
+    id: "leyland-4",
     name: "Ashok Leyland Viking",
     category: "Bus Chassis",
     price: "₹24.00 Lakh*",
     bestFor: "Passenger Transport",
     badge: "NEW",
     image: leylandTrucks,
-    specs: { power: "180 HP", capacity: "50+ Seats", fuel: "Diesel" },
+    specs: { power: "180 HP", capacity: "50+ Seats", fuel: "Diesel", warranty: "3 Years", application: "Passenger Transport" },
   },
   {
-    id: 5,
+    id: "leyland-5",
     name: "Ashok Leyland DOST+",
     category: "Light Commercial",
     price: "₹8.50 Lakh*",
     bestFor: "Last Mile Delivery",
     badge: "VALUE CHOICE",
     image: leylandTrucks,
-    specs: { power: "60 HP", capacity: "2.5T", fuel: "Diesel" },
+    specs: { power: "60 HP", capacity: "2.5T", fuel: "Diesel", warranty: "2 Years", application: "Last Mile Delivery" },
   },
   {
-    id: 6,
+    id: "leyland-6",
     name: "Ashok Leyland 2825",
     category: "Multi-Axle Truck",
     price: "₹28.00 Lakh*",
     bestFor: "Medium Distance",
     badge: null,
     image: leylandTrucks,
-    specs: { power: "220 HP", capacity: "28T GVW", fuel: "Diesel" },
+    specs: { power: "220 HP", capacity: "28T GVW", fuel: "Diesel", warranty: "2 Years", application: "Medium Distance Transport" },
   },
 ];
 
@@ -93,8 +94,8 @@ const AshokLeylandPage = () => {
       <Navbar />
 
       <main>
-        {/* Hero Banner */}
-        <section className="relative h-[50vh] lg:h-[60vh] flex items-center pt-20">
+        {/* Hero Banner - Fixed height with min-height and padding */}
+        <section className="relative min-h-[55vh] lg:min-h-[65vh] flex items-center pt-24 pb-12 lg:pt-28 lg:pb-16">
           <div className="absolute inset-0">
             <img
               src={leylandTrucks}
@@ -199,6 +200,20 @@ const AshokLeylandPage = () => {
                           {product.badge}
                         </div>
                       )}
+                      {/* Compare Checkbox */}
+                      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                        <ProductCompareCheckbox
+                          product={{
+                            id: product.id,
+                            name: product.name,
+                            category: product.category,
+                            price: product.price,
+                            brand: 'Ashok Leyland',
+                            image: product.image,
+                            specs: product.specs,
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {/* Content */}

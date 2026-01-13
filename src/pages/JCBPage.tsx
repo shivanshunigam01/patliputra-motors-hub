@@ -8,18 +8,18 @@ import {
   Fuel,
   Gauge,
   Weight,
-  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
+import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 
 import heroJcb from "@/assets/hero-jcb.jpg";
 
 const products = [
   {
-    id: 1,
+    id: "jcb-1",
     name: "JCB 3DX Super EcoXcellence",
     category: "Backhoe Loader",
     price: "₹16.50 Lakh*",
@@ -27,10 +27,10 @@ const products = [
     badge: "BESTSELLER",
     image: heroJcb,
     featured: true,
-    specs: { power: "81 HP", fuel: "90L Tank", weight: "7,100 kg" },
+    specs: { power: "81 HP", fuel: "Diesel", weight: "7,100 kg", capacity: "1.0 m³", warranty: "3 Years", application: "Construction, Farming" },
   },
   {
-    id: 2,
+    id: "jcb-2",
     name: "JCB 3DX Plus",
     category: "Backhoe Loader",
     price: "₹15.80 Lakh*",
@@ -38,10 +38,10 @@ const products = [
     badge: null,
     image: heroJcb,
     featured: false,
-    specs: { power: "76 HP", fuel: "80L Tank", weight: "6,900 kg" },
+    specs: { power: "76 HP", fuel: "Diesel", weight: "6,900 kg", capacity: "0.9 m³", warranty: "3 Years", application: "General Construction" },
   },
   {
-    id: 3,
+    id: "jcb-3",
     name: "JCB JS205SC",
     category: "Excavator",
     price: "₹42.00 Lakh*",
@@ -49,10 +49,10 @@ const products = [
     badge: "NEW LAUNCH",
     image: heroJcb,
     featured: true,
-    specs: { power: "143 HP", fuel: "350L Tank", weight: "20,700 kg" },
+    specs: { power: "143 HP", fuel: "Diesel", weight: "20,700 kg", capacity: "0.9 m³", warranty: "3 Years", application: "Heavy Earthmoving" },
   },
   {
-    id: 4,
+    id: "jcb-4",
     name: "JCB VM115",
     category: "Compactor",
     price: "₹28.50 Lakh*",
@@ -60,10 +60,10 @@ const products = [
     badge: null,
     image: heroJcb,
     featured: false,
-    specs: { power: "115 HP", fuel: "200L Tank", weight: "11,500 kg" },
+    specs: { power: "115 HP", fuel: "Diesel", weight: "11,500 kg", capacity: "11,500 kg", warranty: "2 Years", application: "Road Compaction" },
   },
   {
-    id: 5,
+    id: "jcb-5",
     name: "JCB 4DX",
     category: "Backhoe Loader",
     price: "₹19.80 Lakh*",
@@ -71,10 +71,10 @@ const products = [
     badge: null,
     image: heroJcb,
     featured: false,
-    specs: { power: "98 HP", fuel: "100L Tank", weight: "8,200 kg" },
+    specs: { power: "98 HP", fuel: "Diesel", weight: "8,200 kg", capacity: "1.2 m³", warranty: "3 Years", application: "Mining, Quarry" },
   },
   {
-    id: 6,
+    id: "jcb-6",
     name: "JCB JS120",
     category: "Excavator",
     price: "₹35.00 Lakh*",
@@ -82,7 +82,7 @@ const products = [
     badge: "ECO CHOICE",
     image: heroJcb,
     featured: false,
-    specs: { power: "95 HP", fuel: "250L Tank", weight: "12,500 kg" },
+    specs: { power: "95 HP", fuel: "Diesel", weight: "12,500 kg", capacity: "0.5 m³", warranty: "3 Years", application: "Urban Construction" },
   },
 ];
 
@@ -94,8 +94,8 @@ const JCBPage = () => {
       <Navbar />
 
       <main>
-        {/* Hero Banner */}
-        <section className="relative h-[50vh] lg:h-[60vh] flex items-center pt-20">
+        {/* Hero Banner - Fixed height with min-height and padding */}
+        <section className="relative min-h-[55vh] lg:min-h-[65vh] flex items-center pt-24 pb-12 lg:pt-28 lg:pb-16">
           <div className="absolute inset-0">
             <img
               src={heroJcb}
@@ -203,6 +203,20 @@ const JCBPage = () => {
                           {product.badge}
                         </div>
                       )}
+                      {/* Compare Checkbox */}
+                      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                        <ProductCompareCheckbox
+                          product={{
+                            id: product.id,
+                            name: product.name,
+                            category: product.category,
+                            price: product.price,
+                            brand: 'JCB',
+                            image: product.image,
+                            specs: product.specs,
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {/* Content */}

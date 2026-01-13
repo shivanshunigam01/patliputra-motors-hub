@@ -13,53 +13,50 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
+import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 
 import switchEvBus from "@/assets/switch-ev-bus.jpg";
 
 const products = [
   {
-    id: 1,
+    id: "switch-1",
     name: "Switch IeV 4",
     category: "Electric Bus",
     price: "₹85.00 Lakh*",
     bestFor: "City Transport",
     badge: "ZERO EMISSION",
     image: switchEvBus,
-    specs: { range: "200+ km", capacity: "34 Seats", charging: "3 hrs Fast" },
+    specs: { range: "200+ km", capacity: "34 Seats", charging: "3 hrs Fast", fuel: "Electric", warranty: "8 Years Battery", application: "City Transport" },
   },
   {
-    id: 2,
+    id: "switch-2",
     name: "Switch IeV 7",
     category: "Electric Bus",
     price: "₹95.00 Lakh*",
     bestFor: "Intercity Routes",
     badge: "LONG RANGE",
     image: switchEvBus,
-    specs: { range: "300+ km", capacity: "45 Seats", charging: "4 hrs Fast" },
+    specs: { range: "300+ km", capacity: "45 Seats", charging: "4 hrs Fast", fuel: "Electric", warranty: "8 Years Battery", application: "Intercity Routes" },
   },
   {
-    id: 3,
+    id: "switch-3",
     name: "Switch EiV 12",
     category: "Electric Bus",
     price: "₹1.10 Cr*",
     bestFor: "Premium City Transit",
     badge: "FLAGSHIP",
     image: switchEvBus,
-    specs: { range: "250+ km", capacity: "60 Seats", charging: "4 hrs Fast" },
+    specs: { range: "250+ km", capacity: "60 Seats", charging: "4 hrs Fast", fuel: "Electric", warranty: "8 Years Battery", application: "Premium City Transit" },
   },
   {
-    id: 4,
+    id: "switch-4",
     name: "Switch Solo EV",
     category: "Electric LCV",
     price: "₹12.50 Lakh*",
     bestFor: "Last Mile Delivery",
     badge: "NEW LAUNCH",
     image: switchEvBus,
-    specs: {
-      range: "150+ km",
-      capacity: "1.5T Payload",
-      charging: "2 hrs Fast",
-    },
+    specs: { range: "150+ km", capacity: "1.5T Payload", charging: "2 hrs Fast", fuel: "Electric", warranty: "5 Years Battery", application: "Last Mile Delivery" },
   },
 ];
 
@@ -71,8 +68,8 @@ const SwitchEVPage = () => {
       <Navbar />
 
       <main>
-        {/* Hero Banner */}
-        <section className="relative h-[50vh] lg:h-[60vh] flex items-center pt-20">
+        {/* Hero Banner - Fixed height with min-height and padding */}
+        <section className="relative min-h-[55vh] lg:min-h-[65vh] flex items-center pt-24 pb-12 lg:pt-28 lg:pb-16">
           <div className="absolute inset-0">
             <img
               src={switchEvBus}
@@ -221,6 +218,20 @@ const SwitchEVPage = () => {
                           {product.badge}
                         </div>
                       )}
+                      {/* Compare Checkbox */}
+                      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+                        <ProductCompareCheckbox
+                          product={{
+                            id: product.id,
+                            name: product.name,
+                            category: product.category,
+                            price: product.price,
+                            brand: 'Switch Mobility',
+                            image: product.image,
+                            specs: product.specs,
+                          }}
+                        />
+                      </div>
                     </div>
 
                     {/* Content */}
