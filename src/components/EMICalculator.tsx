@@ -10,6 +10,11 @@ export function EMICalculator() {
   const [downPayment, setDownPayment] = useState(300000); // 3 Lakh default
   const [tenure, setTenure] = useState(36); // 36 months default
 
+  // Separate input display states for free typing
+  const [priceInput, setPriceInput] = useState(vehiclePrice.toLocaleString('en-IN'));
+  const [downInput, setDownInput] = useState(downPayment.toLocaleString('en-IN'));
+  const [tenureInput, setTenureInput] = useState(tenure.toString());
+
   const interestRate = 10.5; // Annual interest rate
 
   // Constraints
@@ -50,37 +55,91 @@ export function EMICalculator() {
     }
   };
 
-  // Handler for input changes with validation
+  // Handler for price input - allows free typing
   const handlePriceInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
-    const clamped = Math.min(Math.max(value, minPrice), maxPrice);
-    setVehiclePrice(clamped);
+    const rawValue = e.target.value.replace(/,/g, '');
+    setPriceInput(rawValue);
+    
+    const numValue = parseInt(rawValue) || 0;
+    setVehiclePrice(numValue);
+    
     // Adjust down payment if it exceeds new price limit
-    if (downPayment > clamped * 0.5) {
-      setDownPayment(Math.min(clamped * 0.5, maxDown));
+    if (downPayment > numValue * 0.5) {
+      const newDown = Math.max(0, Math.min(numValue * 0.5, maxDown));
+      setDownPayment(newDown);
+      setDownInput(newDown.toLocaleString('en-IN'));
     }
   }, [downPayment]);
 
-  const handleDownInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value.replace(/,/g, '')) || 0;
-    const maxAllowed = Math.min(vehiclePrice * 0.5, maxDown);
-    const clamped = Math.min(Math.max(value, minDown), maxAllowed);
-    setDownPayment(clamped);
-  }, [vehiclePrice]);
+  // Clamp price on blur
+  const handlePriceBlur = useCallback(() => {
+    const clamped = Math.min(Math.max(vehiclePrice, minPrice), maxPrice);
+    setVehiclePrice(clamped);
+    setPriceInput(clamped.toLocaleString('en-IN'));
+    
+    // Also adjust down payment if needed
+    if (downPayment > clamped * 0.5) {
+      const newDown = Math.min(clamped * 0.5, maxDown);
+      setDownPayment(newDown);
+      setDownInput(newDown.toLocaleString('en-IN'));
+    }
+  }, [vehiclePrice, downPayment]);
 
-  const handleTenureInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 0;
-    const clamped = Math.min(Math.max(value, minTenure), maxTenure);
-    setTenure(clamped);
+  // Handler for down payment input - allows free typing
+  const handleDownInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/,/g, '');
+    setDownInput(rawValue);
+    
+    const numValue = parseInt(rawValue) || 0;
+    setDownPayment(numValue);
   }, []);
 
+  // Clamp down payment on blur
+  const handleDownBlur = useCallback(() => {
+    const maxAllowed = Math.min(vehiclePrice * 0.5, maxDown);
+    const clamped = Math.min(Math.max(downPayment, minDown), maxAllowed);
+    setDownPayment(clamped);
+    setDownInput(clamped.toLocaleString('en-IN'));
+  }, [vehiclePrice, downPayment]);
+
+  // Handler for tenure input - allows free typing
+  const handleTenureInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    setTenureInput(rawValue);
+    
+    const numValue = parseInt(rawValue) || 0;
+    setTenure(numValue);
+  }, []);
+
+  // Clamp tenure on blur
+  const handleTenureBlur = useCallback(() => {
+    const clamped = Math.min(Math.max(tenure, minTenure), maxTenure);
+    setTenure(clamped);
+    setTenureInput(clamped.toString());
+  }, [tenure]);
+
+  // Slider handlers - update both state and input display
   const handlePriceSlider = useCallback((value: number[]) => {
     setVehiclePrice(value[0]);
+    setPriceInput(value[0].toLocaleString('en-IN'));
+    
     // Adjust down payment if it exceeds new price limit
     if (downPayment > value[0] * 0.5) {
-      setDownPayment(Math.min(value[0] * 0.5, maxDown));
+      const newDown = Math.min(value[0] * 0.5, maxDown);
+      setDownPayment(newDown);
+      setDownInput(newDown.toLocaleString('en-IN'));
     }
   }, [downPayment]);
+
+  const handleDownSlider = useCallback((value: number[]) => {
+    setDownPayment(value[0]);
+    setDownInput(value[0].toLocaleString('en-IN'));
+  }, []);
+
+  const handleTenureSlider = useCallback((value: number[]) => {
+    setTenure(value[0]);
+    setTenureInput(value[0].toString());
+  }, []);
 
   return (
     <section className="py-16 lg:py-24 bg-muted">
@@ -117,14 +176,15 @@ export function EMICalculator() {
                       <Input
                         type="text"
                         inputMode="numeric"
-                        value={vehiclePrice.toLocaleString('en-IN')}
+                        value={priceInput}
                         onChange={handlePriceInput}
+                        onBlur={handlePriceBlur}
                         className="w-28 h-8 text-right text-sm font-bold text-jcb bg-jcb/5 border-jcb/20"
                       />
                     </div>
                   </div>
                   <Slider
-                    value={[vehiclePrice]}
+                    value={[Math.min(Math.max(vehiclePrice, minPrice), maxPrice)]}
                     onValueChange={handlePriceSlider}
                     min={minPrice}
                     max={maxPrice}
@@ -146,17 +206,18 @@ export function EMICalculator() {
                       <Input
                         type="text"
                         inputMode="numeric"
-                        value={downPayment.toLocaleString('en-IN')}
+                        value={downInput}
                         onChange={handleDownInput}
+                        onBlur={handleDownBlur}
                         className="w-28 h-8 text-right text-sm font-bold text-ev bg-ev/5 border-ev/20"
                       />
                     </div>
                   </div>
                   <Slider
-                    value={[downPayment]}
-                    onValueChange={(v) => setDownPayment(v[0])}
+                    value={[Math.min(Math.max(downPayment, minDown), Math.min(vehiclePrice * 0.5, maxDown))]}
+                    onValueChange={handleDownSlider}
                     min={minDown}
-                    max={Math.min(vehiclePrice * 0.5, maxDown)}
+                    max={Math.min(Math.max(vehiclePrice, minPrice) * 0.5, maxDown)}
                     step={25000}
                     className="w-full"
                   />
@@ -174,16 +235,17 @@ export function EMICalculator() {
                       <Input
                         type="text"
                         inputMode="numeric"
-                        value={tenure}
+                        value={tenureInput}
                         onChange={handleTenureInput}
+                        onBlur={handleTenureBlur}
                         className="w-16 h-8 text-right text-sm font-bold text-leyland bg-leyland/5 border-leyland/20"
                       />
                       <span className="text-sm text-muted-foreground">months</span>
                     </div>
                   </div>
                   <Slider
-                    value={[tenure]}
-                    onValueChange={(v) => setTenure(v[0])}
+                    value={[Math.min(Math.max(tenure, minTenure), maxTenure)]}
+                    onValueChange={handleTenureSlider}
                     min={minTenure}
                     max={maxTenure}
                     step={6}
@@ -218,7 +280,7 @@ export function EMICalculator() {
                     <div>
                       <p className="text-xs text-primary-foreground/70 mb-1">Loan Amount</p>
                       <p className="text-lg font-semibold">
-                        {formatCurrency(vehiclePrice - downPayment)}
+                        {formatCurrency(Math.max(0, vehiclePrice - downPayment))}
                       </p>
                     </div>
                     <div>
