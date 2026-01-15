@@ -27,9 +27,10 @@ export function CompareFloatingBar() {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
-        className="fixed bottom-24 sm:bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md sm:max-w-xl"
+        className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] sm:bottom-20 lg:bottom-6 z-50 px-3"
       >
-        <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl p-3 sm:p-4">
+        <div className="mx-auto w-full max-w-md sm:max-w-xl">
+          <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl p-3 sm:p-4">
           {/* Mobile Layout - Stacked */}
           <div className="flex flex-col gap-3 sm:hidden">
             {/* Selected Products Row */}
@@ -144,6 +145,7 @@ export function CompareFloatingBar() {
                 </Button>
               )}
             </div>
+          </div>
           </div>
         </div>
       </motion.div>
