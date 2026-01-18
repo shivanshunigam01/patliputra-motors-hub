@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Phone, MessageCircle, Shield, Users, Wallet, Wrench, MapPin, CheckCircle } from "lucide-react";
+import { Phone, MessageCircle, Shield, Users, Wallet, Wrench, MapPin, CheckCircle, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
@@ -17,7 +17,7 @@ const AboutPage = () => {
     { name: "JCB", image: heroJcb, color: "jcb" },
     { name: "Ashok Leyland", image: leylandTrucks, color: "leyland" },
     { name: "Switch EV", image: switchEvBus, color: "ev" },
-    { name: "Certified Used", image: usedVehicles, color: "secondary" },
+    { name: t("nav.certifiedRefurbished"), image: usedVehicles, color: "secondary" },
   ];
 
   const pillars = [
@@ -25,6 +25,13 @@ const AboutPage = () => {
     { icon: Users, title: t("about.pillar2Title"), desc: t("about.pillar2Desc") },
     { icon: Wallet, title: t("about.pillar3Title"), desc: t("about.pillar3Desc") },
     { icon: Wrench, title: t("about.pillar4Title"), desc: t("about.pillar4Desc") },
+  ];
+
+  const socialLinks = [
+    { icon: Facebook, url: "https://facebook.com", label: "Facebook", color: "hover:bg-jcb hover:text-jcb-foreground" },
+    { icon: Instagram, url: "https://instagram.com", label: "Instagram", color: "hover:bg-jcb hover:text-jcb-foreground" },
+    { icon: Youtube, url: "https://youtube.com", label: "YouTube", color: "hover:bg-leyland hover:text-leyland-foreground" },
+    { icon: Linkedin, url: "https://linkedin.com", label: "LinkedIn", color: "hover:bg-ev hover:text-ev-foreground" },
   ];
 
   return (
@@ -99,13 +106,35 @@ const AboutPage = () => {
           </div>
         </section>
 
+        {/* Social Links */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 text-center max-w-3xl">
+            <h2 className="text-3xl font-bold text-foreground mb-4">{t("about.socialTitle")}</h2>
+            <p className="text-muted-foreground mb-8">{t("about.socialDesc")}</p>
+            <div className="flex justify-center gap-4">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-14 h-14 rounded-full bg-muted flex items-center justify-center transition-all duration-300 ${social.color}`}
+                  aria-label={social.label}
+                >
+                  <social.icon className="h-6 w-6" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="py-16 bg-gradient-to-br from-primary to-secondary">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-primary-foreground mb-4">{t("about.ctaTitle")}</h2>
             <p className="text-primary-foreground/80 mb-8">{t("about.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210"><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
+              <a href="tel:+919876543210"><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
               <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
             </div>
           </div>

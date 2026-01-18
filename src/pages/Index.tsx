@@ -7,6 +7,7 @@ import { NewArrivals } from "@/components/NewArrivals";
 import { EMICalculator } from "@/components/EMICalculator";
 import { TrustSection } from "@/components/TrustSection";
 import { Testimonials } from "@/components/Testimonials";
+import { OffersSection } from "@/components/OffersSection";
 
 const Index = () => {
   return (
@@ -17,6 +18,7 @@ const Index = () => {
         <Hero />
         <BrandHub />
         <NewArrivals />
+        <OffersSection />
         <EMICalculator />
         <TrustSection />
         <Testimonials />

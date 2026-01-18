@@ -69,14 +69,17 @@ export default {
         jcb: {
           DEFAULT: "hsl(var(--jcb))",
           foreground: "hsl(var(--jcb-foreground))",
+          hover: "hsl(var(--jcb-hover))",
         },
         leyland: {
           DEFAULT: "hsl(var(--leyland))",
           foreground: "hsl(var(--leyland-foreground))",
+          hover: "hsl(var(--leyland-hover))",
         },
         ev: {
           DEFAULT: "hsl(var(--ev))",
           foreground: "hsl(var(--ev-foreground))",
+          hover: "hsl(var(--ev-hover))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",
