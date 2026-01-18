@@ -117,8 +117,7 @@ const JCBPage = () => {
               </div>
 
               <h1 className="text-4xl lg:text-6xl font-bold text-primary-foreground mb-4">
-                Bihar ke liye <span className="text-jcb">JCB</span> ki Puri
-                Range
+                Complete <span className="text-jcb">JCB</span> Range for Bihar
               </h1>
 
               <p className="text-lg text-primary-foreground/80 mb-8">

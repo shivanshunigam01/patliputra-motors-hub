@@ -33,7 +33,7 @@ const FinancePage = () => {
           <div className="container mx-auto px-4 text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <h1 className="text-4xl lg:text-6xl font-bold mb-4">
-                Bihar Mein <span className="text-jcb">Sabse Aasan</span> Finance
+                Bihar's <span className="text-jcb">Easiest</span> Finance
               </h1>
               <div className="flex flex-wrap justify-center gap-4 mt-8">
                 {['80% Approval Rate', 'Low Interest Rates', 'Minimal Documentation', '48-Hour Approval'].map((item) => (
@@ -57,7 +57,7 @@ const FinancePage = () => {
                 <div className="space-y-6">
                   {step === 1 && (
                     <div className="space-y-4">
-                      <p className="text-muted-foreground">Aap kis type ki gaadi chahte hain?</p>
+                      <p className="text-muted-foreground">What type of vehicle are you looking for?</p>
                       <div className="grid grid-cols-2 gap-3">
                         {['JCB / Machine', 'Truck / Commercial', 'Bus', 'Used Vehicle'].map((type) => (
                           <Button key={type} variant={formData.vehicleType === type ? 'default' : 'outline'} className="h-14" onClick={() => { setFormData({ ...formData, vehicleType: type }); setStep(2); }}>
@@ -69,7 +69,7 @@ const FinancePage = () => {
                   )}
                   {step === 2 && (
                     <div className="space-y-4">
-                      <p className="text-muted-foreground">Aapka business kya hai?</p>
+                      <p className="text-muted-foreground">What is your business type?</p>
                       <div className="grid grid-cols-2 gap-3">
                         {['Construction', 'Transport', 'Farming', 'Municipality', 'Other'].map((biz) => (
                           <Button key={biz} variant={formData.business === biz ? 'default' : 'outline'} className="h-12" onClick={() => { setFormData({ ...formData, business: biz }); setStep(3); }}>
