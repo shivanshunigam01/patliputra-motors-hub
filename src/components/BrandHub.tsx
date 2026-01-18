@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 import heroJcb from '@/assets/hero-jcb.jpg';
 import leylandTrucks from '@/assets/leyland-trucks.jpg';
@@ -10,9 +11,10 @@ import usedVehicles from '@/assets/used-vehicles.jpg';
 const brands = [
   {
     id: 'jcb',
-    name: 'JCB',
-    tagline: 'Construction Machines',
-    description: '150+ Models Available',
+    nameKey: 'brands.jcb.title',
+    taglineKey: 'brands.jcb.description',
+    descriptionEn: '150+ Models Available',
+    descriptionHi: '150+ मॉडल उपलब्ध',
     image: heroJcb,
     path: '/jcb',
     cardClass: 'card-jcb',
@@ -21,9 +23,10 @@ const brands = [
   },
   {
     id: 'leyland',
-    name: 'Ashok Leyland',
-    tagline: 'Commercial Trucks',
-    description: 'India\'s Trusted Fleet',
+    nameKey: 'brands.leyland.title',
+    taglineKey: 'brands.leyland.description',
+    descriptionEn: "India's Trusted Fleet",
+    descriptionHi: 'भारत का विश्वसनीय फ्लीट',
     image: leylandTrucks,
     path: '/ashok-leyland',
     cardClass: 'card-leyland',
@@ -32,9 +35,10 @@ const brands = [
   },
   {
     id: 'switch',
-    name: 'Switch Mobility',
-    tagline: 'Electric Vehicles',
-    description: 'Future of Transport',
+    nameKey: 'brands.switchEv.title',
+    taglineKey: 'brands.switchEv.description',
+    descriptionEn: 'Future of Transport',
+    descriptionHi: 'परिवहन का भविष्य',
     image: switchEvBus,
     path: '/switch-ev',
     cardClass: 'card-ev',
@@ -43,9 +47,10 @@ const brands = [
   },
   {
     id: 'used',
-    name: 'Certified Used',
-    tagline: 'Pre-Owned Vehicles',
-    description: '150-Point Inspection',
+    nameKey: 'brands.used.title',
+    taglineKey: 'brands.used.description',
+    descriptionEn: '150-Point Inspection',
+    descriptionHi: '150-पॉइंट निरीक्षण',
     image: usedVehicles,
     path: '/used-vehicles',
     cardClass: 'bg-card border border-border',
@@ -55,6 +60,8 @@ const brands = [
 ];
 
 export function BrandHub() {
+  const { t, language } = useLanguage();
+
   return (
     <section className="py-16 lg:py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -65,10 +72,10 @@ export function BrandHub() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Explore Our Brands
+            {t('brands.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Bihar's most trusted showroom for construction machines, commercial vehicles, and electric mobility solutions.
+            {t('brands.subtitle')}
           </p>
         </motion.div>
 
@@ -89,7 +96,7 @@ export function BrandHub() {
                   <div className="relative aspect-[16/9] overflow-hidden">
                     <img
                       src={brand.image}
-                      alt={brand.name}
+                      alt={t(brand.nameKey)}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent" />
@@ -100,13 +107,13 @@ export function BrandHub() {
                     <div className="flex items-end justify-between">
                       <div>
                         <p className={`text-sm font-medium ${brand.accentColor} mb-1`}>
-                          {brand.tagline}
+                          {t(brand.taglineKey)}
                         </p>
                         <h3 className="text-2xl lg:text-3xl font-bold text-primary-foreground mb-2">
-                          {brand.name}
+                          {t(brand.nameKey)}
                         </h3>
                         <p className="text-primary-foreground/70 text-sm">
-                          {brand.description}
+                          {language === 'hi' ? brand.descriptionHi : brand.descriptionEn}
                         </p>
                       </div>
                       <div className="flex-shrink-0">

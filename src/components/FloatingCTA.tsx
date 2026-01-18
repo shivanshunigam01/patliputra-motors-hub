@@ -1,7 +1,10 @@
 import { Phone, MessageCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from '@/i18n/LanguageContext';
 
 export function FloatingCTA() {
+  const { t } = useLanguage();
+
   return (
     <>
       {/* Desktop FAB Stack */}
@@ -14,7 +17,7 @@ export function FloatingCTA() {
           className="flex items-center gap-2 px-5 py-3 bg-jcb text-jcb-foreground rounded-full shadow-lg hover:shadow-glow-jcb transition-all duration-300 hover:scale-105 font-semibold"
         >
           <Phone className="h-5 w-5" />
-          <span>Call Now</span>
+          <span>{t('common.callNow')}</span>
         </motion.a>
 
         <motion.a
@@ -27,7 +30,7 @@ export function FloatingCTA() {
           className="flex items-center gap-2 px-5 py-3 bg-success text-success-foreground rounded-full shadow-lg hover:shadow-glow-ev transition-all duration-300 hover:scale-105 font-semibold"
         >
           <MessageCircle className="h-5 w-5" />
-          <span>WhatsApp</span>
+          <span>{t('common.whatsapp')}</span>
         </motion.a>
 
         <motion.a
@@ -38,7 +41,7 @@ export function FloatingCTA() {
           className="flex items-center gap-2 px-5 py-3 bg-card text-foreground border border-border rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
         >
           <FileText className="h-5 w-5" />
-          <span>Enquiry</span>
+          <span>{t('common.enquiry')}</span>
         </motion.a>
       </div>
 
@@ -50,7 +53,7 @@ export function FloatingCTA() {
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-jcb text-jcb-foreground rounded-xl font-semibold text-sm"
           >
             <Phone className="h-4 w-4" />
-            Call
+            {t('common.call')}
           </a>
           <a
             href="https://wa.me/919876543210"
@@ -59,14 +62,14 @@ export function FloatingCTA() {
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-success text-success-foreground rounded-xl font-semibold text-sm"
           >
             <MessageCircle className="h-4 w-4" />
-            WhatsApp
+            {t('common.whatsapp')}
           </a>
           <a
             href="/finance"
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-secondary text-secondary-foreground rounded-xl font-semibold text-sm"
           >
             <FileText className="h-4 w-4" />
-            Enquiry
+            {t('common.enquiry')}
           </a>
         </div>
       </div>
