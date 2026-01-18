@@ -36,14 +36,17 @@
     /* JCB Yellow */
     --jcb: 47 100% 51%;
     --jcb-foreground: 215 35% 15%;
+    --jcb-hover: 45 100% 45%;
 
-    /* Leyland Red */
-    --leyland: 355 82% 56%;
+    /* Leyland Blue (brand color) */
+    --leyland: 210 100% 35%;
     --leyland-foreground: 0 0% 100%;
+    --leyland-hover: 210 100% 28%;
 
     /* Switch EV Teal */
     --ev: 162 86% 43%;
     --ev-foreground: 0 0% 100%;
+    --ev-hover: 162 86% 35%;
 
     /* Success */
     --success: 158 64% 40%;
@@ -73,7 +76,7 @@
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(215 35% 15%) 0%, hsl(210 18% 28%) 100%);
     --gradient-jcb: linear-gradient(135deg, hsl(47 100% 51%) 0%, hsl(40 100% 45%) 100%);
-    --gradient-leyland: linear-gradient(135deg, hsl(355 82% 56%) 0%, hsl(345 80% 48%) 100%);
+    --gradient-leyland: linear-gradient(135deg, hsl(210 100% 35%) 0%, hsl(210 100% 28%) 100%);
     --gradient-ev: linear-gradient(135deg, hsl(162 86% 43%) 0%, hsl(170 80% 38%) 100%);
     --gradient-overlay: linear-gradient(180deg, rgba(26, 35, 50, 0.7) 0%, rgba(26, 35, 50, 0.9) 100%);
 
@@ -83,7 +86,7 @@
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
     --shadow-glow-jcb: 0 0 30px rgba(255, 203, 5, 0.4);
-    --shadow-glow-leyland: 0 0 30px rgba(230, 57, 70, 0.4);
+    --shadow-glow-leyland: 0 0 30px rgba(0, 91, 172, 0.4);
     --shadow-glow-ev: 0 0 30px rgba(6, 214, 160, 0.4);
   }
 
@@ -165,13 +168,13 @@
 
   .card-leyland {
     @apply relative overflow-hidden;
-    background: linear-gradient(135deg, hsl(355 82% 56% / 0.1) 0%, hsl(355 82% 56% / 0.05) 100%);
-    border: 1px solid hsl(355 82% 56% / 0.2);
+    background: linear-gradient(135deg, hsl(210 100% 35% / 0.1) 0%, hsl(210 100% 35% / 0.05) 100%);
+    border: 1px solid hsl(210 100% 35% / 0.2);
   }
 
   .card-leyland:hover {
     box-shadow: var(--shadow-glow-leyland);
-    border-color: hsl(355 82% 56% / 0.5);
+    border-color: hsl(210 100% 35% / 0.5);
   }
 
   .card-ev {
@@ -227,6 +230,28 @@
   .scroll-fade-up.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* Brand-specific Button Styles */
+  .btn-jcb {
+    @apply bg-jcb text-jcb-foreground font-semibold;
+  }
+  .btn-jcb:hover {
+    background-color: hsl(var(--jcb-hover));
+  }
+
+  .btn-leyland {
+    @apply bg-leyland text-leyland-foreground font-semibold;
+  }
+  .btn-leyland:hover {
+    background-color: hsl(var(--leyland-hover));
+  }
+
+  .btn-ev {
+    @apply bg-ev text-ev-foreground font-semibold;
+  }
+  .btn-ev:hover {
+    background-color: hsl(var(--ev-hover));
   }
 }
 

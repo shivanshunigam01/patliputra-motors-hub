@@ -27,7 +27,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'en' || stored === 'hi') return stored;
     }
-    return 'hi'; // Default to Hindi
+    return 'en'; // Default to English
   });
 
   useEffect(() => {

@@ -1,36 +1,38 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, IndianRupee, Phone } from 'lucide-react';
+import { Calculator, IndianRupee, Phone, Percent } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 export function EMICalculator() {
-  const [vehiclePrice, setVehiclePrice] = useState(1500000); // 15 Lakh default
-  const [downPayment, setDownPayment] = useState(300000); // 3 Lakh default
-  const [tenure, setTenure] = useState(36); // 36 months default
+  const { t } = useLanguage();
+  const [vehiclePrice, setVehiclePrice] = useState(1500000);
+  const [downPayment, setDownPayment] = useState(300000);
+  const [tenure, setTenure] = useState(36);
+  const [interestRate, setInterestRate] = useState(12);
 
-  // Separate input display states for free typing
   const [priceInput, setPriceInput] = useState(vehiclePrice.toLocaleString('en-IN'));
   const [downInput, setDownInput] = useState(downPayment.toLocaleString('en-IN'));
   const [tenureInput, setTenureInput] = useState(tenure.toString());
+  const [rateInput, setRateInput] = useState(interestRate.toString());
 
-  const interestRate = 10.5; // Annual interest rate
-
-  // Constraints
   const minPrice = 500000;
   const maxPrice = 5000000;
   const minDown = 0;
   const maxDown = 2000000;
   const minTenure = 12;
   const maxTenure = 60;
+  const minRate = 6;
+  const maxRate = 24;
 
   const emiDetails = useMemo(() => {
     const principal = vehiclePrice - downPayment;
     const monthlyRate = interestRate / 12 / 100;
     const n = tenure;
 
-    if (principal <= 0 || n <= 0) {
+    if (principal <= 0 || n <= 0 || interestRate <= 0) {
       return { emi: 0, totalInterest: 0, totalAmount: 0 };
     }
 
@@ -43,7 +45,7 @@ export function EMICalculator() {
       totalInterest: Math.round(totalInterest),
       totalAmount: Math.round(totalAmount),
     };
-  }, [vehiclePrice, downPayment, tenure]);
+  }, [vehiclePrice, downPayment, tenure, interestRate]);
 
   const formatCurrency = (amount: number) => {
     if (amount >= 10000000) {
@@ -55,15 +57,11 @@ export function EMICalculator() {
     }
   };
 
-  // Handler for price input - allows free typing
   const handlePriceInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/,/g, '');
     setPriceInput(rawValue);
-    
     const numValue = parseInt(rawValue) || 0;
     setVehiclePrice(numValue);
-    
-    // Adjust down payment if it exceeds new price limit
     if (downPayment > numValue * 0.5) {
       const newDown = Math.max(0, Math.min(numValue * 0.5, maxDown));
       setDownPayment(newDown);
@@ -71,13 +69,10 @@ export function EMICalculator() {
     }
   }, [downPayment]);
 
-  // Clamp price on blur
   const handlePriceBlur = useCallback(() => {
     const clamped = Math.min(Math.max(vehiclePrice, minPrice), maxPrice);
     setVehiclePrice(clamped);
     setPriceInput(clamped.toLocaleString('en-IN'));
-    
-    // Also adjust down payment if needed
     if (downPayment > clamped * 0.5) {
       const newDown = Math.min(clamped * 0.5, maxDown);
       setDownPayment(newDown);
@@ -85,16 +80,13 @@ export function EMICalculator() {
     }
   }, [vehiclePrice, downPayment]);
 
-  // Handler for down payment input - allows free typing
   const handleDownInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/,/g, '');
     setDownInput(rawValue);
-    
     const numValue = parseInt(rawValue) || 0;
     setDownPayment(numValue);
   }, []);
 
-  // Clamp down payment on blur
   const handleDownBlur = useCallback(() => {
     const maxAllowed = Math.min(vehiclePrice * 0.5, maxDown);
     const clamped = Math.min(Math.max(downPayment, minDown), maxAllowed);
@@ -102,28 +94,35 @@ export function EMICalculator() {
     setDownInput(clamped.toLocaleString('en-IN'));
   }, [vehiclePrice, downPayment]);
 
-  // Handler for tenure input - allows free typing
   const handleTenureInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     setTenureInput(rawValue);
-    
     const numValue = parseInt(rawValue) || 0;
     setTenure(numValue);
   }, []);
 
-  // Clamp tenure on blur
   const handleTenureBlur = useCallback(() => {
     const clamped = Math.min(Math.max(tenure, minTenure), maxTenure);
     setTenure(clamped);
     setTenureInput(clamped.toString());
   }, [tenure]);
 
-  // Slider handlers - update both state and input display
+  const handleRateInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    setRateInput(rawValue);
+    const numValue = parseFloat(rawValue) || 0;
+    setInterestRate(numValue);
+  }, []);
+
+  const handleRateBlur = useCallback(() => {
+    const clamped = Math.min(Math.max(interestRate, minRate), maxRate);
+    setInterestRate(clamped);
+    setRateInput(clamped.toString());
+  }, [interestRate]);
+
   const handlePriceSlider = useCallback((value: number[]) => {
     setVehiclePrice(value[0]);
     setPriceInput(value[0].toLocaleString('en-IN'));
-    
-    // Adjust down payment if it exceeds new price limit
     if (downPayment > value[0] * 0.5) {
       const newDown = Math.min(value[0] * 0.5, maxDown);
       setDownPayment(newDown);
@@ -141,6 +140,11 @@ export function EMICalculator() {
     setTenureInput(value[0].toString());
   }, []);
 
+  const handleRateSlider = useCallback((value: number[]) => {
+    setInterestRate(value[0]);
+    setRateInput(value[0].toString());
+  }, []);
+
   return (
     <section className="py-16 lg:py-24 bg-muted">
       <div className="container mx-auto px-4">
@@ -153,24 +157,24 @@ export function EMICalculator() {
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-ev/10 text-ev rounded-full text-sm font-medium mb-4">
               <Calculator className="h-4 w-4" />
-              Easy Finance
+              {t("emi.badge")}
             </div>
             <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Apna EMI Calculate Karein
+              {t("emi.title")}
             </h2>
             <p className="text-muted-foreground text-lg">
-              Instant EMI calculation for your dream vehicle
+              {t("emi.subtitle")}
             </p>
           </div>
 
           <div className="bg-card rounded-2xl shadow-xl p-6 lg:p-10 border border-border">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
               {/* Sliders + Inputs */}
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Vehicle Price */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <label className="text-sm font-medium text-foreground">Vehicle Price</label>
+                    <label className="text-sm font-medium text-foreground">{t("emi.vehiclePrice")}</label>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">₹</span>
                       <Input
@@ -200,7 +204,7 @@ export function EMICalculator() {
                 {/* Down Payment */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <label className="text-sm font-medium text-foreground">Down Payment</label>
+                    <label className="text-sm font-medium text-foreground">{t("emi.downPayment")}</label>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">₹</span>
                       <Input
@@ -227,10 +231,40 @@ export function EMICalculator() {
                   </div>
                 </div>
 
+                {/* Interest Rate */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="text-sm font-medium text-foreground">{t("emi.interestRate")}</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={rateInput}
+                        onChange={handleRateInput}
+                        onBlur={handleRateBlur}
+                        className="w-16 h-8 text-right text-sm font-bold text-destructive bg-destructive/5 border-destructive/20"
+                      />
+                      <span className="text-sm text-muted-foreground">%</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[Math.min(Math.max(interestRate, minRate), maxRate)]}
+                    onValueChange={handleRateSlider}
+                    min={minRate}
+                    max={maxRate}
+                    step={0.5}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                    <span>6%</span>
+                    <span>24%</span>
+                  </div>
+                </div>
+
                 {/* Tenure */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <label className="text-sm font-medium text-foreground">Loan Tenure</label>
+                    <label className="text-sm font-medium text-foreground">{t("emi.loanTenure")}</label>
                     <div className="flex items-center gap-2">
                       <Input
                         type="text"
@@ -240,7 +274,7 @@ export function EMICalculator() {
                         onBlur={handleTenureBlur}
                         className="w-16 h-8 text-right text-sm font-bold text-leyland bg-leyland/5 border-leyland/20"
                       />
-                      <span className="text-sm text-muted-foreground">months</span>
+                      <span className="text-sm text-muted-foreground">{t("emi.months")}</span>
                     </div>
                   </div>
                   <Slider
@@ -252,8 +286,8 @@ export function EMICalculator() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                    <span>12 months</span>
-                    <span>60 months</span>
+                    <span>12 {t("emi.months")}</span>
+                    <span>60 {t("emi.months")}</span>
                   </div>
                 </div>
               </div>
@@ -262,7 +296,7 @@ export function EMICalculator() {
               <div className="bg-gradient-to-br from-primary to-secondary rounded-xl p-6 lg:p-8 text-primary-foreground">
                 <div className="space-y-6">
                   <div className="text-center pb-6 border-b border-primary-foreground/20">
-                    <p className="text-sm text-primary-foreground/70 mb-2">Approx Monthly EMI</p>
+                    <p className="text-sm text-primary-foreground/70 mb-2">{t("emi.monthlyEmi")}</p>
                     <div className="flex items-center justify-center gap-2">
                       <IndianRupee className="h-8 w-8" />
                       <motion.span
@@ -278,30 +312,36 @@ export function EMICalculator() {
 
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-xs text-primary-foreground/70 mb-1">Loan Amount</p>
+                      <p className="text-xs text-primary-foreground/70 mb-1">{t("emi.loanAmount")}</p>
                       <p className="text-lg font-semibold">
                         {formatCurrency(Math.max(0, vehiclePrice - downPayment))}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-primary-foreground/70 mb-1">Total Interest</p>
+                      <p className="text-xs text-primary-foreground/70 mb-1">{t("emi.totalInterest")}</p>
                       <p className="text-lg font-semibold">
                         {formatCurrency(emiDetails.totalInterest)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-primary-foreground/20 text-center">
+                  <div className="text-center pt-4 border-t border-primary-foreground/20">
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Percent className="h-4 w-4 text-primary-foreground/70" />
+                      <p className="text-xs text-primary-foreground/70">
+                        @ {interestRate}% p.a. | {t("emi.totalPayment")}: {formatCurrency(emiDetails.totalAmount)}
+                      </p>
+                    </div>
                     <p className="text-xs text-primary-foreground/60 mb-4">
-                      * Final EMI bank approval par depend karega
+                      {t("emi.disclaimer")}
                     </p>
                     <a href="tel:+919876543210">
                       <Button 
                         size="lg"
-                        className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90 gap-2 font-semibold"
+                        className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover gap-2 font-semibold"
                       >
                         <Phone className="h-5 w-5" />
-                        Finance Team se Baat Karein
+                        {t("emi.talkToFinance")}
                       </Button>
                     </a>
                   </div>
