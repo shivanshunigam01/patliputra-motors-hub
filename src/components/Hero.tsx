@@ -9,6 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from '@/i18n/LanguageContext';
 
 import heroJcb from "@/assets/hero-jcb.jpg";
 import leyland from "@/assets/leyland-trucks.jpg";
@@ -18,23 +19,35 @@ import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const heroImages = [heroJcb, leyland, switchEv, usedVehicles];
-const trustBadges = [
+
+const trustBadgesEn = [
   "Authorized Dealer",
   "Finance Support",
   "24/7 Service",
   "Genuine Parts",
 ];
 
+const trustBadgesHi = [
+  "अधिकृत डीलर",
+  "फाइनेंस सहायता",
+  "24/7 सेवा",
+  "असली पार्ट्स",
+];
+
 export function Hero() {
   const [currentImage, setCurrentImage] = useState(0);
+  const { t, language } = useLanguage();
+  
+  const trustBadges = language === 'hi' ? trustBadgesHi : trustBadgesEn;
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroImages.length);
-    }, 5000); // change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
+  
   return (
     <section className="relative min-h-screen flex items-center pt-20 lg:pt-0">
       {/* Background Image */}
@@ -66,7 +79,7 @@ export function Hero() {
             className="trust-badge mb-6"
           >
             <CheckCircle className="h-4 w-4" />
-            <span>Authorized Dealer Since 2010</span>
+            <span>{t('hero.badge')}</span>
           </motion.div>
 
           {/* Headline */}
@@ -76,7 +89,7 @@ export function Hero() {
             transition={{ delay: 0.3 }}
             className="text-4xl md:text-5xl lg:text-7xl font-bold text-primary-foreground mb-6 leading-tight"
           >
-            Bihar का <span className="text-jcb">Bharosemand</span> Partner
+            {t('hero.title')}
           </motion.h1>
 
           {/* Subheadline */}
@@ -86,8 +99,7 @@ export function Hero() {
             transition={{ delay: 0.4 }}
             className="text-lg md:text-xl lg:text-2xl text-primary-foreground/80 mb-8 leading-relaxed"
           >
-            JCB Machines | Ashok Leyland Trucks | Switch Electric Vehicles |
-            Certified Used
+            {t('hero.subtitle')}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -103,7 +115,7 @@ export function Hero() {
                 className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-jcb transition-all"
               >
                 <Phone className="h-5 w-5" />
-                Call Karein
+                {t('common.callNow')}
               </Button>
             </a>
             <a
@@ -116,7 +128,7 @@ export function Hero() {
                 className="w-full sm:w-auto gap-2 bg-success text-success-foreground hover:bg-success/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-ev transition-all"
               >
                 <MessageCircle className="h-5 w-5" />
-                WhatsApp
+                {t('common.whatsapp')}
               </Button>
             </a>
             <Link to="/finance">
@@ -126,12 +138,12 @@ export function Hero() {
                 className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold text-base px-8"
               >
                 <FileText className="h-5 w-5" />
-                Enquiry Karein
+                {t('common.enquiry')}
               </Button>
             </Link>
           </motion.div>
 
-          {/* Used Vehicles Link */}
+          {/* Certified Refurbished Link */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -141,7 +153,7 @@ export function Hero() {
               to="/used-vehicles"
               className="inline-flex items-center gap-2 text-jcb hover:text-jcb/80 font-medium transition-colors group"
             >
-              <span>👉 Used Gaadi Deals Dekhein</span>
+              <span>👉 {language === 'hi' ? 'सर्टिफाइड रिफर्बिश्ड डील्स देखें' : 'View Certified Refurbished Deals'}</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>
@@ -156,7 +168,7 @@ export function Hero() {
             <div className="flex items-center gap-2 px-4 py-3 bg-primary-foreground/10 rounded-full backdrop-blur-sm">
               <Users className="h-5 w-5 text-jcb" />
               <span className="text-primary-foreground font-semibold">
-                2,500+ Happy Customers
+                {language === 'hi' ? '2,500+ खुश ग्राहक' : '2,500+ Happy Customers'}
               </span>
             </div>
           </motion.div>
@@ -170,7 +182,7 @@ export function Hero() {
           >
             {trustBadges.map((badge, index) => (
               <div
-                key={badge}
+                key={index}
                 className="flex items-center gap-2 px-3 py-2 bg-primary-foreground/5 rounded-lg backdrop-blur-sm"
               >
                 <CheckCircle className="h-4 w-4 text-success" />
@@ -192,7 +204,7 @@ export function Hero() {
       >
         <div className="flex flex-col items-center gap-2 text-primary-foreground/60">
           <span className="text-xs tracking-wider uppercase">
-            Scroll to Explore
+            {language === 'hi' ? 'एक्सप्लोर करें' : 'Scroll to Explore'}
           </span>
           <motion.div
             animate={{ y: [0, 8, 0] }}

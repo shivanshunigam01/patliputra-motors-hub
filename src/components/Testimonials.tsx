@@ -2,44 +2,54 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const testimonials = [
   {
     id: 1,
     name: 'Rajesh Kumar',
-    role: 'Patna Contractor',
+    roleEn: 'Patna Contractor',
+    roleHi: 'पटना ठेकेदार',
     rating: 5,
-    text: 'JCB 3DX se hamara construction business double ho gaya. Patliputra ki service bhi bahut acchi hai. Highly recommended for Bihar contractors!',
+    textEn: "The JCB 3DX doubled our construction business output. Patliputra's service is excellent. Highly recommended for Bihar contractors!",
+    textHi: 'JCB 3DX ने हमारे निर्माण व्यवसाय की उत्पादकता दोगुनी कर दी। पाटलिपुत्र की सेवा उत्कृष्ट है। बिहार के ठेकेदारों के लिए अत्यधिक अनुशंसित!',
     avatar: 'RK',
   },
   {
     id: 2,
     name: 'Mohammad Imran',
-    role: 'Transport Business Owner',
+    roleEn: 'Transport Business Owner',
+    roleHi: 'परिवहन व्यवसाय मालिक',
     rating: 5,
-    text: 'Ashok Leyland trucks ka fleet liya yahan se. Finance bhi easy mila, aur after-sales support excellent hai. Bihar mein best dealer!',
+    textEn: 'Purchased a fleet of Ashok Leyland trucks from here. Got easy financing and excellent after-sales support. Best dealer in Bihar!',
+    textHi: 'यहां से अशोक लेलैंड ट्रकों का फ्लीट खरीदा। आसान फाइनेंसिंग और उत्कृष्ट आफ्टर-सेल्स सपोर्ट मिला। बिहार का सबसे अच्छा डीलर!',
     avatar: 'MI',
   },
   {
     id: 3,
     name: 'Priya Singh',
-    role: 'Municipality Officer',
+    roleEn: 'Municipality Officer',
+    roleHi: 'नगरपालिका अधिकारी',
     rating: 5,
-    text: 'Switch EV buses ne hamari city transport ko completely change kar diya. Zero emission, low running cost. Future of Bihar transport!',
+    textEn: 'Switch EV buses completely transformed our city transport. Zero emissions, low running cost. The future of Bihar transport!',
+    textHi: 'स्विच EV बसों ने हमारे शहरी परिवहन को पूरी तरह बदल दिया। शून्य उत्सर्जन, कम परिचालन लागत। बिहार परिवहन का भविष्य!',
     avatar: 'PS',
   },
   {
     id: 4,
     name: 'Sunil Choudhary',
-    role: 'Farmer & Contractor',
+    roleEn: 'Farmer & Contractor',
+    roleHi: 'किसान और ठेकेदार',
     rating: 5,
-    text: 'Used tipper truck liya Patliputra se. 150-point inspection ke baad bahut confidence mila. Price bhi market se kam tha!',
+    textEn: 'Bought a certified refurbished tipper truck from Patliputra. The 150-point inspection gave me confidence. Price was below market!',
+    textHi: 'पाटलिपुत्र से सर्टिफाइड रिफर्बिश्ड टिपर ट्रक खरीदा। 150-पॉइंट निरीक्षण से विश्वास मिला। कीमत बाजार से कम थी!',
     avatar: 'SC',
   },
 ];
 
 export function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { t, language } = useLanguage();
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -48,6 +58,8 @@ export function Testimonials() {
   const prev = () => {
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
+
+  const currentTestimonial = testimonials[currentIndex];
 
   return (
     <section className="py-16 lg:py-24 bg-muted overflow-hidden">
@@ -59,10 +71,10 @@ export function Testimonials() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Customer Stories
+            {t('testimonials.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Trusted by 5000+ happy customers across Bihar
+            {t('testimonials.subtitle')}
           </p>
         </motion.div>
 
@@ -104,27 +116,27 @@ export function Testimonials() {
                 
                 {/* Stars */}
                 <div className="flex gap-1 mb-6">
-                  {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
+                  {[...Array(currentTestimonial.rating)].map((_, i) => (
                     <Star key={i} className="h-5 w-5 fill-jcb text-jcb" />
                   ))}
                 </div>
 
                 {/* Quote */}
                 <p className="text-lg lg:text-xl text-foreground leading-relaxed mb-8">
-                  "{testimonials[currentIndex].text}"
+                  "{language === 'hi' ? currentTestimonial.textHi : currentTestimonial.textEn}"
                 </p>
 
                 {/* Author */}
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
-                    {testimonials[currentIndex].avatar}
+                    {currentTestimonial.avatar}
                   </div>
                   <div>
                     <p className="font-semibold text-foreground">
-                      {testimonials[currentIndex].name}
+                      {currentTestimonial.name}
                     </p>
                     <p className="text-muted-foreground text-sm">
-                      {testimonials[currentIndex].role}
+                      {language === 'hi' ? currentTestimonial.roleHi : currentTestimonial.roleEn}
                     </p>
                   </div>
                 </div>
