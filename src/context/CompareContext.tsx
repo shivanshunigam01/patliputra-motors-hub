@@ -21,11 +21,12 @@ export interface CompareProduct {
 
 interface CompareContextType {
   selectedProducts: CompareProduct[];
-  addProduct: (product: CompareProduct) => boolean;
+  addProduct: (product: CompareProduct) => { success: boolean; reason?: string };
   removeProduct: (productId: string) => void;
   clearProducts: () => void;
   isSelected: (productId: string) => boolean;
   canAddMore: boolean;
+  currentBrand: string | null;
 }
 
 const CompareContext = createContext<CompareContextType | undefined>(undefined);
@@ -33,15 +34,22 @@ const CompareContext = createContext<CompareContextType | undefined>(undefined);
 export function CompareProvider({ children }: { children: ReactNode }) {
   const [selectedProducts, setSelectedProducts] = useState<CompareProduct[]>([]);
 
-  const addProduct = (product: CompareProduct): boolean => {
+  // Get the current brand being compared (from first selected product)
+  const currentBrand = selectedProducts.length > 0 ? selectedProducts[0].brand : null;
+
+  const addProduct = (product: CompareProduct): { success: boolean; reason?: string } => {
     if (selectedProducts.length >= 2) {
-      return false;
+      return { success: false, reason: 'max_limit' };
     }
     if (selectedProducts.some(p => p.id === product.id)) {
-      return false;
+      return { success: false, reason: 'already_selected' };
+    }
+    // Check if product is from a different brand/category
+    if (currentBrand && product.brand !== currentBrand) {
+      return { success: false, reason: 'different_category' };
     }
     setSelectedProducts(prev => [...prev, product]);
-    return true;
+    return { success: true };
   };
 
   const removeProduct = (productId: string) => {
@@ -65,7 +73,8 @@ export function CompareProvider({ children }: { children: ReactNode }) {
       removeProduct,
       clearProducts,
       isSelected,
-      canAddMore
+      canAddMore,
+      currentBrand
     }}>
       {children}
     </CompareContext.Provider>
