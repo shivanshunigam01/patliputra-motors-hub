@@ -8,7 +8,7 @@ export function FloatingCTA() {
   return (
     <>
       {/* Desktop FAB Stack */}
-      <div className="hidden lg:flex fixed right-6 bottom-6 z-50 flex-col gap-3">
+      {/* <div className="hidden lg:flex fixed right-6 bottom-6 z-50 flex-col gap-3">
         <motion.a
           href="tel:+919876543210"
           initial={{ opacity: 0, x: 20 }}
@@ -43,10 +43,10 @@ export function FloatingCTA() {
           <FileText className="h-5 w-5" />
           <span>{t('common.enquiry')}</span>
         </motion.a>
-      </div>
+      </div> */}
 
       {/* Mobile Sticky CTA Bar */}
-      <div className="lg:hidden sticky-cta">
+      {/* <div className="lg:hidden sticky-cta">
         <div className="flex gap-3">
           <a
             href="tel:+919876543210"
@@ -72,7 +72,7 @@ export function FloatingCTA() {
             {t('common.enquiry')}
           </a>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

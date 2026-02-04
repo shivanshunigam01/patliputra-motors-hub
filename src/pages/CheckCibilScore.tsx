@@ -28,6 +28,15 @@ const CheckCibilScore = () => {
   const [panFile, setPanFile] = useState<File | null>(null);
   const aadhaarInputRef = useRef<HTMLInputElement>(null);
   const panInputRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState({
+  customer_name: "",
+  mobile: "",
+  pan: "",
+  dob: "",
+});
+
+const [loading, setLoading] = useState(false);
+const [result, setResult] = useState<any>(null);
 
   const dummyScore = 742;
 
@@ -72,6 +81,55 @@ const CheckCibilScore = () => {
       if (panInputRef.current) panInputRef.current.value = "";
     }
   };
+
+  const handleCheckCibil = async () => {
+  try {
+    setLoading(true);
+
+    // 1️⃣ Create Razorpay order
+    const orderRes = await createCibilOrder({
+      customer_name: form.customer_name,
+      mobile: form.mobile,
+      pan: form.pan,
+      dob: form.dob,
+    });
+
+    // 2️⃣ Open Razorpay Checkout
+    const options = {
+      key: orderRes.razorpay_key_id,
+      amount: orderRes.order.amount,
+      currency: orderRes.order.currency,
+      name: "Patliputra Finance",
+      description: "CIBIL Score Check",
+      order_id: orderRes.order.id,
+      handler: async (response: any) => {
+        // 3️⃣ Verify payment + check CIBIL
+        const result = await verifyCibilPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+        });
+
+        setResult(result);
+        setSubmitted(true);
+      },
+      prefill: {
+        name: form.customer_name,
+        contact: form.mobile,
+      },
+      theme: {
+        color: "#FBBF24",
+      },
+    };
+
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    alert("Payment failed or cancelled");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,10 +177,17 @@ const CheckCibilScore = () => {
                   </h2>
 
                   <div className="space-y-4">
-                    <Input icon={User} label={t("cibil.nameLabel")} />
-                    <Input icon={Phone} label={t("cibil.mobileLabel")} />
-                    <Input icon={CreditCard} label={t("cibil.panLabel")} />
-                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} />
+                   <Input
+  icon={User}
+  label={t("cibil.nameLabel")}
+  value={form.customer_name}
+  onChange={(e) =>
+    setForm({ ...form, customer_name: e.target.value })
+  }
+/>
+                    <Input icon={Phone} label={t("cibil.mobileLabel")} value={form.mobile} onChange={(e) => setForm({...form, mobile: e.target.value})} />
+                    <Input icon={CreditCard} label={t("cibil.panLabel")} value={form.pan} onChange={(e) => setForm({...form, pan: e.target.value})} />
+                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} value={form.dob} onChange={(e) => setForm({...form, dob: e.target.value})} />
 
                     {/* Aadhaar Upload */}
                     <div>
@@ -209,7 +274,8 @@ const CheckCibilScore = () => {
                     <Button
                       size="lg"
                       className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover font-semibold mt-4"
-                      onClick={() => setSubmitted(true)}
+                    onClick={handleCheckCibil}
+disabled={loading}
                     >
                       {t("cibil.checkScore")}
                     </Button>
