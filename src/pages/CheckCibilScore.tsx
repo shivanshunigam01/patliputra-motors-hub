@@ -20,6 +20,9 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
 
 const CheckCibilScore = () => {
   const { t } = useLanguage();
@@ -28,24 +31,182 @@ const CheckCibilScore = () => {
   const [panFile, setPanFile] = useState<File | null>(null);
   const aadhaarInputRef = useRef<HTMLInputElement>(null);
   const panInputRef = useRef<HTMLInputElement>(null);
+
+
   const [form, setForm] = useState({
-  customer_name: "",
-  mobile: "",
-  pan: "",
-  dob: "",
-});
+    name: "",
+    mobile: "",
+    pan: "",
+  });
 
-const [loading, setLoading] = useState(false);
-const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [score, setScore] = useState<number | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
-  const dummyScore = 742;
+  const dummyScore = 742
 
   const scoreLabel =
-    dummyScore >= 750
+    score && score >= 750
       ? t("cibil.excellent")
-      : dummyScore >= 700
-      ? t("cibil.good")
-      : t("cibil.needsImprovement");
+      : score && score >= 700
+        ? t("cibil.good")
+        : t("cibil.needsImprovement");
+
+  const loadRazorpay = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true);
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+
+  const handleCheckCibil = async () => {
+    if (!form.name || !form.mobile || !form.pan) {
+      toast.warning("Please fill all required fields");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const ok = await loadRazorpay();
+      if (!ok) {
+        toast.error("Razorpay SDK failed to load");
+        return;
+      }
+
+      const orderRes = await fetch(
+        "http://localhost:5000/payments/razorpay/order",
+        { method: "POST" }
+      );
+
+      const order = await orderRes.json();
+      if (!order.id) {
+        throw new Error("Order creation failed");
+      }
+
+      const rzp = new (window as any).Razorpay({
+        key: order.key_id,
+        order_id: order.id,
+        amount: order.amount,
+        currency: "INR",
+        name: "Patliputra Autos",
+        description: "CIBIL Check",
+        prefill: {
+          name: form.name,
+          contact: form.mobile,
+        },
+
+        handler: async (resp: any) => {
+          try {
+            toast.loading("Verifying payment & fetching CIBIL…", {
+              id: "verify-cibil",
+            });
+
+            const verifyRes = await fetch(
+              "http://localhost:5000/payments/razorpay/verify-cibil",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: resp.razorpay_order_id,
+                  razorpay_payment_id: resp.razorpay_payment_id,
+                  razorpay_signature: resp.razorpay_signature,
+                  name: form.name,
+                  mobile: form.mobile,
+                  pan: form.pan,
+                }),
+              }
+            );
+
+            const data = await verifyRes.json();
+
+            if (!data.ok) {
+              toast.error("Payment successful but CIBIL fetch failed", {
+                id: "verify-cibil",
+              });
+              return;
+            }
+
+            toast.success("CIBIL fetched successfully", {
+              id: "verify-cibil",
+            });
+
+            setScore(data.score);
+            setSubmitted(true);
+          } catch (err) {
+            toast.error("Verification failed");
+          }
+        },
+
+        modal: {
+          ondismiss: () => {
+            toast.info("Payment cancelled");
+          },
+        },
+      });
+
+      rzp.open();
+    } catch (err) {
+      toast.error("CIBIL check failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+ const handleDownloadPdf = async () => {
+  setPdfLoading(true);
+  toast.loading("Generating CIBIL PDF…", { id: "cibil-pdf" });
+
+  try {
+    const res = await fetch(
+      "http://localhost:5000/payments/experian-pdf",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          mobile: form.mobile,
+          pan: form.pan,
+          consent: "Y",
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.ok || !data.credit_report_link) {
+      toast.error("Failed to generate CIBIL PDF", {
+        id: "cibil-pdf",
+      });
+      return;
+    }
+
+    toast.success("CIBIL PDF ready", {
+      id: "cibil-pdf",
+    });
+
+    window.open(data.credit_report_link, "_blank");
+  } catch (err) {
+    toast.error("PDF download failed", {
+      id: "cibil-pdf",
+    });
+  } finally {
+    setPdfLoading(false);
+  }
+};
+
+
+
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -81,55 +242,6 @@ const [result, setResult] = useState<any>(null);
       if (panInputRef.current) panInputRef.current.value = "";
     }
   };
-
-  const handleCheckCibil = async () => {
-  try {
-    setLoading(true);
-
-    // 1️⃣ Create Razorpay order
-    const orderRes = await createCibilOrder({
-      customer_name: form.customer_name,
-      mobile: form.mobile,
-      pan: form.pan,
-      dob: form.dob,
-    });
-
-    // 2️⃣ Open Razorpay Checkout
-    const options = {
-      key: orderRes.razorpay_key_id,
-      amount: orderRes.order.amount,
-      currency: orderRes.order.currency,
-      name: "Patliputra Finance",
-      description: "CIBIL Score Check",
-      order_id: orderRes.order.id,
-      handler: async (response: any) => {
-        // 3️⃣ Verify payment + check CIBIL
-        const result = await verifyCibilPayment({
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-        });
-
-        setResult(result);
-        setSubmitted(true);
-      },
-      prefill: {
-        name: form.customer_name,
-        contact: form.mobile,
-      },
-      theme: {
-        color: "#FBBF24",
-      },
-    };
-
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  } catch (err) {
-    alert("Payment failed or cancelled");
-  } finally {
-    setLoading(false);
-  }
-};
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,17 +289,31 @@ const [result, setResult] = useState<any>(null);
                   </h2>
 
                   <div className="space-y-4">
-                   <Input
-  icon={User}
-  label={t("cibil.nameLabel")}
-  value={form.customer_name}
-  onChange={(e) =>
-    setForm({ ...form, customer_name: e.target.value })
-  }
-/>
-                    <Input icon={Phone} label={t("cibil.mobileLabel")} value={form.mobile} onChange={(e) => setForm({...form, mobile: e.target.value})} />
-                    <Input icon={CreditCard} label={t("cibil.panLabel")} value={form.pan} onChange={(e) => setForm({...form, pan: e.target.value})} />
-                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} value={form.dob} onChange={(e) => setForm({...form, dob: e.target.value})} />
+                    <Input
+                      icon={User}
+                      label={t("cibil.nameLabel")}
+                      value={form.name}
+                      onChange={(v) => setForm({ ...form, name: v })}
+                    />
+
+                    <Input
+                      icon={Phone}
+                      label={t("cibil.mobileLabel")}
+                      value={form.mobile}
+                      onChange={(v) =>
+                        setForm({ ...form, mobile: v.replace(/\D/g, "").slice(0, 10) })
+                      }
+                    />
+
+                    <Input
+                      icon={CreditCard}
+                      label={t("cibil.panLabel")}
+                      value={form.pan}
+                      onChange={(v) =>
+                        setForm({ ...form, pan: v.toUpperCase().slice(0, 10) })
+                      }
+                    />
+                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} />
 
                     {/* Aadhaar Upload */}
                     <div>
@@ -274,10 +400,17 @@ const [result, setResult] = useState<any>(null);
                     <Button
                       size="lg"
                       className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover font-semibold mt-4"
-                    onClick={handleCheckCibil}
-disabled={loading}
+                      onClick={handleCheckCibil}
+                      disabled={loading}
                     >
-                      {t("cibil.checkScore")}
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Processing…
+                        </span>
+                      ) : (
+                        t("cibil.checkScore")
+                      )}
                     </Button>
 
                     <p className="text-xs text-muted-foreground text-center mt-3">
@@ -301,7 +434,7 @@ disabled={loading}
                   </p>
 
                   <h3 className="text-6xl font-bold text-foreground mb-2">
-                    {dummyScore}
+                    {score ?? "—"}
                   </h3>
 
                   <span className="inline-block px-4 py-1 rounded-full bg-success/20 text-success text-sm font-medium mb-4">
@@ -311,14 +444,25 @@ disabled={loading}
                   <p className="text-muted-foreground mb-6">
                     {t("cibil.eligibleMessage")}
                   </p>
+                 <Button
+  size="lg"
+  className="w-full gap-2 bg-primary text-primary-foreground mb-4"
+  onClick={handleDownloadPdf}
+  disabled={pdfLoading}
+>
+  {pdfLoading ? (
+    <span className="flex items-center justify-center gap-2">
+      <Loader2 className="h-5 w-5 animate-spin" />
+      Generating PDF…
+    </span>
+  ) : (
+    <>
+      <FileDown className="h-5 w-5" />
+      Download CIBIL Report (PDF)
+    </>
+  )}
+</Button>
 
-                  <Button
-                    size="lg"
-                    className="w-full gap-2 bg-primary text-primary-foreground mb-4"
-                  >
-                    <FileDown className="h-5 w-5" />
-                    {t("cibil.downloadReport")}
-                  </Button>
 
                   <Button
                     size="lg"
@@ -366,10 +510,14 @@ const Input = ({
   label,
   icon: Icon,
   type = "text",
+  value,
+  onChange,
 }: {
   label: string;
   icon: any;
   type?: string;
+  value?: string;
+  onChange?: (v: string) => void;
 }) => (
   <div>
     <label className="text-sm font-medium text-muted-foreground mb-1 block">
@@ -379,11 +527,14 @@ const Input = ({
       <Icon className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
       <input
         type={type}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
         className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
         placeholder={label}
       />
     </div>
   </div>
 );
+
 
 export default CheckCibilScore;

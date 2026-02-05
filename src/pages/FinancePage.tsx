@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Phone, MessageCircle, CheckCircle, FileText, Building2 } from 'lucide-react';
+import { Phone, MessageCircle, CheckCircle, FileText, Building2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,15 +13,81 @@ import { useToast } from '@/hooks/use-toast';
 const partners = ['HDFC Bank', 'SBI', 'Mahindra Finance', 'Tata Capital', 'Bajaj Finserv'];
 const districts = ['Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Darbhanga', 'Purnia', 'Nalanda', 'Vaishali', 'Other'];
 
+
+
 const FinancePage = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ vehicleType: '', business: '', name: '', mobile: '', district: '' });
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    toast({ title: '✅ Application Received!', description: 'Our finance team will call you within 2 hours.' });
+
+const handleSubmit = async () => {
+  if (!formData.name || !formData.mobile || !formData.district) {
+    toast({
+      title: "Missing details",
+      description: "Please fill all required fields",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  if (!/^\d{10}$/.test(formData.mobile)) {
+    toast({
+      title: "Invalid mobile number",
+      description: "Please enter a valid 10-digit mobile number",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setSubmitting(true);
+
+  const toastId = toast({
+    title: "Submitting application…",
+    description: "Please wait while we process your request",
+  });
+
+  try {
+    const res = await fetch("http://localhost:5000/finance/apply", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        vehicleType: formData.vehicleType,
+        business: formData.business,
+        name: formData.name,
+        mobile: formData.mobile,
+        district: formData.district,
+        source: "Finance Page",
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data?.error || "Submission failed");
+    }
+
+    toast({
+      title: "✅ Application Received!",
+      description: `Application No: ${data.application_number}. Our finance team will call you within 2 hours.`,
+    });
+
     setStep(4);
-  };
+  } catch (err: any) {
+    toast({
+      title: "Submission failed",
+      description: err.message || "Please try again",
+      variant: "destructive",
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -87,7 +153,20 @@ const FinancePage = () => {
                         <SelectTrigger><SelectValue placeholder="Select District" /></SelectTrigger>
                         <SelectContent>{districts.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                       </Select>
-                      <Button className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90" onClick={handleSubmit} disabled={!formData.name || !formData.mobile}>Submit Application</Button>
+                    <Button
+  className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90"
+  onClick={handleSubmit}
+  disabled={submitting || !formData.name || !formData.mobile}
+>
+  {submitting ? (
+    <span className="flex items-center justify-center gap-2">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Submitting…
+    </span>
+  ) : (
+    'Submit Application'
+  )}
+</Button>
                     </div>
                   )}
                 </div>
