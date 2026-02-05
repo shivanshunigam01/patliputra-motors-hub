@@ -81,7 +81,7 @@ const CheckCibilScore = () => {
       }
 
       const orderRes = await fetch(
-        "http://localhost:5000/payments/razorpay/order",
+        "https://api.patliputragroup.com/payments/razorpay/order",
         { method: "POST" }
       );
 
@@ -109,7 +109,7 @@ const CheckCibilScore = () => {
             });
 
             const verifyRes = await fetch(
-              "http://localhost:5000/payments/razorpay/verify-cibil",
+              "https://api.patliputragroup.com/payments/razorpay/verify-cibil",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -167,7 +167,7 @@ const CheckCibilScore = () => {
 
   try {
     const res = await fetch(
-      "http://localhost:5000/payments/experian-pdf",
+      "https://api.patliputragroup.com/payments/experian-pdf",
       {
         method: "POST",
         headers: {
