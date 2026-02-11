@@ -49,7 +49,7 @@ const handleSubmit = async () => {
   });
 
   try {
-    const res = await fetch("http://localhost:5000/finance/apply", {
+    const res = await fetch("https://api.patliputragroup.com/finance/apply", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
