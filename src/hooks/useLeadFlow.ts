@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-interface Product {
+export interface LeadProduct {
   id: string;
   name: string;
   brand: string;
@@ -20,22 +20,20 @@ interface Product {
 export function useLeadFlow() {
   const navigate = useNavigate();
   const [isTcoOpen, setIsTcoOpen] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<LeadProduct[]>([]);
 
-  const handleProductSelect = useCallback((product: Product) => {
+  const handleProductSelect = useCallback((product: LeadProduct) => {
     setSelectedProducts(prev => {
       const isAlreadySelected = prev.some(p => p.id === product.id);
       if (isAlreadySelected) {
         return prev.filter(p => p.id !== product.id);
       }
       
-      // Max 2 products
       if (prev.length >= 2) {
         toast.error('Maximum 2 products can be selected for comparison');
         return prev;
       }
 
-      // Same brand only
       if (prev.length > 0 && prev[0].brand !== product.brand) {
         toast.error('You can only compare products of the same brand');
         return prev;
@@ -44,6 +42,10 @@ export function useLeadFlow() {
       return [...prev, product];
     });
   }, []);
+
+  const isSelected = useCallback((productId: string) => {
+    return selectedProducts.some(p => p.id === productId);
+  }, [selectedProducts]);
 
   const handleViewTco = useCallback(() => {
     if (selectedProducts.length === 0) {
@@ -73,5 +75,6 @@ export function useLeadFlow() {
     handleViewTco,
     handleTcoContinue,
     clearSelection,
+    isSelected,
   };
 }
