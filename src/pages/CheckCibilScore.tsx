@@ -125,6 +125,7 @@ const CheckCibilScore = () => {
             );
 
             const data = await verifyRes.json();
+console.log("VERIFY RESPONSE:", data);
 
             if (!data.ok) {
               toast.error("Payment successful but CIBIL fetch failed", {
