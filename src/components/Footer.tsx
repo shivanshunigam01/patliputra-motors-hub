@@ -10,6 +10,7 @@ import {
   Linkedin,
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -32,6 +33,7 @@ export function Footer() {
     { name: t("nav.contact"), path: "/contact" },
   ];
 
+   const { settings } = useAdminSettings();
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-12 lg:py-16">
@@ -129,7 +131,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="tel:+919876543210"
+                  href={`tel:+91${settings?.primary_phone}`}
                   className="flex items-center gap-3 text-primary-foreground/70 hover:text-jcb transition-colors"
                 >
                   <Phone className="h-5 w-5 text-jcb flex-shrink-0" />

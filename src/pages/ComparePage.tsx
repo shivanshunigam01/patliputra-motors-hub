@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useCompare } from '@/context/CompareContext';
+import { useAdminSettings } from '@/context/AdminSettingsContext';
 
 const ComparePage = () => {
   const { selectedProducts, clearProducts, removeProduct } = useCompare();
@@ -32,6 +33,7 @@ const ComparePage = () => {
     { label: 'Warranty', key: 'warranty' },
   ];
 
+   const { settings } = useAdminSettings();
   const getValue = (product: typeof selectedProducts[0], key: string): string => {
     if (key === 'price' || key === 'brand' || key === 'category') {
       return product[key as 'price' | 'brand' | 'category'] || '-';
@@ -169,7 +171,7 @@ const ComparePage = () => {
               Our experts can help you choose the right vehicle for your needs. Get personalized recommendations.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <a href="tel:+919876543210" className="w-full sm:w-auto">
+              <a href={`tel:+91${settings?.primary_phone}`} className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
@@ -179,7 +181,7 @@ const ComparePage = () => {
                 </Button>
               </a>
               <a
-                href="https://wa.me/919876543210"
+                href={`https://wa.me/91${settings?.whatsapp_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"

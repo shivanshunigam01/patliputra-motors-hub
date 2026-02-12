@@ -25,11 +25,14 @@ import DealerLocatorPage from "./pages/DealerLocatorPage";
 import ServiceWarrantyPage from "./pages/ServiceWarrantyPage";
 import PartsLubricantsPage from "./pages/PartsLubricantsPage";
 import CompanyAlbumPage from "./pages/CompanyAlbumPage";
+import { AdminSettingsProvider } from "./context/AdminSettingsContext";
+import ProductDetail from "./pages/ProductDetail";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+        <AdminSettingsProvider> 
     <LanguageProvider>
       <TooltipProvider>
         <CompareProvider>
@@ -45,6 +48,7 @@ const App = () => (
               <Route path="/used-vehicles" element={<UsedVehiclesPage />} />
               <Route path="/certified-refurbished" element={<Navigate to="/used-vehicles" replace />} />
               <Route path="/cibil-score" element={<CheckCibilScore />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/finance" element={<FinancePage />} />
               <Route path="/compare" element={<ComparePage />} />
               <Route path="/about" element={<AboutPage />} />
@@ -63,6 +67,7 @@ const App = () => (
         </CompareProvider>
       </TooltipProvider>
     </LanguageProvider>
+    </AdminSettingsProvider>  
   </QueryClientProvider>
 );
 

@@ -5,13 +5,14 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const PartsLubricantsPage = () => {
   const { t } = useLanguage();
 
   const partsBenefits = [t("partsLubricants.parts1"), t("partsLubricants.parts2"), t("partsLubricants.parts3"), t("partsLubricants.parts4")];
   const lubricantTypes = [t("partsLubricants.lubricant1"), t("partsLubricants.lubricant2"), t("partsLubricants.lubricant3"), t("partsLubricants.lubricant4")];
-
+ const { settings } = useAdminSettings();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -72,8 +73,8 @@ const PartsLubricantsPage = () => {
             <h2 className="text-3xl font-bold text-primary-foreground mb-4">{t("partsLubricants.ctaTitle")}</h2>
             <p className="text-primary-foreground/80 mb-8">{t("partsLubricants.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210"><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
-              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
+              <a href={`tel:+91${settings?.primary_phone}`}><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
+              <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
             </div>
           </div>
         </section>

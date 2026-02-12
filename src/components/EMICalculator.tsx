@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useAdminSettings } from '@/context/AdminSettingsContext';
 
 export function EMICalculator() {
   const { t } = useLanguage();
@@ -144,6 +145,8 @@ export function EMICalculator() {
     setInterestRate(value[0]);
     setRateInput(value[0].toString());
   }, []);
+
+  const { settings } = useAdminSettings();
 
   return (
     <section className="py-16 lg:py-24 bg-muted">
@@ -335,7 +338,7 @@ export function EMICalculator() {
                     <p className="text-xs text-primary-foreground/60 mb-4">
                       {t("emi.disclaimer")}
                     </p>
-                    <a href="tel:+919876543210">
+                    <a href={`tel:+91${settings?.primary_phone}`}>
                       <Button 
                         size="lg"
                         className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover gap-2 font-semibold"

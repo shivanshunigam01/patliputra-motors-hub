@@ -20,6 +20,7 @@ import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 import leylandTrucks from "@/assets/leyland-trucks.jpg";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const products = [
   {
@@ -191,6 +192,8 @@ const AshokLeylandPage = () => {
     setSelectedSubcategory("All");
   };
 
+   const { settings } = useAdminSettings();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -233,7 +236,7 @@ const AshokLeylandPage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:+919876543210">
+                <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto gap-2 bg-leyland text-leyland-foreground hover:bg-leyland/90 font-semibold"
@@ -243,7 +246,7 @@ const AshokLeylandPage = () => {
                   </Button>
                 </a>
                 <a
-                  href="https://wa.me/919876543210"
+                  href={`https://wa.me/91${settings?.whatsapp_number}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -417,7 +420,7 @@ const AshokLeylandPage = () => {
                           {product.price}
                         </p>
                         <div className="flex gap-2">
-                          <a href="tel:+919876543210">
+                          <a href={`tel:+91${settings?.primary_phone}`}>
                             <Button
                               size="sm"
                               variant="outline"
@@ -466,7 +469,7 @@ const AshokLeylandPage = () => {
                 : 'Special pricing for fleet purchases. Get customized solutions for your transport business.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210">
+              <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
                   size="lg"
                   className="gap-2 bg-leyland text-leyland-foreground hover:bg-leyland/90 font-semibold"

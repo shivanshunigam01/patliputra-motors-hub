@@ -20,6 +20,7 @@ import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 import usedVehicles from "@/assets/used-vehicles.jpg";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const vehicles = [
   {
@@ -186,7 +187,7 @@ const UsedVehiclesPage = () => {
     setSelectedCategory(category);
     setSelectedSubcategory("All");
   };
-
+ const { settings } = useAdminSettings();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -229,7 +230,7 @@ const UsedVehiclesPage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:+919876543210">
+                <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
@@ -239,7 +240,7 @@ const UsedVehiclesPage = () => {
                   </Button>
                 </a>
                 <a
-                  href="https://wa.me/919876543210"
+                  href={`https://wa.me/91${settings?.whatsapp_number}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -466,7 +467,7 @@ const UsedVehiclesPage = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <a href="tel:+919876543210" className="flex-1">
+                          <a href={`tel:+91${settings?.primary_phone}`} className="flex-1">
                             <Button
                               size="sm"
                               className="w-full bg-jcb text-jcb-foreground hover:bg-jcb/90"
@@ -475,7 +476,7 @@ const UsedVehiclesPage = () => {
                             </Button>
                           </a>
                           <a
-                            href="https://wa.me/919876543210"
+                            href={`https://wa.me/91${settings?.whatsapp_number}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1"
@@ -528,7 +529,7 @@ const UsedVehiclesPage = () => {
                 : 'Looking to sell your commercial vehicle? Get the best price from Bihar\'s most trusted dealer.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210">
+              <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
                   size="lg"
                   className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"

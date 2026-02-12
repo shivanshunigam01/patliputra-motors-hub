@@ -9,6 +9,7 @@ import heroJcb from "@/assets/hero-jcb.jpg";
 import leylandTrucks from "@/assets/leyland-trucks.jpg";
 import switchEvBus from "@/assets/switch-ev-bus.jpg";
 import usedVehicles from "@/assets/used-vehicles.jpg";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const AboutPage = () => {
   const { t } = useLanguage();
@@ -34,6 +35,7 @@ const AboutPage = () => {
     { icon: Linkedin, url: "https://linkedin.com", label: "LinkedIn", color: "hover:bg-ev hover:text-ev-foreground" },
   ];
 
+   const { settings } = useAdminSettings();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -134,8 +136,8 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold text-primary-foreground mb-4">{t("about.ctaTitle")}</h2>
             <p className="text-primary-foreground/80 mb-8">{t("about.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210"><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
-              <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
+              <a href={`tel:+91${settings?.primary_phone}`}><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
+              <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
             </div>
           </div>
         </section>

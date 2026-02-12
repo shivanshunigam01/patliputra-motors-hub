@@ -1,16 +1,17 @@
 import { Phone, MessageCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 export function FloatingCTA() {
   const { t } = useLanguage();
-
+ const { settings } = useAdminSettings();
   return (
     <>
       {/* Desktop FAB Stack */}
       {/* <div className="hidden lg:flex fixed right-6 bottom-6 z-50 flex-col gap-3">
         <motion.a
-          href="tel:+919876543210"
+          href={`tel:+91${settings?.primary_phone}`}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
@@ -21,7 +22,7 @@ export function FloatingCTA() {
         </motion.a>
 
         <motion.a
-          href="https://wa.me/919876543210"
+          href={`https://wa.me/91${settings?.whatsapp_number}`}
           target="_blank"
           rel="noopener noreferrer"
           initial={{ opacity: 0, x: 20 }}
@@ -49,14 +50,14 @@ export function FloatingCTA() {
       {/* <div className="lg:hidden sticky-cta">
         <div className="flex gap-3">
           <a
-            href="tel:+919876543210"
+            href={`tel:+91${settings?.primary_phone}`}
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-jcb text-jcb-foreground rounded-xl font-semibold text-sm"
           >
             <Phone className="h-4 w-4" />
             {t('common.call')}
           </a>
           <a
-            href="https://wa.me/919876543210"
+            href={`https://wa.me/91${settings?.whatsapp_number}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-success text-success-foreground rounded-xl font-semibold text-sm"

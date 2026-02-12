@@ -6,11 +6,12 @@ import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getActiveOffers } from "@/data/offers";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const OffersPage = () => {
   const { t, language } = useLanguage();
   const activeOffers = getActiveOffers();
-
+ const { settings } = useAdminSettings();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -48,8 +49,8 @@ const OffersPage = () => {
                         {t("offers.validTill")}: {new Date(offer.validTill).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN")}
                       </div>
                       <div className="flex gap-2">
-                        <a href="tel:+919876543210" className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
-                        <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
+                        <a href={`tel:+91${settings?.primary_phone}`} className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
+                        <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
                       </div>
                     </div>
                   </motion.div>

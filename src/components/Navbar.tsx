@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +52,8 @@ export function Navbar() {
   useEffect(() => {
     setIsOpen(false);
   }, [location]);
+
+   const { settings } = useAdminSettings();
 
   return (
     <>
@@ -139,7 +142,7 @@ export function Navbar() {
               >
                 <Search className="h-5 w-5" />
               </Button>
-              <a href="tel:+919876543210">
+              <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
                   variant={isScrolled ? "outline" : "secondary"}
                   size="sm"
@@ -150,7 +153,7 @@ export function Navbar() {
                 </Button>
               </a>
               <a
-                href="https://wa.me/919876543210"
+                href={`https://wa.me/91${settings?.whatsapp_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -222,7 +225,7 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex flex-col gap-3 mt-auto pt-4">
-                  <a href="tel:+919876543210" className="w-full">
+                  <a href={`tel:+91${settings?.primary_phone}`} className="w-full">
                     <Button
                       variant="secondary"
                       size="lg"
@@ -233,7 +236,7 @@ export function Navbar() {
                     </Button>
                   </a>
                   <a
-                    href="https://wa.me/919876543210"
+                    href={`https://wa.me/91${settings?.whatsapp_number}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full"

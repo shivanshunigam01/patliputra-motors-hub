@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { getFeaturedOffers } from "@/data/offers";
 import { Link } from "react-router-dom";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 export function OffersSection() {
   const { t, language } = useLanguage();
   const featuredOffers = getFeaturedOffers();
 
   if (featuredOffers.length === 0) return null;
+
+   const { settings } = useAdminSettings();
 
   return (
     <section className="py-16 lg:py-24 bg-muted">
@@ -36,8 +39,8 @@ export function OffersSection() {
                 {t("offers.validTill")}: {new Date(offer.validTill).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN")}
               </div>
               <div className="flex gap-2">
-                <a href="tel:+919876543210" className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
-                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
+                <a href={`tel:+91${settings?.primary_phone}`} className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
+                <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
               </div>
             </motion.div>
           ))}

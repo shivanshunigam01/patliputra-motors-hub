@@ -20,6 +20,7 @@ import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
 import { useLanguage } from "@/i18n/LanguageContext";
 
 import heroJcb from "@/assets/hero-jcb.jpg";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const products = [
   {
@@ -160,7 +161,7 @@ const JCBPage = () => {
     setSelectedCategory(category);
     setSelectedSubcategory("All");
   };
-
+ const { settings } = useAdminSettings();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -203,7 +204,7 @@ const JCBPage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:+919876543210">
+                <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
@@ -213,7 +214,7 @@ const JCBPage = () => {
                   </Button>
                 </a>
                 <a
-                  href="https://wa.me/919876543210"
+                  href={`https://wa.me/91${settings?.whatsapp_number}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -388,7 +389,7 @@ const JCBPage = () => {
                           {product.price}
                         </p>
                         <div className="flex gap-2">
-                          <a href="tel:+919876543210">
+                          <a href={`tel:+91${settings?.primary_phone}`}>
                             <Button
                               size="sm"
                               variant="outline"
@@ -437,7 +438,7 @@ const JCBPage = () => {
                 : 'Our JCB experts will help you find the perfect machine for your project requirements.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="tel:+919876543210">
+              <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
                   size="lg"
                   className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"

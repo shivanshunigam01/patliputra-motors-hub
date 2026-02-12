@@ -9,9 +9,80 @@ import { Footer } from '@/components/Footer';
 import { FloatingCTA } from '@/components/FloatingCTA';
 import { EMICalculator } from '@/components/EMICalculator';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
-const partners = ['HDFC Bank', 'SBI', 'Mahindra Finance', 'Tata Capital', 'Bajaj Finserv'];
-const districts = ['Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Darbhanga', 'Purnia', 'Nalanda', 'Vaishali', 'Other'];
+const partners = [
+  // Banks
+  "State Bank of India (SBI)",
+  "Punjab National Bank (PNB)",
+  "Bank of Baroda",
+  "Canara Bank",
+  "Union Bank of India",
+  "UCO Bank",
+  "Central Bank of India",
+  "Bank of India",
+  "Indian Bank",
+  "IDBI Bank",
+  "HDFC Bank",
+  "ICICI Bank",
+  "Axis Bank",
+  "Kotak Mahindra Bank",
+  "IndusInd Bank",
+
+  // NBFCs / Vehicle Finance
+  "Tata Capital",
+  "Mahindra Finance",
+  "Bajaj Finance",
+  "Shriram Finance",
+  "Cholamandalam Finance",
+  "HDB Financial Services",
+  "L&T Finance",
+  "Magma HDI Finance",
+  "Sundaram Finance",
+  "Manappuram Finance",
+  "Muthoot Finance",
+];
+
+const districts = [
+  "Araria",
+  "Arwal",
+  "Aurangabad",
+  "Banka",
+  "Begusarai",
+  "Bhagalpur",
+  "Bhojpur",
+  "Buxar",
+  "Darbhanga",
+  "East Champaran (Motihari)",
+  "Gaya",
+  "Gopalganj",
+  "Jamui",
+  "Jehanabad",
+  "Kaimur (Bhabua)",
+  "Katihar",
+  "Khagaria",
+  "Kishanganj",
+  "Lakhisarai",
+  "Madhepura",
+  "Madhubani",
+  "Munger",
+  "Muzaffarpur",
+  "Nalanda",
+  "Nawada",
+  "Patna",
+  "Purnia",
+  "Rohtas (Sasaram)",
+  "Saharsa",
+  "Samastipur",
+  "Saran (Chhapra)",
+  "Sheikhpura",
+  "Sheohar",
+  "Sitamarhi",
+  "Siwan",
+  "Supaul",
+  "Vaishali (Hajipur)",
+  "West Champaran (Bettiah)",
+];
 
 
 
@@ -87,7 +158,7 @@ const handleSubmit = async () => {
   }
 };
 
-
+const { settings } = useAdminSettings();
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,7 +248,7 @@ const handleSubmit = async () => {
                   </div>
                   <h3 className="text-xl font-bold text-foreground mb-2">Application Received!</h3>
                   <p className="text-muted-foreground mb-6">Our finance team will call you within 2 hours.</p>
-                  <a href="tel:+919876543210"><Button className="gap-2 bg-jcb text-jcb-foreground"><Phone className="h-4 w-4" />Call Now</Button></a>
+                  <a href={`tel:+91${settings?.primary_phone}`}><Button className="gap-2 bg-jcb text-jcb-foreground"><Phone className="h-4 w-4" />Call Now</Button></a>
                 </div>
               )}
             </div>

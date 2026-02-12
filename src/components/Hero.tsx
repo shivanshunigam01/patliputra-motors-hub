@@ -17,6 +17,9 @@ import switchEv from "@/assets/switch-ev-bus.jpg";
 import usedVehicles from "@/assets/used-vehicles.jpg";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
+
+
 
 const heroImages = [heroJcb, leyland, switchEv, usedVehicles];
 
@@ -39,12 +42,15 @@ export function Hero() {
   const { t, language } = useLanguage();
   
   const trustBadges = language === 'hi' ? trustBadgesHi : trustBadgesEn;
+  const { settings } = useAdminSettings();
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroImages.length);
     }, 5000);
 
+    
+    
     return () => clearInterval(interval);
   }, []);
   
@@ -109,17 +115,19 @@ export function Hero() {
             transition={{ delay: 0.5 }}
             className="flex flex-col sm:flex-row gap-4 mb-8"
           >
-            <a href="tel:+919876543210">
+            <a href={`tel:+91${settings?.primary_phone}`}>
               <Button
                 size="lg"
                 className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-jcb transition-all"
               >
                 <Phone className="h-5 w-5" />
-                {t('common.callNow')}
+               <a href={`tel:${settings?.primary_phone}`}>
+  {t('common.callNow')}
+</a>
               </Button>
             </a>
             <a
-              href="https://wa.me/919876543210"
+              href={`https://wa.me/91${settings?.whatsapp_number}`}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -128,7 +136,13 @@ export function Hero() {
                 className="w-full sm:w-auto gap-2 bg-success text-success-foreground hover:bg-success/90 font-semibold text-base px-8 shadow-lg hover:shadow-glow-ev transition-all"
               >
                 <MessageCircle className="h-5 w-5" />
-                {t('common.whatsapp')}
+                <a
+  href={`https://wa.me/${settings?.whatsapp_number}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  {t('common.whatsapp')}
+</a>
               </Button>
             </a>
             <Link to="/finance">
