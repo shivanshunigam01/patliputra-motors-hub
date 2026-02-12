@@ -86,6 +86,7 @@ const CheckCibilScore = () => {
       );
 
       const order = await orderRes.json();
+         console.log("ORDER RESPONSE:", order);
       if (!order.id) {
         throw new Error("Order creation failed");
       }
