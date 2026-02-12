@@ -27,6 +27,7 @@ import PartsLubricantsPage from "./pages/PartsLubricantsPage";
 import CompanyAlbumPage from "./pages/CompanyAlbumPage";
 import { AdminSettingsProvider } from "./context/AdminSettingsContext";
 import ProductDetail from "./pages/ProductDetail";
+import { LeadReviewPage } from "./pages/LeadReviewPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/service-warranty" element={<ServiceWarrantyPage />} />
               <Route path="/parts-lubricants" element={<PartsLubricantsPage />} />
               <Route path="/company-album" element={<CompanyAlbumPage />} />
+              <Route path="/review" element={<LeadReviewPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <CompareFloatingBar />
