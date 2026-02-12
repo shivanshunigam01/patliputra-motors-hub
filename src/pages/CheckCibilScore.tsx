@@ -91,67 +91,47 @@ const CheckCibilScore = () => {
         throw new Error("Order creation failed");
       }
 
-      const rzp = new (window as any).Razorpay({
-        key: order.key_id,
-        order_id: order.id,
-        amount: order.amount,
-        currency: "INR",
-        name: "Patliputra Autos",
-        description: "CIBIL Check",
-        prefill: {
-          name: form.name,
-          contact: form.mobile,
-        },
+     const rzp = new (window as any).Razorpay({
+  key: order.key_id,
+  order_id: order.id,
+  amount: order.amount,
+  currency: "INR",
+  name: "Patliputra Autos",
+  description: "CIBIL Check",
+  prefill: {
+    name: form.name,
+    contact: form.mobile,
+  },
+  theme: {
+    color: "#facc15",
+  },
+  handler: function (resp: any) {
+    console.log("RAZORPAY SUCCESS:", resp);
 
-        handler: async (resp: any) => {
-          try {
-            toast.loading("Verifying payment & fetching CIBIL…", {
-              id: "verify-cibil",
-            });
-
-            const verifyRes = await fetch(
-              "https://api.patliputragroup.com/payments/razorpay/verify-cibil",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_order_id: resp.razorpay_order_id,
-                  razorpay_payment_id: resp.razorpay_payment_id,
-                  razorpay_signature: resp.razorpay_signature,
-                  name: form.name,
-                  mobile: form.mobile,
-                  pan: form.pan,
-                }),
-              }
-            );
-
-            const data = await verifyRes.json();
-console.log("VERIFY RESPONSE:", data);
-
-            if (!data.ok) {
-              toast.error("Payment successful but CIBIL fetch failed", {
-                id: "verify-cibil",
-              });
-              return;
-            }
-
-            toast.success("CIBIL fetched successfully", {
-              id: "verify-cibil",
-            });
-
-            setScore(data.score);
-            setSubmitted(true);
-          } catch (err) {
-            toast.error("Verification failed");
-          }
-        },
-
-        modal: {
-          ondismiss: () => {
-            toast.info("Payment cancelled");
-          },
-        },
+    fetch("https://api.patliputragroup.com/payments/razorpay/verify-cibil", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        razorpay_order_id: resp.razorpay_order_id,
+        razorpay_payment_id: resp.razorpay_payment_id,
+        razorpay_signature: resp.razorpay_signature,
+        name: form.name,
+        mobile: form.mobile,
+        pan: form.pan,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("VERIFY RESPONSE:", data);
+        setScore(data.score);
+        setSubmitted(true);
+      })
+      .catch((err) => {
+        console.error(err);
       });
+  },
+});
+
 
       rzp.open();
     } catch (err) {
