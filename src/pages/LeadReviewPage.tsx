@@ -138,7 +138,7 @@ export function LeadReviewPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-1 container mx-auto px-4 py-12">
+    <main className="flex-1 container mx-auto px-4 pt-32 pb-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
