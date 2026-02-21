@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
-import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
+
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
 import { LeadSelectionBar } from "@/components/LeadSelectionBar";
@@ -226,9 +226,6 @@ const JCBPage = () => {
                           {product.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-jcb text-jcb-foreground rounded-full text-xs font-bold tracking-wide">{product.badge}</div>
                           )}
-                          <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
-                            <ProductCompareCheckbox product={{ id: product.id, name: product.name, category: product.category, price: product.price, brand: 'JCB', image: product.image, specs: product.specs }} />
-                          </div>
                         </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-2">
@@ -261,7 +258,7 @@ const JCBPage = () => {
                               className={`gap-2 ${selected ? 'bg-jcb text-jcb-foreground hover:bg-jcb/90' : 'border-jcb text-jcb hover:bg-jcb hover:text-jcb-foreground'}`}
                               onClick={() => handleProductSelect(toLeadProduct(product))}>
                               <ShoppingCart className="h-4 w-4" />
-                              {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'चयन करें' : 'Select')}
+                              {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                             </Button>
                           </div>
                         </div>
