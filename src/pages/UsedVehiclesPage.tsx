@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
-import { ProductCompareCheckbox } from "@/components/ProductCompareCheckbox";
+
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
 import { LeadSelectionBar } from "@/components/LeadSelectionBar";
@@ -246,9 +246,6 @@ const UsedVehiclesPage = () => {
                           {vehicle.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-success text-success-foreground rounded-full text-xs font-bold tracking-wide">🎖️ {vehicle.badge}</div>
                           )}
-                          <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
-                            <ProductCompareCheckbox product={{ id: vehicle.id, name: vehicle.name, category: `${vehicle.year} • ${vehicle.km}`, price: vehicle.price, brand: 'Certified Refurbished', image: vehicle.image, specs: vehicle.specs }} />
-                          </div>
                         </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-2">
@@ -277,7 +274,7 @@ const UsedVehiclesPage = () => {
                                 className={`gap-2 ${selected ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'}`}
                                 onClick={() => handleProductSelect(toLeadProduct(vehicle))}>
                                 <ShoppingCart className="h-4 w-4" />
-                                {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'चयन करें' : 'Select')}
+                                {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                               </Button>
                             </div>
                           </div>
