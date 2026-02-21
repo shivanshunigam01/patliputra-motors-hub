@@ -206,6 +206,12 @@ const AshokLeylandPage = () => {
                           {product.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-leyland text-leyland-foreground rounded-full text-xs font-bold tracking-wide">{product.badge}</div>
                           )}
+                          <Button size="sm" variant="outline"
+                            className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-leyland text-leyland-foreground border-leyland hover:bg-leyland/90' : 'bg-background/90 backdrop-blur-sm border-leyland/50 text-leyland hover:bg-leyland hover:text-leyland-foreground'}`}
+                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(product)); }}>
+                            <ShoppingCart className="h-3.5 w-3.5" />
+                            {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
+                          </Button>
                         </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-2">
@@ -232,14 +238,8 @@ const AshokLeylandPage = () => {
                               </Button>
                             )}
                           </div>
-                          <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <div className="pt-4 border-t border-border">
                             <p className="text-xl font-bold text-foreground">{product.price}</p>
-                            <Button size="sm" variant={selected ? 'default' : 'outline'}
-                              className={`gap-2 ${selected ? 'bg-leyland text-leyland-foreground hover:bg-leyland/90' : 'border-leyland text-leyland hover:bg-leyland hover:text-leyland-foreground'}`}
-                              onClick={() => handleProductSelect(toLeadProduct(product))}>
-                              <ShoppingCart className="h-4 w-4" />
-                              {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
-                            </Button>
                           </div>
                         </div>
                       </div>

@@ -246,6 +246,12 @@ const UsedVehiclesPage = () => {
                           {vehicle.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-success text-success-foreground rounded-full text-xs font-bold tracking-wide">🎖️ {vehicle.badge}</div>
                           )}
+                          <Button size="sm" variant="outline"
+                            className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : 'bg-background/90 backdrop-blur-sm border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground'}`}
+                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(vehicle)); }}>
+                            <ShoppingCart className="h-3.5 w-3.5" />
+                            {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
+                          </Button>
                         </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-2">
@@ -268,15 +274,7 @@ const UsedVehiclesPage = () => {
                             {vehicle.financeAvailable && <span className="text-xs px-2 py-1 bg-leyland/10 text-leyland rounded">{language === 'hi' ? 'फाइनेंस' : 'Finance'}</span>}
                           </div>
                           <div className="pt-4 border-t border-border">
-                            <div className="flex items-center justify-between">
-                              <p className="text-2xl font-bold text-foreground">{vehicle.price}</p>
-                              <Button size="sm" variant={selected ? 'default' : 'outline'}
-                                className={`gap-2 ${selected ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground'}`}
-                                onClick={() => handleProductSelect(toLeadProduct(vehicle))}>
-                                <ShoppingCart className="h-4 w-4" />
-                                {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
-                              </Button>
-                            </div>
+                            <p className="text-2xl font-bold text-foreground">{vehicle.price}</p>
                           </div>
                         </div>
                       </div>

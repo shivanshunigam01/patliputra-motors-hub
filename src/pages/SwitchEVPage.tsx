@@ -234,6 +234,12 @@ const SwitchEVPage = () => {
                           {product.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-ev text-ev-foreground rounded-full text-xs font-bold tracking-wide">{product.badge}</div>
                           )}
+                          <Button size="sm" variant="outline"
+                            className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-ev text-ev-foreground border-ev hover:bg-ev/90' : 'bg-background/90 backdrop-blur-sm border-ev/50 text-ev hover:bg-ev hover:text-ev-foreground'}`}
+                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(product)); }}>
+                            <ShoppingCart className="h-3.5 w-3.5" />
+                            {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
+                          </Button>
                         </div>
                         <div className="p-6">
                           <div className="flex items-center gap-2 mb-2">
@@ -260,14 +266,8 @@ const SwitchEVPage = () => {
                               </Button>
                             )}
                           </div>
-                          <div className="flex items-center justify-between pt-4 border-t border-border">
+                          <div className="pt-4 border-t border-border">
                             <p className="text-xl font-bold text-foreground">{product.price}</p>
-                            <Button size="sm" variant={selected ? 'default' : 'outline'}
-                              className={`gap-2 ${selected ? 'bg-ev text-ev-foreground hover:bg-ev/90' : 'border-ev text-ev hover:bg-ev hover:text-ev-foreground'}`}
-                              onClick={() => handleProductSelect(toLeadProduct(product))}>
-                              <ShoppingCart className="h-4 w-4" />
-                              {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
-                            </Button>
                           </div>
                         </div>
                       </div>
