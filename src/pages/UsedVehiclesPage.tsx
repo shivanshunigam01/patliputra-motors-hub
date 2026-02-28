@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -61,6 +62,7 @@ interface ApiUsedVehicle {
 
 const UsedVehiclesPage = () => {
   const { language } = useLanguage();
+  const { settings } = useAdminSettings();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
 
@@ -274,8 +276,14 @@ const UsedVehiclesPage = () => {
                             {vehicle.hasWarranty && <span className="text-xs px-2 py-1 bg-success/10 text-success rounded">{language === 'hi' ? 'वारंटी' : 'Warranty'}</span>}
                             {vehicle.financeAvailable && <span className="text-xs px-2 py-1 bg-leyland/10 text-leyland rounded">{language === 'hi' ? 'फाइनेंस' : 'Finance'}</span>}
                           </div>
-                          <div className="pt-4 border-t border-border">
+                          <div className="pt-4 border-t border-border flex items-center justify-between">
                             <p className="text-2xl font-bold text-foreground">{vehicle.price}</p>
+                            <a href={getWhatsAppUrl(settings?.whatsapp_number, vehicle.name)} target="_blank" rel="noopener noreferrer">
+                              <Button size="sm" className="gap-1.5 bg-success text-success-foreground hover:bg-success/90 rounded-full text-xs">
+                                <MessageCircle className="h-3.5 w-3.5" />
+                                {language === 'hi' ? 'पूछें' : 'Enquire'}
+                              </Button>
+                            </a>
                           </div>
                         </div>
                       </div>

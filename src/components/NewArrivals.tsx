@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Flame } from "lucide-react";
+import { ArrowRight, Flame, MessageCircle } from "lucide-react";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +10,7 @@ import { getProducts } from "@/services/products.service";
 
 export function NewArrivals() {
   const { t, language } = useLanguage();
+  const { settings } = useAdminSettings();
 
   const {
     data: products = [],
@@ -132,13 +135,19 @@ export function NewArrivals() {
                             *
                           </p>
 
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                            <span>
-                              {language === "hi"
-                                ? "विवरण"
-                                : "Details"}
-                            </span>
-                            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          <div className="flex items-center gap-2">
+                            <a href={getWhatsAppUrl(settings?.whatsapp_number, product.name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              <button className="flex items-center gap-1 px-3 py-1.5 bg-success text-success-foreground rounded-full text-xs font-medium hover:bg-success/90 transition-colors">
+                                <MessageCircle className="h-3.5 w-3.5" />
+                                {language === "hi" ? "पूछें" : "Enquire"}
+                              </button>
+                            </a>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                              <span>
+                                {language === "hi" ? "विवरण" : "Details"}
+                              </span>
+                              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            </div>
                           </div>
                         </div>
                       </div>
