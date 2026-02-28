@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { Tag, Phone, MessageCircle, Calendar } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -50,7 +51,7 @@ const OffersPage = () => {
                       </div>
                       <div className="flex gap-2">
                         <a href={`tel:+91${settings?.primary_phone}`} className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
-                        <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
+                        <a href={getWhatsAppUrl(settings?.whatsapp_number)} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
                       </div>
                     </div>
                   </motion.div>

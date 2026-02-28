@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { Phone, MessageCircle, Shield, Wrench, Clock, CheckCircle, Settings, Truck } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -86,7 +87,7 @@ const ServiceWarrantyPage = () => {
             <p className="text-primary-foreground/80 mb-8">{t("serviceWarranty.ctaDesc")}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a href={`tel:+91${settings?.primary_phone}`}><Button size="lg" className="gap-2 bg-jcb text-jcb-foreground hover:bg-jcb-hover"><Phone className="h-5 w-5" />{t("common.callNow")}</Button></a>
-              <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
+              <a href={getWhatsAppUrl(settings?.whatsapp_number)} target="_blank" rel="noopener noreferrer"><Button size="lg" className="gap-2 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-5 w-5" />{t("common.whatsapp")}</Button></a>
             </div>
           </div>
         </section>

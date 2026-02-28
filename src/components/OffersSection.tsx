@@ -5,6 +5,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { getFeaturedOffers } from "@/data/offers";
 import { Link } from "react-router-dom";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export function OffersSection() {
   const { t, language } = useLanguage();
@@ -40,7 +41,7 @@ export function OffersSection() {
               </div>
               <div className="flex gap-2">
                 <a href={`tel:+91${settings?.primary_phone}`} className="flex-1"><Button size="sm" variant="outline" className="w-full gap-1"><Phone className="h-3 w-3" />{t("common.call")}</Button></a>
-                <a href={`https://wa.me/91${settings?.whatsapp_number}`} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
+                <a href={getWhatsAppUrl(settings?.whatsapp_number)} target="_blank" rel="noopener noreferrer" className="flex-1"><Button size="sm" className="w-full gap-1 bg-success text-success-foreground hover:bg-success/90"><MessageCircle className="h-3 w-3" />{t("common.whatsapp")}</Button></a>
               </div>
             </motion.div>
           ))}

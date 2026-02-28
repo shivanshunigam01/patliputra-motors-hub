@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useCompare } from '@/context/CompareContext';
 import { useAdminSettings } from '@/context/AdminSettingsContext';
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 const ComparePage = () => {
   const { selectedProducts, clearProducts, removeProduct } = useCompare();
@@ -181,7 +182,7 @@ const ComparePage = () => {
                 </Button>
               </a>
               <a
-                href={`https://wa.me/91${settings?.whatsapp_number}`}
+                href={getWhatsAppUrl(settings?.whatsapp_number)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"

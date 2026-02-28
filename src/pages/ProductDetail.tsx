@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { getProducts, Product } from "@/services/products.service";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -113,7 +114,7 @@ export default function ProductDetail() {
                 </a>
 
                 <a
-                  href={`https://wa.me/91${settings?.whatsapp_number}`}
+                  href={getWhatsAppUrl(settings?.whatsapp_number)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
