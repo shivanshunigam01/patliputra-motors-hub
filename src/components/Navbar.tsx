@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -153,7 +154,7 @@ export function Navbar() {
                 </Button>
               </a>
               <a
-                href={`https://wa.me/91${settings?.whatsapp_number}`}
+                href={getWhatsAppUrl(settings?.whatsapp_number)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -236,7 +237,7 @@ export function Navbar() {
                     </Button>
                   </a>
                   <a
-                    href={`https://wa.me/91${settings?.whatsapp_number}`}
+                    href={getWhatsAppUrl(settings?.whatsapp_number)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full"

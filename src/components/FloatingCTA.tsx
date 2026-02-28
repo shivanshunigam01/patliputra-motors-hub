@@ -2,6 +2,7 @@ import { Phone, MessageCircle, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export function FloatingCTA() {
   const { t } = useLanguage();
@@ -22,7 +23,7 @@ export function FloatingCTA() {
         </motion.a>
 
         <motion.a
-          href={`https://wa.me/91${settings?.whatsapp_number}`}
+          href={getWhatsAppUrl(settings?.whatsapp_number)}
           target="_blank"
           rel="noopener noreferrer"
           initial={{ opacity: 0, x: 20 }}
@@ -57,7 +58,7 @@ export function FloatingCTA() {
             {t('common.call')}
           </a>
           <a
-            href={`https://wa.me/91${settings?.whatsapp_number}`}
+            href={getWhatsAppUrl(settings?.whatsapp_number)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-success text-success-foreground rounded-xl font-semibold text-sm"

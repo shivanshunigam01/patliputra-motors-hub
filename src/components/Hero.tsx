@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '@/i18n/LanguageContext';
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 import heroJcb from "@/assets/hero-jcb.jpg";
 import leyland from "@/assets/leyland-trucks.jpg";
@@ -127,7 +128,7 @@ export function Hero() {
               </Button>
             </a>
             <a
-              href={`https://wa.me/91${settings?.whatsapp_number}`}
+              href={getWhatsAppUrl(settings?.whatsapp_number)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -137,7 +138,7 @@ export function Hero() {
               >
                 <MessageCircle className="h-5 w-5" />
                 <a
-  href={`https://wa.me/${settings?.whatsapp_number}`}
+  href={getWhatsAppUrl(settings?.whatsapp_number)}
   target="_blank"
   rel="noopener noreferrer"
 >

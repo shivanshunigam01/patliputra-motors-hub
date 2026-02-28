@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -144,7 +145,7 @@ const AshokLeylandPage = () => {
                     <Phone className="h-5 w-5" />{language === 'hi' ? 'बेस्ट प्राइस पाएं' : 'Get Best Price'}
                   </Button>
                 </a>
-                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer">
+                <a href={getWhatsAppUrl("9876543210")} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold">
                     <MessageCircle className="h-5 w-5" />{language === 'hi' ? 'टेस्ट ड्राइव बुक करें' : 'Book Test Drive'}
                   </Button>
