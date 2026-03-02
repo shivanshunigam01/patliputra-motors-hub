@@ -76,9 +76,9 @@ export function ProductCardWithLead({
         className={product.featured ? 'md:col-span-2 lg:col-span-1' : ''}
       >
         <div
-          className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border ${
+          className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border flex flex-col ${
             isSelected ? `border-primary ring-2 ring-primary` : 'border-border'
-          } h-full`}
+          }`}
           style={isSelected ? { borderColor: 'var(--primary)' } : {}}
         >
           {/* Image */}
@@ -112,7 +112,7 @@ export function ProductCardWithLead({
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-6 flex flex-col flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span
                 className={`text-xs font-medium px-2 py-0.5 rounded text-white`}
@@ -129,7 +129,7 @@ export function ProductCardWithLead({
               {product.name}
             </h3>
 
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
               {language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}
             </p>
 
@@ -146,7 +146,7 @@ export function ProductCardWithLead({
             </div>
 
             {/* Brochure Download */}
-            <div className="mb-4">
+            <div className="mb-4 mt-auto">
               <BrochureDownloadButton
                 productName={product.name}
                 brochureUrl={product.brochureUrl}

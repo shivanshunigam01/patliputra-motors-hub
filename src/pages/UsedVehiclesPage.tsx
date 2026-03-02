@@ -157,7 +157,7 @@ const UsedVehiclesPage = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <div className="bg-card rounded-2xl overflow-hidden shadow-lg border border-border h-full">
+                    <div className="bg-card rounded-2xl overflow-hidden shadow-lg border border-border flex flex-col">
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <img
                           src={vehicle.image}
@@ -166,7 +166,7 @@ const UsedVehiclesPage = () => {
                         />
                       </div>
 
-                      <div className="p-6">
+                      <div className="p-6 flex flex-col flex-1">
                         <h3 className="text-lg font-bold mb-2">
                           {vehicle.name}
                         </h3>
@@ -176,7 +176,7 @@ const UsedVehiclesPage = () => {
                         </p>
 
                         {/* DOWNLOAD BROCHURE BUTTON */}
-                        <div className="mb-4">
+                        <div className="mb-4 mt-auto">
                           <BrochureDownloadButton
                             productName={vehicle.name}
                             brochureUrl={vehicle.brochureUrl}

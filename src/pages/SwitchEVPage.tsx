@@ -230,7 +230,7 @@ const SwitchEVPage = () => {
                   const selected = isSelected(product.id);
                   return (
                     <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}>
-                      <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border h-full card-ev ${selected ? 'border-ev ring-2 ring-ev' : 'border-border'}`}>
+                      <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border flex flex-col card-ev ${selected ? 'border-ev ring-2 ring-ev' : 'border-border'}`}>
                         <div className="relative aspect-[16/10] overflow-hidden">
                           <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           {product.badge && (
@@ -243,19 +243,19 @@ const SwitchEVPage = () => {
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
                         </div>
-                        <div className="p-6">
+                        <div className="p-6 flex flex-col flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs text-ev font-medium px-2 py-0.5 bg-ev/10 rounded">{product.category}</span>
                             <span className="text-xs text-muted-foreground">{product.subcategory}</span>
                           </div>
                           <h3 className="text-xl font-bold text-foreground mb-2">{product.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-4">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
                           <div className="flex flex-wrap gap-4 mb-4 text-xs text-muted-foreground">
                             {product.specs.range && <div className="flex items-center gap-1"><Battery className="h-3 w-3" />{product.specs.range}</div>}
                             {product.specs.capacity && <div className="flex items-center gap-1"><CheckCircle className="h-3 w-3" />{product.specs.capacity}</div>}
                             {product.specs.charging && <div className="flex items-center gap-1"><Zap className="h-3 w-3" />{product.specs.charging}</div>}
                           </div>
-                          <div className="mb-4">
+                          <div className="mb-4 mt-auto">
                             <BrochureDownloadButton
                               productName={product.name}
                               brochureUrl={product.brochureUrl}

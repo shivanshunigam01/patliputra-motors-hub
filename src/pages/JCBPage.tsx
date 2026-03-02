@@ -222,7 +222,7 @@ const JCBPage = () => {
                   return (
                     <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}
                       className={product.featured ? "md:col-span-2 lg:col-span-1" : ""}>
-                      <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border h-full card-jcb ${selected ? 'border-jcb ring-2 ring-jcb' : 'border-border'}`}>
+                      <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border flex flex-col card-jcb ${selected ? 'border-jcb ring-2 ring-jcb' : 'border-border'}`}>
                         <div className="relative aspect-[4/3] overflow-hidden">
                           <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           {product.badge && (
@@ -235,19 +235,19 @@ const JCBPage = () => {
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
                         </div>
-                        <div className="p-6">
+                        <div className="p-6 flex flex-col flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs text-jcb font-medium px-2 py-0.5 bg-jcb/10 rounded">{product.category}</span>
                             <span className="text-xs text-muted-foreground">{product.subcategory}</span>
                           </div>
                           <h3 className="text-lg font-bold text-foreground mb-2">{product.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-4">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
                           <div className="flex gap-4 mb-4 text-xs text-muted-foreground">
                             {product.specs.power && <div className="flex items-center gap-1"><Gauge className="h-3 w-3" />{product.specs.power}</div>}
                             {product.specs.fuel && <div className="flex items-center gap-1"><Fuel className="h-3 w-3" />{product.specs.fuel}</div>}
                             {product.specs.weight && <div className="flex items-center gap-1"><Weight className="h-3 w-3" />{product.specs.weight}</div>}
                           </div>
-                          <div className="mb-4">
+                          <div className="mb-4 mt-auto">
                             <BrochureDownloadButton
                               productName={product.name}
                               brochureUrl={product.brochureUrl}
