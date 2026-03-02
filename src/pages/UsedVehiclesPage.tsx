@@ -11,12 +11,11 @@ import {
   Shield,
   Calendar,
   RefreshCcw,
-  Download,
-  FileText,
   ShoppingCart,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrochureDownloadButton } from "@/components/BrochureDownloadButton";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
@@ -177,33 +176,13 @@ const UsedVehiclesPage = () => {
                         </p>
 
                         {/* DOWNLOAD BROCHURE BUTTON */}
-                    {vehicle.brochureUrl ? (
-  <a
-    href={vehicle.brochureUrl}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <Button
-      variant="outline"
-      size="sm"
-      className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/10"
-    >
-      <Download className="h-4 w-4" />
-      Download Brochure
-    </Button>
-  </a>
-) : (
-  <Button
-    variant="outline"
-    size="sm"
-    disabled
-    className="w-full gap-2 opacity-50"
-  >
-    <FileText className="h-4 w-4" />
-    Brochure Coming Soon
-  </Button>
-)}
-
+                        <div className="mb-4">
+                          <BrochureDownloadButton
+                            productName={vehicle.name}
+                            brochureUrl={vehicle.brochureUrl}
+                            className="border-primary/30 text-primary hover:bg-primary/10"
+                          />
+                        </div>
                         <div className="pt-4 border-t border-border flex items-center justify-between">
                           <p className="text-2xl font-bold">
                             {vehicle.price}

@@ -11,12 +11,11 @@ import {
   Fuel,
   Gauge,
   Weight,
-  Download,
-  FileText,
   ShoppingCart,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrochureDownloadButton } from "@/components/BrochureDownloadButton";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
@@ -229,17 +228,11 @@ const AshokLeylandPage = () => {
                             {product.specs.fuel && <div className="flex items-center gap-1"><Fuel className="h-3 w-3" />{product.specs.fuel}</div>}
                           </div>
                           <div className="mb-4">
-                            {product.brochureUrl ? (
-                              <a href={product.brochureUrl.startsWith('http') ? product.brochureUrl : `${import.meta.env.VITE_API_URL}${product.brochureUrl}`} target="_blank" rel="noopener noreferrer">
-                                <Button variant="outline" size="sm" className="w-full gap-2 border-leyland/30 text-leyland hover:bg-leyland/10">
-                                  <Download className="h-4 w-4" />{language === 'hi' ? 'ब्रोशर डाउनलोड करें' : 'Download Brochure'}
-                                </Button>
-                              </a>
-                            ) : (
-                              <Button variant="outline" size="sm" disabled className="w-full gap-2 opacity-50">
-                                <FileText className="h-4 w-4" />{language === 'hi' ? 'ब्रोशर जल्द आ रहा है' : 'Brochure Coming Soon'}
-                              </Button>
-                            )}
+                            <BrochureDownloadButton
+                              productName={product.name}
+                              brochureUrl={product.brochureUrl}
+                              className="border-leyland/30 text-leyland hover:bg-leyland/10"
+                            />
                           </div>
                           <div className="pt-4 border-t border-border flex items-center justify-between">
                             <p className="text-xl font-bold text-foreground">{product.price}</p>
