@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { ProductCompareCheckbox } from '@/components/ProductCompareCheckbox';
+import { BrochureDownloadButton } from '@/components/BrochureDownloadButton';
 import { TCOPopup } from '@/components/TCOPopup';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { toast } from 'sonner';
@@ -146,32 +147,11 @@ export function ProductCardWithLead({
 
             {/* Brochure Download */}
             <div className="mb-4">
-              {product.brochureUrl ? (
-                <a href={product.brochureUrl} target="_blank" rel="noopener noreferrer">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-2"
-                    style={{
-                      borderColor: `${brandColor}30`,
-                      color: brandColor,
-                    }}
-                  >
-                    <Download className="h-4 w-4" />
-                    {language === 'hi' ? 'ब्रोशर डाउनलोड करें' : 'Download Brochure'}
-                  </Button>
-                </a>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                  className="w-full gap-2 opacity-50"
-                >
-                  <FileText className="h-4 w-4" />
-                  {language === 'hi' ? 'ब्रोशर जल्द आ रहा है' : 'Brochure Coming Soon'}
-                </Button>
-              )}
+              <BrochureDownloadButton
+                productName={product.name}
+                brochureUrl={product.brochureUrl}
+                brandColor={brandColor}
+              />
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-border">
