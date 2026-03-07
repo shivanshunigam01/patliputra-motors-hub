@@ -67,7 +67,7 @@ const SwitchEVPage = () => {
   });
 
   const products = useMemo(() => {
-    return apiProducts.filter(p => p.isActive !== false).map(p => ({
+    return apiProducts.filter(p => p.isActive !== false && p.brand === 'Switch EV').map(p => ({
       id: p.id,
       name: p.name,
       category: p.category,
