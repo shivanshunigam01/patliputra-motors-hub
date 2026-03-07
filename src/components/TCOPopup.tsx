@@ -64,48 +64,104 @@ export function TCOPopup({ isOpen, products, onContinue, onBack }: TCOPopupProps
 
             {/* Content */}
             <div className="p-6">
-              {/* Products Summary */}
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-                  {language === 'hi' ? 'चयनित उत्पाद' : 'Selected Products'}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {products.map((product) => (
-                    <div key={product.id} className="p-4 border border-border rounded-lg bg-muted/30">
-                      <p className="font-semibold text-foreground">{product.name}</p>
-                      <p className="text-lg font-bold text-primary mt-2">{product.price}</p>
+              {products.length === 2 ? (
+                /* Side-by-side comparison for 2 products */
+                <div>
+                  {/* Product headers */}
+                  <div className="grid grid-cols-3 gap-2 mb-4">
+                    <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-end">
+                      {language === 'hi' ? 'पैरामीटर' : 'Parameter'}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* TCO Items */}
-              {allTcoItems.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-                    {language === 'hi' ? 'लागत विवरण' : 'Cost Breakdown'}
-                  </h3>
-                  <div className="space-y-3">
-                    {allTcoItems.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
-                        <div>
-                          <p className="font-medium text-foreground">{item.label}</p>
-                          <p className="text-sm text-muted-foreground">{item.unit}</p>
-                        </div>
-                        <p className="text-lg font-bold text-primary">
-                          ₹{item.value.toLocaleString('en-IN')}
-                        </p>
+                    {products.map((p) => (
+                      <div key={p.id} className="p-3 border border-border rounded-lg bg-muted/30 text-center">
+                        <p className="font-semibold text-foreground text-sm">{p.name}</p>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
 
-              {allTcoItems.length === 0 && (
-                <div className="p-8 text-center bg-muted/30 rounded-lg">
-                  <p className="text-muted-foreground">
-                    {language === 'hi' ? 'TCO डेटा उपलब्ध नहीं' : 'TCO data not available'}
-                  </p>
+                  {/* Price row */}
+                  <div className="grid grid-cols-3 gap-2 p-3 border border-border rounded-lg bg-muted/20 mb-2">
+                    <p className="font-medium text-foreground text-sm flex items-center">
+                      {language === 'hi' ? 'कीमत' : 'Price'}
+                    </p>
+                    {products.map((p) => (
+                      <p key={p.id} className="text-center font-bold text-primary text-sm">{p.price}</p>
+                    ))}
+                  </div>
+
+                  {/* TCO items comparison rows */}
+                  {(() => {
+                    const tcoKeys = new Map<string, { label: string; unit: string }>();
+                    products.forEach(p => (p.tcoItems || []).forEach(item => {
+                      if (!tcoKeys.has(item.key)) tcoKeys.set(item.key, { label: item.label, unit: item.unit });
+                    }));
+
+                    if (tcoKeys.size === 0) return (
+                      <div className="p-6 text-center bg-muted/30 rounded-lg mt-4">
+                        <p className="text-muted-foreground text-sm">
+                          {language === 'hi' ? 'TCO डेटा उपलब्ध नहीं' : 'No additional TCO data available'}
+                        </p>
+                      </div>
+                    );
+
+                    return Array.from(tcoKeys.entries()).map(([key, meta]) => {
+                      const values = products.map(p => {
+                        const item = (p.tcoItems || []).find(t => t.key === key);
+                        return item ? item.value : null;
+                      });
+                      const numericValues = values.filter((v): v is number => v !== null);
+                      const best = numericValues.length > 1 ? Math.min(...numericValues) : null;
+
+                      return (
+                        <div key={key} className="grid grid-cols-3 gap-2 p-3 border border-border rounded-lg bg-muted/20 mb-2">
+                          <div className="flex flex-col justify-center">
+                            <p className="font-medium text-foreground text-sm">{meta.label}</p>
+                            <p className="text-xs text-muted-foreground">{meta.unit}</p>
+                          </div>
+                          {values.map((val, i) => (
+                            <p key={i} className={`text-center font-bold text-sm flex items-center justify-center ${val !== null && val === best && numericValues.length > 1 ? 'text-green-600' : 'text-foreground'}`}>
+                              {val !== null ? `₹${val.toLocaleString('en-IN')}` : '—'}
+                            </p>
+                          ))}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+              ) : (
+                /* Single product view */
+                <div>
+                  <div className="mb-6">
+                    <div className="p-4 border border-border rounded-lg bg-muted/30">
+                      <p className="font-semibold text-foreground">{products[0]?.name}</p>
+                      <p className="text-lg font-bold text-primary mt-2">{products[0]?.price}</p>
+                    </div>
+                  </div>
+
+                  {allTcoItems.length > 0 ? (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        {language === 'hi' ? 'लागत विवरण' : 'Cost Breakdown'}
+                      </h3>
+                      {allTcoItems.map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 border border-border rounded-lg bg-muted/20">
+                          <div>
+                            <p className="font-medium text-foreground">{item.label}</p>
+                            <p className="text-sm text-muted-foreground">{item.unit}</p>
+                          </div>
+                          <p className="text-lg font-bold text-primary">
+                            ₹{item.value.toLocaleString('en-IN')}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-muted/30 rounded-lg">
+                      <p className="text-muted-foreground">
+                        {language === 'hi' ? 'TCO डेटा उपलब्ध नहीं' : 'TCO data not available'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
