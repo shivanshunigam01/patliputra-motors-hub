@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
@@ -24,6 +25,15 @@ export interface TCOPopupProps {
 
 export function TCOPopup({ isOpen, products, onContinue, onBack }: TCOPopupProps) {
   const { language } = useLanguage();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
 
   if (products.length === 0) return null;
 
