@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ShoppingCart } from 'lucide-react';
 import { ProductCompareCheckbox } from '@/components/ProductCompareCheckbox';
@@ -82,7 +83,7 @@ export function ProductCardWithLead({
           style={isSelected ? { borderColor: 'var(--primary)' } : {}}
         >
           {/* Image */}
-          <div className="relative aspect-[4/3] overflow-hidden">
+          <Link to={`/product/${product.id}`} className="relative aspect-[4/3] overflow-hidden block">
             <img
               src={product.image}
               alt={product.name}
@@ -96,7 +97,7 @@ export function ProductCardWithLead({
                 {product.badge}
               </div>
             )}
-            <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+            <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md" onClick={(e) => e.preventDefault()}>
               <ProductCompareCheckbox
                 product={{
                   id: product.id,
@@ -109,7 +110,7 @@ export function ProductCardWithLead({
                 }}
               />
             </div>
-          </div>
+          </Link>
 
           {/* Content */}
           <div className="p-6 flex flex-col flex-1">
@@ -125,9 +126,11 @@ export function ProductCardWithLead({
               </span>
             </div>
 
-            <h3 className="text-lg font-bold text-foreground mb-2">
-              {product.name}
-            </h3>
+            <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors">
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {product.name}
+              </h3>
+            </Link>
 
             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
               {language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}
