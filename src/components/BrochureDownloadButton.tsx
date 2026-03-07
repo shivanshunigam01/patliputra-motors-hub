@@ -40,9 +40,10 @@ function saveLead(info: BrochureLeadInfo) {
 
 function triggerDownload(brochureUrl?: string | null) {
   const url = brochureUrl || "/dummy-brochure.pdf";
-  const finalUrl = url.startsWith("http") || url.startsWith("/")
+  const API_BASE = import.meta.env.VITE_API_URL || "https://api.patliputragroup.com";
+  const finalUrl = url.startsWith("http")
     ? url
-    : `${import.meta.env.VITE_API_URL || ""}${url}`;
+    : `${API_BASE}${url.startsWith("/") ? url : `/${url}`}`;
 
   const a = document.createElement("a");
   a.href = finalUrl;
