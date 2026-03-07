@@ -125,14 +125,10 @@ export default function ProductDetail() {
                   </Button>
                 </a>
 
-                {product.brochureUrl && (
-                  <a href={product.brochureUrl} target="_blank">
-                    <Button variant="secondary" className="gap-2">
-                      <Download className="h-4 w-4" />
-                      Brochure
-                    </Button>
-                  </a>
-                )}
+                <BrochureDownloadButton
+                  productName={product.name}
+                  brochureUrl={product.brochureUrl}
+                />
               </div>
 
               {/* Specifications */}
