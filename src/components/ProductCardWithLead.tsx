@@ -83,7 +83,7 @@ export function ProductCardWithLead({
           style={isSelected ? { borderColor: 'var(--primary)' } : {}}
         >
           {/* Image */}
-          <div className="relative aspect-[4/3] overflow-hidden">
+          <Link to={`/product/${product.id}`} className="relative aspect-[4/3] overflow-hidden block">
             <img
               src={product.image}
               alt={product.name}
@@ -97,7 +97,7 @@ export function ProductCardWithLead({
                 {product.badge}
               </div>
             )}
-            <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md">
+            <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-md" onClick={(e) => e.preventDefault()}>
               <ProductCompareCheckbox
                 product={{
                   id: product.id,
@@ -110,7 +110,7 @@ export function ProductCardWithLead({
                 }}
               />
             </div>
-          </div>
+          </Link>
 
           {/* Content */}
           <div className="p-6 flex flex-col flex-1">
