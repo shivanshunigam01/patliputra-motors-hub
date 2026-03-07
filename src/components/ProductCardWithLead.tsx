@@ -126,9 +126,11 @@ export function ProductCardWithLead({
               </span>
             </div>
 
-            <h3 className="text-lg font-bold text-foreground mb-2">
-              {product.name}
-            </h3>
+            <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors">
+              <h3 className="text-lg font-bold text-foreground mb-2">
+                {product.name}
+              </h3>
+            </Link>
 
             <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
               {language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}
