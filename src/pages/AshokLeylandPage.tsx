@@ -79,10 +79,11 @@ const AshokLeylandPage = () => {
       badge: p.isNewLaunch ? 'NEW LAUNCH' : p.isBestseller ? 'BESTSELLER' : p.isFeatured ? 'FEATURED' : null,
       image: p.images?.[0] || leylandTrucks,
       brochureUrl: p.brochureUrl || null,
+      specifications: p.specifications || {},
       specs: {
-        power: p.specifications?.power || '',
-        capacity: p.specifications?.capacity || '',
-        fuel: p.specifications?.fuel || 'Diesel',
+        power: p.specifications?.power || p.specifications?.['Power'] || p.specifications?.['Engine Power'] || '',
+        capacity: p.specifications?.capacity || p.specifications?.['Payload Capacity'] || p.specifications?.['Rated Payload'] || '',
+        fuel: p.specifications?.fuel || p.specifications?.['Fuel Type'] || 'Diesel',
       },
       tcoItems: p.tcoItems || [],
     }));
