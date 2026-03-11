@@ -223,7 +223,7 @@ const AshokLeylandPage = () => {
                           )}
                           <Button size="sm" variant="outline"
                             className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-leyland text-leyland-foreground border-leyland hover:bg-leyland/90' : 'bg-background/90 backdrop-blur-sm border-leyland/50 text-leyland hover:bg-leyland hover:text-leyland-foreground'}`}
-                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(product)); }}>
+                            onClick={(e) => { e.stopPropagation(); handleCompareSelect(product); }}>
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
