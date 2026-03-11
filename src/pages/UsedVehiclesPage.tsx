@@ -90,14 +90,22 @@ const UsedVehiclesPage = () => {
       }));
   }, [apiVehicles]);
 
-  const toLeadProduct = (vehicle: typeof vehicles[0]): LeadProduct => ({
-    id: vehicle.id,
-    name: vehicle.name,
-    brand: "Used Vehicle",
-    price: vehicle.price,
-    image: vehicle.image,
-    category: "Used",
-  });
+  const handleCompareSelect = (vehicle: typeof vehicles[0]) => {
+    if (isSelected(vehicle.id)) {
+      removeProduct(vehicle.id);
+    } else {
+      const result = addProduct({
+        id: vehicle.id, name: vehicle.name, brand: 'Certified Refurbished',
+        price: vehicle.price, image: vehicle.image, category: 'Used',
+        specifications: { Year: vehicle.year, Kilometers: vehicle.km },
+        specs: {},
+      });
+      if (!result.success) {
+        if (result.reason === 'max_limit') toast.error('Maximum 2 products can be compared');
+        else if (result.reason === 'different_category') toast.error('You can only compare products of the same brand');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
