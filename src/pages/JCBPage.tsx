@@ -54,14 +54,12 @@ const JCBPage = () => {
 
   const {
     selectedProducts,
-    isTcoOpen,
-    setIsTcoOpen,
-    handleProductSelect,
-    handleViewTco,
-    handleTcoContinue,
-    clearSelection,
+    addProduct,
+    removeProduct,
+    clearProducts,
     isSelected,
-  } = useLeadFlow();
+    currentBrand,
+  } = useCompare();
 
   const { data: apiProducts = [], isLoading } = useQuery({
     queryKey: ['products', 'JCB'],
