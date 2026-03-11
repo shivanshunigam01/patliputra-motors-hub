@@ -24,7 +24,7 @@ const ComparePage = () => {
   }
 
   const comparisonRows = [
-    { label: 'Price', key: 'price' },
+    
     { label: 'Brand', key: 'brand' },
     { label: 'Category', key: 'category' },
     { label: 'Fuel Type', key: 'fuel' },
