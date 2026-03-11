@@ -129,11 +129,11 @@ export function NewArrivals() {
                         </h3>
 
                         <div className="flex items-center justify-between">
-                          <p className="text-xl font-bold text-foreground">
-                            ₹
-                            {product.price?.toLocaleString("en-IN")}
-                            *
-                          </p>
+                          <Link to="/contact" onClick={(e) => e.stopPropagation()}>
+                            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 transition-colors">
+                              {language === "hi" ? "नवीनतम कीमत पाएं" : "Get Latest Price"}
+                            </button>
+                          </Link>
 
                           <div className="flex items-center gap-2">
                             <a href={getWhatsAppUrl(settings?.whatsapp_number, product.name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>

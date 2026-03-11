@@ -184,9 +184,7 @@ const UsedVehiclesPage = () => {
                           />
                         </div>
                         <div className="pt-4 border-t border-border flex items-center justify-between">
-                          <p className="text-2xl font-bold">
-                            {vehicle.price}
-                          </p>
+                          <Link to="/contact"><Button size="sm" className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full">Get Latest Price</Button></Link>
 
                           <a
                             href={getWhatsAppUrl(

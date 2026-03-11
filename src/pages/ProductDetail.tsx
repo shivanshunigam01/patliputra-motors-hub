@@ -97,9 +97,11 @@ export default function ProductDetail() {
                 </h1>
               </div>
 
-              <p className="text-2xl font-bold text-primary">
-                ₹{product.price?.toLocaleString("en-IN")}*
-              </p>
+              <Link to="/contact">
+                <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                  Get Latest Price
+                </Button>
+              </Link>
 
               <p className="text-muted-foreground">
                 {product.shortDescription}

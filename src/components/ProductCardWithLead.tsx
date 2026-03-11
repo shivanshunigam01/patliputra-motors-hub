@@ -158,9 +158,11 @@ export function ProductCardWithLead({
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-border">
-              <p className="text-xl font-bold text-foreground">
-                {product.price}
-              </p>
+              <Link to="/contact">
+                <Button size="sm" className="gap-2" style={{ backgroundColor: brandColor, color: 'white' }}>
+                  {language === 'hi' ? 'नवीनतम कीमत पाएं' : 'Get Latest Price'}
+                </Button>
+              </Link>
               <div className="flex gap-2">
                 <Button
                   size="sm"

@@ -108,7 +108,7 @@ const ProductFinderPage = () => {
                         {product.specs.weight && <span className="flex items-center gap-1"><Weight className="h-3 w-3" />{product.specs.weight}</span>}
                       </div>
                       <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                        <span className="text-xl font-bold text-foreground">{product.price}</span>
+                        <Link to="/contact"><Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">{t("common.viewAll") === "सभी देखें" ? "नवीनतम कीमत पाएं" : "Get Latest Price"}</Button></Link>
                         <Button size="sm" asChild><Link to={`/${product.brand === "JCB" ? "jcb" : product.brand === "Ashok Leyland" ? "ashok-leyland" : product.brand === "Switch EV" ? "switch-ev" : "used-vehicles"}`}>{t("common.viewAll")}</Link></Button>
                       </div>
                     </div>
