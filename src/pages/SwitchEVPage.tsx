@@ -115,11 +115,21 @@ const SwitchEVPage = () => {
     setSelectedSubcategory("All");
   };
 
-  const toLeadProduct = (product: typeof filteredProducts[0]): LeadProduct => ({
-    id: product.id, name: product.name, brand: 'Switch EV',
-    price: product.price, image: product.image, category: product.category,
-    tcoItems: product.tcoItems,
-  });
+  const handleCompareSelect = (product: typeof filteredProducts[0]) => {
+    if (isSelected(product.id)) {
+      removeProduct(product.id);
+    } else {
+      const result = addProduct({
+        id: product.id, name: product.name, brand: 'Switch EV',
+        price: product.price, image: product.image, category: product.category,
+        specifications: product.specifications, specs: product.specs,
+      });
+      if (!result.success) {
+        if (result.reason === 'max_limit') toast.error('Maximum 2 products can be compared');
+        else if (result.reason === 'different_category') toast.error('You can only compare products of the same brand');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
