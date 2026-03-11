@@ -7,6 +7,7 @@ export interface CompareProduct {
   price: string;
   brand: string;
   image: string;
+  specifications?: Record<string, string>;
   specs: {
     fuel?: string;
     capacity?: string;
@@ -34,7 +35,6 @@ const CompareContext = createContext<CompareContextType | undefined>(undefined);
 export function CompareProvider({ children }: { children: ReactNode }) {
   const [selectedProducts, setSelectedProducts] = useState<CompareProduct[]>([]);
 
-  // Get the current brand being compared (from first selected product)
   const currentBrand = selectedProducts.length > 0 ? selectedProducts[0].brand : null;
 
   const addProduct = (product: CompareProduct): { success: boolean; reason?: string } => {
@@ -44,7 +44,6 @@ export function CompareProvider({ children }: { children: ReactNode }) {
     if (selectedProducts.some(p => p.id === product.id)) {
       return { success: false, reason: 'already_selected' };
     }
-    // Check if product is from a different brand/category
     if (currentBrand && product.brand !== currentBrand) {
       return { success: false, reason: 'different_category' };
     }
