@@ -53,10 +53,12 @@ const SwitchEVPage = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
 
   const {
-    selectedProducts, isTcoOpen, setIsTcoOpen,
-    handleProductSelect, handleViewTco, handleTcoContinue,
-    clearSelection, isSelected,
-  } = useLeadFlow();
+    selectedProducts,
+    addProduct,
+    removeProduct,
+    clearProducts,
+    isSelected,
+  } = useCompare();
 
   const { data: apiProducts = [], isLoading } = useQuery({
     queryKey: ['products', 'Switch EV'],
