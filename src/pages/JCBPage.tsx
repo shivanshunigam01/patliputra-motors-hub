@@ -81,10 +81,11 @@ const JCBPage = () => {
       image: p.images?.[0] || heroJcb,
       featured: p.isFeatured || false,
       brochureUrl: p.brochureUrl || null,
+      specifications: p.specifications || {},
       specs: {
-        power: p.specifications?.power || '',
-        fuel: p.specifications?.fuel || 'Diesel',
-        weight: p.specifications?.weight || '',
+        power: p.specifications?.power || p.specifications?.['Max Power'] || p.specifications?.['Engine Power'] || '',
+        fuel: p.specifications?.fuel || p.specifications?.['Fuel Type'] || 'Diesel',
+        weight: p.specifications?.weight || p.specifications?.['Gross Vehicle Weight'] || '',
       },
       tcoItems: p.tcoItems || [],
     }));
