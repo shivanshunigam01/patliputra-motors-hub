@@ -21,9 +21,9 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
-import { LeadSelectionBar } from "@/components/LeadSelectionBar";
-import { TCOPopup } from "@/components/TCOPopup";
+import { useCompare } from "@/context/CompareContext";
+import { CompareFloatingBar } from "@/components/CompareFloatingBar";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
