@@ -56,14 +56,11 @@ const UsedVehiclesPage = () => {
 
   const {
     selectedProducts,
-    isTcoOpen,
-    setIsTcoOpen,
-    handleProductSelect,
-    handleViewTco,
-    handleTcoContinue,
-    clearSelection,
+    addProduct,
+    removeProduct,
+    clearProducts,
     isSelected,
-  } = useLeadFlow();
+  } = useCompare();
 
   const { data: apiVehicles = [], isLoading } = useQuery({
     queryKey: ["used-vehicles"],
