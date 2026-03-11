@@ -21,9 +21,9 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
-import { LeadSelectionBar } from "@/components/LeadSelectionBar";
-import { TCOPopup } from "@/components/TCOPopup";
+import { useCompare } from "@/context/CompareContext";
+import { CompareFloatingBar } from "@/components/CompareFloatingBar";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
@@ -53,10 +53,12 @@ const AshokLeylandPage = () => {
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
 
   const {
-    selectedProducts, isTcoOpen, setIsTcoOpen,
-    handleProductSelect, handleViewTco, handleTcoContinue,
-    clearSelection, isSelected,
-  } = useLeadFlow();
+    selectedProducts,
+    addProduct,
+    removeProduct,
+    clearProducts,
+    isSelected,
+  } = useCompare();
 
   const { data: apiProducts = [], isLoading } = useQuery({
     queryKey: ['products', 'Ashok Leyland'],
@@ -77,10 +79,11 @@ const AshokLeylandPage = () => {
       badge: p.isNewLaunch ? 'NEW LAUNCH' : p.isBestseller ? 'BESTSELLER' : p.isFeatured ? 'FEATURED' : null,
       image: p.images?.[0] || leylandTrucks,
       brochureUrl: p.brochureUrl || null,
+      specifications: p.specifications || {},
       specs: {
-        power: p.specifications?.power || '',
-        capacity: p.specifications?.capacity || '',
-        fuel: p.specifications?.fuel || 'Diesel',
+        power: p.specifications?.power || p.specifications?.['Power'] || p.specifications?.['Engine Power'] || '',
+        capacity: p.specifications?.capacity || p.specifications?.['Payload Capacity'] || p.specifications?.['Rated Payload'] || '',
+        fuel: p.specifications?.fuel || p.specifications?.['Fuel Type'] || 'Diesel',
       },
       tcoItems: p.tcoItems || [],
     }));
@@ -112,11 +115,21 @@ const AshokLeylandPage = () => {
     setSelectedSubcategory("All");
   };
 
-  const toLeadProduct = (product: typeof filteredProducts[0]): LeadProduct => ({
-    id: product.id, name: product.name, brand: 'Ashok Leyland',
-    price: product.price, image: product.image, category: product.category,
-    tcoItems: product.tcoItems,
-  });
+  const handleCompareSelect = (product: typeof filteredProducts[0]) => {
+    if (isSelected(product.id)) {
+      removeProduct(product.id);
+    } else {
+      const result = addProduct({
+        id: product.id, name: product.name, brand: 'Ashok Leyland',
+        price: product.price, image: product.image, category: product.category,
+        specifications: product.specifications, specs: product.specs,
+      });
+      if (!result.success) {
+        if (result.reason === 'max_limit') toast.error('Maximum 2 products can be compared');
+        else if (result.reason === 'different_category') toast.error('You can only compare products of the same brand');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -210,7 +223,7 @@ const AshokLeylandPage = () => {
                           )}
                           <Button size="sm" variant="outline"
                             className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-leyland text-leyland-foreground border-leyland hover:bg-leyland/90' : 'bg-background/90 backdrop-blur-sm border-leyland/50 text-leyland hover:bg-leyland hover:text-leyland-foreground'}`}
-                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(product)); }}>
+                            onClick={(e) => { e.stopPropagation(); handleCompareSelect(product); }}>
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
@@ -288,8 +301,7 @@ const AshokLeylandPage = () => {
 
       <Footer />
       <FloatingCTA />
-      <LeadSelectionBar selectedCount={selectedProducts.length} onSelectClick={handleViewTco} onClearClick={clearSelection} />
-      <TCOPopup isOpen={isTcoOpen} products={selectedProducts} onContinue={handleTcoContinue} onBack={() => setIsTcoOpen(false)} />
+      <CompareFloatingBar />
     </div>
   );
 };

@@ -21,9 +21,9 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
-import { LeadSelectionBar } from "@/components/LeadSelectionBar";
-import { TCOPopup } from "@/components/TCOPopup";
+import { useCompare, type CompareProduct } from "@/context/CompareContext";
+import { CompareFloatingBar } from "@/components/CompareFloatingBar";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
@@ -54,14 +54,12 @@ const JCBPage = () => {
 
   const {
     selectedProducts,
-    isTcoOpen,
-    setIsTcoOpen,
-    handleProductSelect,
-    handleViewTco,
-    handleTcoContinue,
-    clearSelection,
+    addProduct,
+    removeProduct,
+    clearProducts,
     isSelected,
-  } = useLeadFlow();
+    currentBrand,
+  } = useCompare();
 
   const { data: apiProducts = [], isLoading } = useQuery({
     queryKey: ['products', 'JCB'],
@@ -83,10 +81,11 @@ const JCBPage = () => {
       image: p.images?.[0] || heroJcb,
       featured: p.isFeatured || false,
       brochureUrl: p.brochureUrl || null,
+      specifications: p.specifications || {},
       specs: {
-        power: p.specifications?.power || '',
-        fuel: p.specifications?.fuel || 'Diesel',
-        weight: p.specifications?.weight || '',
+        power: p.specifications?.power || p.specifications?.['Max Power'] || p.specifications?.['Engine Power'] || '',
+        fuel: p.specifications?.fuel || p.specifications?.['Fuel Type'] || 'Diesel',
+        weight: p.specifications?.weight || p.specifications?.['Gross Vehicle Weight'] || '',
       },
       tcoItems: p.tcoItems || [],
     }));
@@ -120,15 +119,29 @@ const JCBPage = () => {
     setSelectedSubcategory("All");
   };
 
-  const toLeadProduct = (product: typeof filteredProducts[0]): LeadProduct => ({
-    id: product.id,
-    name: product.name,
-    brand: 'JCB',
-    price: product.price,
-    image: product.image,
-    category: product.category,
-    tcoItems: product.tcoItems,
-  });
+  const handleCompareSelect = (product: typeof filteredProducts[0]) => {
+    if (isSelected(product.id)) {
+      removeProduct(product.id);
+    } else {
+      const result = addProduct({
+        id: product.id,
+        name: product.name,
+        brand: 'JCB',
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        specifications: product.specifications,
+        specs: product.specs,
+      });
+      if (!result.success) {
+        if (result.reason === 'max_limit') {
+          toast.error('Maximum 2 products can be compared');
+        } else if (result.reason === 'different_category') {
+          toast.error('You can only compare products of the same brand');
+        }
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,7 +243,7 @@ const JCBPage = () => {
                           )}
                           <Button size="sm" variant="outline"
                             className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-jcb text-jcb-foreground border-jcb hover:bg-jcb/90' : 'bg-background/90 backdrop-blur-sm border-jcb/50 text-jcb hover:bg-jcb hover:text-jcb-foreground'}`}
-                            onClick={(e) => { e.stopPropagation(); handleProductSelect(toLeadProduct(product)); }}>
+                            onClick={(e) => { e.stopPropagation(); handleCompareSelect(product); }}>
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
@@ -311,8 +324,7 @@ const JCBPage = () => {
       <FloatingCTA />
 
       {/* Lead Flow */}
-      <LeadSelectionBar selectedCount={selectedProducts.length} onSelectClick={handleViewTco} onClearClick={clearSelection} />
-      <TCOPopup isOpen={isTcoOpen} products={selectedProducts} onContinue={handleTcoContinue} onBack={() => setIsTcoOpen(false)} />
+      <CompareFloatingBar />
     </div>
   );
 };

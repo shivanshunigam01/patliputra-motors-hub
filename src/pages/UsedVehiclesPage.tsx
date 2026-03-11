@@ -21,9 +21,9 @@ import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 
 import { useLanguage } from "@/i18n/LanguageContext";
-import { useLeadFlow, type LeadProduct } from "@/hooks/useLeadFlow";
-import { LeadSelectionBar } from "@/components/LeadSelectionBar";
-import { TCOPopup } from "@/components/TCOPopup";
+import { useCompare } from "@/context/CompareContext";
+import { CompareFloatingBar } from "@/components/CompareFloatingBar";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
@@ -56,14 +56,11 @@ const UsedVehiclesPage = () => {
 
   const {
     selectedProducts,
-    isTcoOpen,
-    setIsTcoOpen,
-    handleProductSelect,
-    handleViewTco,
-    handleTcoContinue,
-    clearSelection,
+    addProduct,
+    removeProduct,
+    clearProducts,
     isSelected,
-  } = useLeadFlow();
+  } = useCompare();
 
   const { data: apiVehicles = [], isLoading } = useQuery({
     queryKey: ["used-vehicles"],
@@ -93,14 +90,22 @@ const UsedVehiclesPage = () => {
       }));
   }, [apiVehicles]);
 
-  const toLeadProduct = (vehicle: typeof vehicles[0]): LeadProduct => ({
-    id: vehicle.id,
-    name: vehicle.name,
-    brand: "Used Vehicle",
-    price: vehicle.price,
-    image: vehicle.image,
-    category: "Used",
-  });
+  const handleCompareSelect = (vehicle: typeof vehicles[0]) => {
+    if (isSelected(vehicle.id)) {
+      removeProduct(vehicle.id);
+    } else {
+      const result = addProduct({
+        id: vehicle.id, name: vehicle.name, brand: 'Certified Refurbished',
+        price: vehicle.price, image: vehicle.image, category: 'Used',
+        specifications: { Year: vehicle.year, Kilometers: vehicle.km },
+        specs: {},
+      });
+      if (!result.success) {
+        if (result.reason === 'max_limit') toast.error('Maximum 2 products can be compared');
+        else if (result.reason === 'different_category') toast.error('You can only compare products of the same brand');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -215,17 +220,7 @@ const UsedVehiclesPage = () => {
 
       <Footer />
       <FloatingCTA />
-      <LeadSelectionBar
-        selectedCount={selectedProducts.length}
-        onSelectClick={handleViewTco}
-        onClearClick={clearSelection}
-      />
-      <TCOPopup
-        isOpen={isTcoOpen}
-        products={selectedProducts}
-        onContinue={handleTcoContinue}
-        onBack={() => setIsTcoOpen(false)}
-      />
+      <CompareFloatingBar />
     </div>
   );
 };
