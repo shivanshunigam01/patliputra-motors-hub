@@ -79,10 +79,11 @@ const SwitchEVPage = () => {
       badge: p.isNewLaunch ? 'NEW LAUNCH' : p.isBestseller ? 'BESTSELLER' : p.isFeatured ? 'FEATURED' : null,
       image: p.images?.[0] || switchEvBus,
       brochureUrl: p.brochureUrl || null,
+      specifications: p.specifications || {},
       specs: {
-        range: p.specifications?.range || '',
-        capacity: p.specifications?.capacity || '',
-        charging: p.specifications?.charging || '',
+        range: p.specifications?.range || p.specifications?.['Range'] || '',
+        capacity: p.specifications?.capacity || p.specifications?.['Loading Capacity'] || '',
+        charging: p.specifications?.charging || p.specifications?.['Charging'] || '',
       },
       tcoItems: p.tcoItems || [],
     }));
