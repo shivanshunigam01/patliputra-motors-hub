@@ -220,17 +220,7 @@ const UsedVehiclesPage = () => {
 
       <Footer />
       <FloatingCTA />
-      <LeadSelectionBar
-        selectedCount={selectedProducts.length}
-        onSelectClick={handleViewTco}
-        onClearClick={clearSelection}
-      />
-      <TCOPopup
-        isOpen={isTcoOpen}
-        products={selectedProducts}
-        onContinue={handleTcoContinue}
-        onBack={() => setIsTcoOpen(false)}
-      />
+      <CompareFloatingBar />
     </div>
   );
 };
