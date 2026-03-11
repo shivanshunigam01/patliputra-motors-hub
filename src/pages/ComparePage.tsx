@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Phone, MessageCircle, X } from 'lucide-react';
@@ -12,35 +12,61 @@ import { getWhatsAppUrl } from "@/lib/whatsapp";
 const ComparePage = () => {
   const { selectedProducts, clearProducts, removeProduct } = useCompare();
   const navigate = useNavigate();
+  const { settings } = useAdminSettings();
 
-  useEffect(() => {
-    if (selectedProducts.length === 0) {
-      navigate(-1);
+  // Dynamically build comparison rows from all specification keys
+  const comparisonRows = useMemo(() => {
+    const allKeys = new Set<string>();
+
+    selectedProducts.forEach((product) => {
+      if (product.specifications) {
+        Object.keys(product.specifications).forEach((key) => {
+          // Skip subcategory or internal keys
+          if (key.toLowerCase() !== 'subcategory' && key.toLowerCase() !== 'application') {
+            allKeys.add(key);
+          }
+        });
+      }
+    });
+
+    // Also add brand and category as static rows
+    const rows: { label: string; key: string; isStatic?: boolean }[] = [
+      { label: 'Brand', key: 'brand', isStatic: true },
+      { label: 'Category', key: 'category', isStatic: true },
+    ];
+
+    allKeys.forEach((key) => {
+      rows.push({ label: key, key });
+    });
+
+    return rows;
+  }, [selectedProducts]);
+
+  const getValue = (product: typeof selectedProducts[0], key: string, isStatic?: boolean): string => {
+    if (isStatic) {
+      if (key === 'brand') return product.brand || '-';
+      if (key === 'category') return product.category || '-';
+      return '-';
     }
-  }, [selectedProducts.length, navigate]);
+    // Look up in specifications
+    return product.specifications?.[key] || '-';
+  };
 
   if (selectedProducts.length === 0) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 text-center py-20">
+            <h1 className="text-2xl font-bold text-foreground mb-4">No Products Selected</h1>
+            <p className="text-muted-foreground mb-6">Please select products from the brand pages to compare.</p>
+            <Button onClick={() => navigate(-1)}>Go Back</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
-
-  const comparisonRows = [
-    
-    { label: 'Brand', key: 'brand' },
-    { label: 'Category', key: 'category' },
-    { label: 'Fuel Type', key: 'fuel' },
-    { label: 'Capacity / Payload', key: 'capacity' },
-    { label: 'Power', key: 'power' },
-    { label: 'Application', key: 'application' },
-    { label: 'Warranty', key: 'warranty' },
-  ];
-
-   const { settings } = useAdminSettings();
-  const getValue = (product: typeof selectedProducts[0], key: string): string => {
-    if (key === 'price' || key === 'brand' || key === 'category') {
-      return product[key as 'price' | 'brand' | 'category'] || '-';
-    }
-    return product.specs[key as keyof typeof product.specs] || '-';
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,7 +94,7 @@ const ComparePage = () => {
                   Compare Products
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Side-by-side comparison of selected vehicles
+                  Side-by-side specification comparison
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={clearProducts} className="self-start sm:self-auto">
@@ -84,7 +110,6 @@ const ComparePage = () => {
             transition={{ delay: 0.1 }}
             className="bg-card rounded-xl sm:rounded-2xl border border-border overflow-hidden shadow-lg"
           >
-            {/* Mobile/tablet: allow horizontal scroll instead of breaking */}
             <div className="w-full overflow-x-auto">
               <div className="min-w-[640px] sm:min-w-0">
                 {/* Product Headers */}
@@ -109,7 +134,11 @@ const ComparePage = () => {
                       <h3 className="text-sm sm:text-lg font-bold text-foreground mb-1 line-clamp-2">
                         {product.name}
                       </h3>
-                      <Link to="/contact"><Button size="sm" className="mt-1 bg-jcb text-jcb-foreground hover:bg-jcb/90 text-xs">Get Latest Price</Button></Link>
+                      <Link to="/contact">
+                        <Button size="sm" className="mt-1 bg-primary text-primary-foreground hover:bg-primary/90 text-xs">
+                          Get Latest Price
+                        </Button>
+                      </Link>
                     </div>
                   ))}
                   {selectedProducts.length === 1 && (
@@ -130,23 +159,20 @@ const ComparePage = () => {
                         index % 2 === 0 ? 'bg-background' : 'bg-muted/30'
                       }`}
                     >
-                      {/* Mobile: Label on top */}
-                      <div className="px-4 pt-3 pb-1 sm:hidden">
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      {/* Row Label - always visible */}
+                      <div className="px-4 pt-3 pb-1 sm:pb-0">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                           {row.label}
                         </p>
                       </div>
                       
-                      <div className={`grid gap-3 sm:gap-4 px-4 pb-3 sm:py-4 ${
+                      <div className={`grid gap-3 sm:gap-4 px-4 pb-3 sm:py-3 ${
                         selectedProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                       }`}>
                         {selectedProducts.map((product) => (
                           <div key={product.id} className="sm:text-center">
-                            <p className="hidden sm:block text-xs text-muted-foreground mb-1 lg:hidden">
-                              {row.label}
-                            </p>
                             <p className="text-sm sm:text-base font-medium text-foreground break-words">
-                              {getValue(product, row.key)}
+                              {getValue(product, row.key, row.isStatic)}
                             </p>
                           </div>
                         ))}
@@ -175,7 +201,7 @@ const ComparePage = () => {
               <a href={`tel:+91${settings?.primary_phone}`} className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto gap-2 bg-jcb text-jcb-foreground hover:bg-jcb/90 font-semibold"
+                  className="w-full sm:w-auto gap-2 bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold"
                 >
                   <Phone className="h-5 w-5" />
                   Talk to Expert
@@ -190,7 +216,7 @@ const ComparePage = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
+                  className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 font-semibold"
                 >
                   <MessageCircle className="h-5 w-5" />
                   WhatsApp Us
