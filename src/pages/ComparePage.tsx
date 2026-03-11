@@ -109,7 +109,7 @@ const ComparePage = () => {
                       <h3 className="text-sm sm:text-lg font-bold text-foreground mb-1 line-clamp-2">
                         {product.name}
                       </h3>
-                      <p className="text-lg sm:text-2xl font-bold text-jcb">{product.price}</p>
+                      <Link to="/contact"><Button size="sm" className="mt-1 bg-jcb text-jcb-foreground hover:bg-jcb/90 text-xs">Get Latest Price</Button></Link>
                     </div>
                   ))}
                   {selectedProducts.length === 1 && (
