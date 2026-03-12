@@ -152,11 +152,7 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${
-                isScrolled
-                  ? "text-foreground hover:bg-muted"
-                  : "text-primary-foreground hover:bg-primary-foreground/10"
-              }`}
+              className="lg:hidden p-2 rounded-lg transition-colors text-primary-foreground hover:bg-primary-foreground/10"
             >
               {isOpen ? (
                 <X className="h-6 w-6" />
