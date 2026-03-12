@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import patliputraLogo from "@/assets/patliputra-logo.jpeg";
 
 export function Footer() {
   const { t } = useLanguage();
