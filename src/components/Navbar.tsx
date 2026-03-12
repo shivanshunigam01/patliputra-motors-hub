@@ -85,11 +85,7 @@ export function Navbar() {
                   to={link.path}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     location.pathname === link.path
-                      ? isScrolled
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary-foreground/20 text-primary-foreground"
-                      : isScrolled
-                      ? "text-foreground hover:bg-muted"
+                      ? "bg-primary-foreground/20 text-primary-foreground"
                       : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
                   }`}
                 >
