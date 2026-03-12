@@ -61,7 +61,7 @@ export function Navbar() {
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-primary ${
-          isScrolled ? "py-2 shadow-lg" : "py-4"
+         isScrolled ? "py-1 shadow-lg" : "py-2"
         }`}
       >
         <div className="container mx-auto px-4">
