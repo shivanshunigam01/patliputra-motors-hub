@@ -62,7 +62,7 @@ export default function ProductDetail() {
             >
               <div className="rounded-2xl overflow-hidden border">
                 <img
-                  src={product.images?.[0]}
+                  src={getImageUrl(product.images?.[0])}
                   alt={product.name}
                   className="w-full h-[400px] object-cover"
                 />
