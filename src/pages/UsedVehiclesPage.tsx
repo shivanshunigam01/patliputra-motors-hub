@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
 import usedVehiclesImg from "@/assets/used-vehicles.jpg";
+import { getImageUrl } from "@/lib/imageUrl";
 
 interface ApiUsedVehicle {
   _id: string;
