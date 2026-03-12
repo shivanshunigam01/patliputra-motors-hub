@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import patliputraLogo from "@/assets/patliputra-logo.jpeg";
 
 export function Footer() {
   const { t } = useLanguage();
@@ -40,10 +41,11 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
-            <div className="text-2xl font-bold mb-4">
-              <span className="text-jcb">Patliputra</span>
-              <span className="text-primary-foreground"> Autos</span>
-            </div>
+            <img
+              src={patliputraLogo}
+              alt="Patliputra Autos"
+              className="h-16 rounded mb-4"
+            />
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
               {t("footer.tagline")}
             </p>
