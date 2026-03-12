@@ -3,6 +3,7 @@ import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "@/lib/imageUrl";
 import {
   Phone,
   MessageCircle,
