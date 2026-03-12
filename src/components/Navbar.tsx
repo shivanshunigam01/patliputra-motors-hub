@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import patliputraLogo from "@/assets/patliputra-logo.jpeg";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
