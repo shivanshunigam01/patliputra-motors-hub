@@ -116,19 +116,17 @@ export function Navbar() {
 
             {/* Desktop CTAs */}
             <div className="hidden lg:flex items-center gap-2">
-              <LanguageToggle isScrolled={isScrolled} />
+              <LanguageToggle isScrolled={false} />
               <Button
                 variant="ghost"
                 size="icon"
-                className={
-                  isScrolled ? "text-foreground" : "text-primary-foreground"
-                }
+                className="text-primary-foreground"
               >
                 <Search className="h-5 w-5" />
               </Button>
               <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
-                  variant={isScrolled ? "outline" : "secondary"}
+                  variant="secondary"
                   size="sm"
                   className="gap-2 hover:bg-jcb hover:text-jcb-foreground hover:border-jcb transition-all"
                 >
