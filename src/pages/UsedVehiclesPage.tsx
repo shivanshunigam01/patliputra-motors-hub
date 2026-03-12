@@ -28,6 +28,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
 import usedVehiclesImg from "@/assets/used-vehicles.jpg";
+import { getImageUrl } from "@/lib/imageUrl";
 
 interface ApiUsedVehicle {
   _id: string;
@@ -81,7 +82,7 @@ const UsedVehiclesPage = () => {
           ? `${v.kilometers.toLocaleString("en-IN")} km`
           : `${v.hours?.toLocaleString("en-IN")} hrs`,
         price: `₹${v.price.toLocaleString("en-IN")}`,
-        image: v.featured_image || usedVehiclesImg,
+        image: getImageUrl(v.featured_image) || usedVehiclesImg,
         brochureUrl: v.inspection_report_url
           ? v.inspection_report_url.startsWith("http")
             ? v.inspection_report_url

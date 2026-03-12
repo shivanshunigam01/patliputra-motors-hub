@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { BrochureDownloadButton } from "@/components/BrochureDownloadButton";
 import { getProducts, Product } from "@/services/products.service";
+import { getImageUrl } from "@/lib/imageUrl";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -61,7 +62,7 @@ export default function ProductDetail() {
             >
               <div className="rounded-2xl overflow-hidden border">
                 <img
-                  src={product.images?.[0]}
+                  src={getImageUrl(product.images?.[0])}
                   alt={product.name}
                   className="w-full h-[400px] object-cover"
                 />
@@ -73,7 +74,7 @@ export default function ProductDetail() {
                   {product.images.map((img: string, i: number) => (
                     <img
                       key={i}
-                      src={img}
+                      src={getImageUrl(img)}
                       alt="thumbnail"
                       className="w-20 h-20 object-cover rounded-lg border"
                     />

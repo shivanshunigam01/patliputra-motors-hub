@@ -3,6 +3,7 @@ import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "@/lib/imageUrl";
 import {
   Phone,
   MessageCircle,
@@ -78,7 +79,7 @@ const JCBPage = () => {
       price: `₹${p.price.toLocaleString('en-IN')}`,
       bestFor: p.shortDescription || p.specifications?.application || '',
       badge: p.isNewLaunch ? 'NEW LAUNCH' : p.isBestseller ? 'BESTSELLER' : p.isFeatured ? 'FEATURED' : null,
-      image: p.images?.[0] || heroJcb,
+      image: getImageUrl(p.images?.[0]) || heroJcb,
       featured: p.isFeatured || false,
       brochureUrl: p.brochureUrl || null,
       specifications: p.specifications || {},
