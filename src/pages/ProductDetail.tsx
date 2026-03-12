@@ -74,7 +74,7 @@ export default function ProductDetail() {
                   {product.images.map((img: string, i: number) => (
                     <img
                       key={i}
-                      src={img}
+                      src={getImageUrl(img)}
                       alt="thumbnail"
                       className="w-20 h-20 object-cover rounded-lg border"
                     />
