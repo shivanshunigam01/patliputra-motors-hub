@@ -67,24 +67,14 @@ export function Navbar() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <div
-                className={`font-bold transition-all duration-300 ${
-                  isScrolled
-                    ? "text-xl text-primary"
-                    : "text-2xl text-primary-foreground"
+            <Link to="/" className="flex items-center">
+              <img
+                src={patliputraLogo}
+                alt="Patliputra Autos"
+                className={`transition-all duration-300 rounded ${
+                  isScrolled ? "h-10" : "h-12"
                 }`}
-              >
-                <span className="text-jcb">Patliputra</span>
-                <span
-                  className={
-                    isScrolled ? "text-primary" : "text-primary-foreground"
-                  }
-                >
-                  {" "}
-                  Autos
-                </span>
-              </div>
+              />
             </Link>
 
             {/* Desktop Navigation */}
