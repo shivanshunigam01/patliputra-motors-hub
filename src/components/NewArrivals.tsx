@@ -105,7 +105,7 @@ export function NewArrivals() {
                       <div className="relative aspect-[4/3] overflow-hidden">
                         <img
                           src={
-                            product.images?.[0] ||
+                            getImageUrl(product.images?.[0]) ||
                             "https://via.placeholder.com/600x400?text=No+Image"
                           }
                           alt={product.name}
