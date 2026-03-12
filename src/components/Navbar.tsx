@@ -60,8 +60,8 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? "glass py-2 shadow-lg" : "bg-primary/95 py-4"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-primary ${
+          isScrolled ? "py-2 shadow-lg" : "py-4"
         }`}
       >
         <div className="container mx-auto px-4">
@@ -72,7 +72,7 @@ export function Navbar() {
                 src={patliputraLogo}
                 alt="Patliputra Autos"
                 className={`transition-all duration-300 rounded ${
-                  isScrolled ? "h-12" : "h-14"
+                  isScrolled ? "h-14" : "h-16"
                 }`}
               />
             </Link>
@@ -85,11 +85,7 @@ export function Navbar() {
                   to={link.path}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     location.pathname === link.path
-                      ? isScrolled
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-primary-foreground/20 text-primary-foreground"
-                      : isScrolled
-                      ? "text-foreground hover:bg-muted"
+                      ? "bg-primary-foreground/20 text-primary-foreground"
                       : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
                   }`}
                 >
@@ -101,11 +97,7 @@ export function Navbar() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                      isScrolled
-                        ? "text-foreground hover:bg-muted"
-                        : "text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10"
-                    }`}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10`}
                   >
                     More <ChevronDown className="h-4 w-4" />
                   </button>
@@ -124,19 +116,17 @@ export function Navbar() {
 
             {/* Desktop CTAs */}
             <div className="hidden lg:flex items-center gap-2">
-              <LanguageToggle isScrolled={isScrolled} />
+              <LanguageToggle isScrolled={false} />
               <Button
                 variant="ghost"
                 size="icon"
-                className={
-                  isScrolled ? "text-foreground" : "text-primary-foreground"
-                }
+                className="text-primary-foreground"
               >
                 <Search className="h-5 w-5" />
               </Button>
               <a href={`tel:+91${settings?.primary_phone}`}>
                 <Button
-                  variant={isScrolled ? "outline" : "secondary"}
+                  variant="secondary"
                   size="sm"
                   className="gap-2 hover:bg-jcb hover:text-jcb-foreground hover:border-jcb transition-all"
                 >
@@ -162,11 +152,7 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`lg:hidden p-2 rounded-lg transition-colors ${
-                isScrolled
-                  ? "text-foreground hover:bg-muted"
-                  : "text-primary-foreground hover:bg-primary-foreground/10"
-              }`}
+              className="lg:hidden p-2 rounded-lg transition-colors text-primary-foreground hover:bg-primary-foreground/10"
             >
               {isOpen ? (
                 <X className="h-6 w-6" />
