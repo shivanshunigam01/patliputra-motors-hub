@@ -17,8 +17,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Primary - Black (matching logo) */
-    --primary: 0 0% 5%;
+    /* Primary - Pure Black (matching logo #000000) */
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - Charcoal (Power) */
