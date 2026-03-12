@@ -44,7 +44,7 @@ export function Footer() {
             <img
               src={patliputraLogo}
               alt="Patliputra Autos"
-              className="h-16 rounded mb-4"
+              className="h-20 rounded mb-4"
             />
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
               {t("footer.tagline")}

@@ -72,7 +72,7 @@ export function Navbar() {
                 src={patliputraLogo}
                 alt="Patliputra Autos"
                 className={`transition-all duration-300 rounded ${
-                  isScrolled ? "h-10" : "h-12"
+                  isScrolled ? "h-12" : "h-14"
                 }`}
               />
             </Link>
