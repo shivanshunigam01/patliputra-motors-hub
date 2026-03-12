@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { BrochureDownloadButton } from "@/components/BrochureDownloadButton";
 import { getProducts, Product } from "@/services/products.service";
+import { getImageUrl } from "@/lib/imageUrl";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
 
