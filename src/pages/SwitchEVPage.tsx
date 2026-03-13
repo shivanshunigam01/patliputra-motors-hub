@@ -252,7 +252,7 @@ const SwitchEVPage = () => {
                           )}
                           <Button size="sm" variant="outline"
                             className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-ev text-ev-foreground border-ev hover:bg-ev/90' : 'bg-background/90 backdrop-blur-sm border-ev/50 text-ev hover:bg-ev hover:text-ev-foreground'}`}
-                            onClick={(e) => { e.stopPropagation(); handleCompareSelect(product); }}>
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCompareSelect(product); }}>
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>

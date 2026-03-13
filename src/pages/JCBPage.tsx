@@ -244,7 +244,7 @@ const JCBPage = () => {
                           )}
                           <Button size="sm" variant="outline"
                             className={`absolute top-4 right-4 gap-1.5 rounded-full text-xs font-medium shadow-md ${selected ? 'bg-jcb text-jcb-foreground border-jcb hover:bg-jcb/90' : 'bg-background/90 backdrop-blur-sm border-jcb/50 text-jcb hover:bg-jcb hover:text-jcb-foreground'}`}
-                            onClick={(e) => { e.stopPropagation(); handleCompareSelect(product); }}>
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleCompareSelect(product); }}>
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
