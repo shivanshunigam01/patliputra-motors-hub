@@ -256,13 +256,13 @@ const SwitchEVPage = () => {
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
-                        </div>
+                        </Link>
                         <div className="p-6 flex flex-col flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs text-ev font-medium px-2 py-0.5 bg-ev/10 rounded">{product.category}</span>
                             <span className="text-xs text-muted-foreground">{product.subcategory}</span>
                           </div>
-                          <h3 className="text-xl font-bold text-foreground mb-2">{product.name}</h3>
+                          <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors"><h3 className="text-xl font-bold text-foreground mb-2">{product.name}</h3></Link>
                           <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
                           <div className="flex flex-wrap gap-4 mb-4 text-xs text-muted-foreground">
                             {product.specs.range && <div className="flex items-center gap-1"><Battery className="h-3 w-3" />{product.specs.range}</div>}

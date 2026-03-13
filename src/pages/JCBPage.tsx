@@ -254,7 +254,7 @@ const JCBPage = () => {
                             <span className="text-xs text-jcb font-medium px-2 py-0.5 bg-jcb/10 rounded">{product.category}</span>
                             <span className="text-xs text-muted-foreground">{product.subcategory}</span>
                           </div>
-                          <h3 className="text-lg font-bold text-foreground mb-2">{product.name}</h3>
+                          <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors"><h3 className="text-lg font-bold text-foreground mb-2">{product.name}</h3></Link>
                           <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{language === 'hi' ? 'के लिए सर्वश्रेष्ठ:' : 'Best for:'} {product.bestFor}</p>
                           <div className="flex gap-4 mb-4 text-xs text-muted-foreground">
                             {product.specs.power && <div className="flex items-center gap-1"><Gauge className="h-3 w-3" />{product.specs.power}</div>}
