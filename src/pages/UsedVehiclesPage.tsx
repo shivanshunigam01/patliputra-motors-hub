@@ -164,18 +164,20 @@ const UsedVehiclesPage = () => {
                     transition={{ delay: index * 0.05 }}
                   >
                     <div className="bg-card rounded-2xl overflow-hidden shadow-lg border border-border flex flex-col">
-                      <div className="relative aspect-[4/3] overflow-hidden">
+                      <Link to={`/product/${vehicle.id}`} className="relative aspect-[4/3] overflow-hidden block">
                         <img
                           src={vehicle.image}
                           alt={vehicle.name}
                           className="w-full h-full object-cover"
                         />
-                      </div>
+                      </Link>
 
                       <div className="p-6 flex flex-col flex-1">
-                        <h3 className="text-lg font-bold mb-2">
-                          {vehicle.name}
-                        </h3>
+                        <Link to={`/product/${vehicle.id}`} className="hover:text-primary transition-colors">
+                          <h3 className="text-lg font-bold mb-2">
+                            {vehicle.name}
+                          </h3>
+                        </Link>
 
                         <p className="text-sm text-muted-foreground mb-4">
                           {vehicle.year} • {vehicle.km}
