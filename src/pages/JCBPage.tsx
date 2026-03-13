@@ -237,7 +237,7 @@ const JCBPage = () => {
                     <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}
                       className={product.featured ? "md:col-span-2 lg:col-span-1" : ""}>
                       <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border flex flex-col card-jcb ${selected ? 'border-jcb ring-2 ring-jcb' : 'border-border'}`}>
-                        <div className="relative aspect-[4/3] overflow-hidden">
+                        <Link to={`/product/${product.id}`} className="relative aspect-[4/3] overflow-hidden block">
                           <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           {product.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-jcb text-jcb-foreground rounded-full text-xs font-bold tracking-wide">{product.badge}</div>
