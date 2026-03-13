@@ -28,6 +28,7 @@ import CompanyAlbumPage from "./pages/CompanyAlbumPage";
 import { AdminSettingsProvider } from "./context/AdminSettingsContext";
 import ProductDetail from "./pages/ProductDetail";
 import { LeadReviewPage } from "./pages/LeadReviewPage";
+import CareersPage from "./pages/CareersPage";
 
 const queryClient = new QueryClient();
 
