@@ -126,9 +126,7 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-jcb flex-shrink-0 mt-0.5" />
                 <span className="text-primary-foreground/70 text-sm">
-                  Bailey Road, Near AIIMS,
-                  <br />
-                  Patna, Bihar 800001
+                  {settings?.address || "Near Didarganj Check Post, NH-30, Patna - 8"}
                 </span>
               </li>
               <li>
