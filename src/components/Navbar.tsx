@@ -39,6 +39,7 @@ export function Navbar() {
     { name: t("nav.partsLubricants"), path: "/parts-lubricants" },
     { name: t("nav.companyAlbum"), path: "/company-album" },
     { name: t("nav.cibilScore"), path: "/cibil-score" },
+    { name: t("nav.careers"), path: "/careers" },
     { name: t("nav.about"), path: "/about" },
     { name: t("nav.contact"), path: "/contact" },
   ];
