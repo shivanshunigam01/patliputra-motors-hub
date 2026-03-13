@@ -157,20 +157,8 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-jcb flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="text-primary-foreground/70">
-                    {t("contact.mondayToSaturday")}
-                  </p>
                   <p className="text-primary-foreground font-medium">
-                    9:00 AM - 7:00 PM
-                  </p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-ev flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="text-primary-foreground/70">{t("contact.sunday")}</p>
-                  <p className="text-primary-foreground font-medium">
-                    10:00 AM - 5:00 PM
+                    {settings?.working_hours || "10:00 AM to 6:30 PM Mon-Sat"}
                   </p>
                 </div>
               </li>
