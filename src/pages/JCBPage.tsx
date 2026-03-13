@@ -248,7 +248,7 @@ const JCBPage = () => {
                             <ShoppingCart className="h-3.5 w-3.5" />
                             {selected ? (language === 'hi' ? 'चयनित' : 'Selected') : (language === 'hi' ? 'तुलना करें' : 'Compare')}
                           </Button>
-                        </div>
+                        </Link>
                         <div className="p-6 flex flex-col flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs text-jcb font-medium px-2 py-0.5 bg-jcb/10 rounded">{product.category}</span>
