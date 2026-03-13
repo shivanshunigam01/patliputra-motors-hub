@@ -245,7 +245,7 @@ const SwitchEVPage = () => {
                   return (
                     <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.05 }}>
                       <div className={`group bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border flex flex-col card-ev ${selected ? 'border-ev ring-2 ring-ev' : 'border-border'}`}>
-                        <div className="relative aspect-[16/10] overflow-hidden">
+                        <Link to={`/product/${product.id}`} className="relative aspect-[16/10] overflow-hidden block">
                           <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           {product.badge && (
                             <div className="absolute top-4 left-4 px-3 py-1.5 bg-ev text-ev-foreground rounded-full text-xs font-bold tracking-wide">{product.badge}</div>
