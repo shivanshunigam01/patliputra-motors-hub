@@ -32,6 +32,7 @@ export function Footer() {
     { name: t("nav.partsLubricants"), path: "/parts-lubricants" },
     { name: t("nav.about"), path: "/about" },
     { name: t("nav.contact"), path: "/contact" },
+    { name: t("nav.careers"), path: "/careers" },
   ];
 
    const { settings } = useAdminSettings();
