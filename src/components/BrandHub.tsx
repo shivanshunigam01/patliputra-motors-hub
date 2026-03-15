@@ -106,7 +106,7 @@ export function BrandHub() {
                   <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
                     <div className="flex items-end justify-between">
                       <div>
-                        <p className={`text-sm font-medium ${brand.accentColor} mb-1`}>
+                        <p className="text-sm font-semibold text-white mb-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
                           {t(brand.taglineKey)}
                         </p>
                         <h3 className="text-2xl lg:text-3xl font-bold text-primary-foreground mb-2">
