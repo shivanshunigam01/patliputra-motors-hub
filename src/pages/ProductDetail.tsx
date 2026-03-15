@@ -102,12 +102,7 @@ export default function ProductDetail() {
                 {product.shortDescription}
               </p>
 
-              <Link to="/contact">
-                <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-                  Get Latest Price
-                </Button>
-              </Link>
-
+             
               {/* Buttons */}
               <div className="flex flex-wrap gap-4">
                 <a href={`tel:+91${settings?.primary_phone}`}>
@@ -127,6 +122,13 @@ export default function ProductDetail() {
                     WhatsApp
                   </Button>
                 </a>
+
+                 <Link to="/contact">
+                <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                  Get Latest Price
+                </Button>
+              </Link>
+
 
                 <BrochureDownloadButton
                   productName={product.name}
