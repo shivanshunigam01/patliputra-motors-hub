@@ -144,7 +144,7 @@ const AshokLeylandPage = () => {
           </div>
           <div className="container mx-auto px-4 relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-leyland/20 text-leyland rounded-full text-sm font-medium mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#005BAC] text-white rounded-full text-sm font-medium mb-6">
                 <CheckCircle className="h-4 w-4" />
                 {language === 'hi' ? 'अधिकृत अशोक लेलैंड डीलर' : 'Authorized Ashok Leyland Dealer'}
               </div>
