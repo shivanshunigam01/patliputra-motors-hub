@@ -15,7 +15,7 @@ import { getWhatsAppUrl } from "@/lib/whatsapp";
 import heroJcb from "@/assets/hero-jcb.jpg";
 import leyland from "@/assets/leyland-trucks.jpg";
 import switchEv from "@/assets/switch-ev-bus.jpg";
-import usedVehicles from "@/assets/used-vehicles.jpg";
+import usedVehicles from "@/assets/hero-jcb.jpg";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useAdminSettings } from "@/context/AdminSettingsContext";

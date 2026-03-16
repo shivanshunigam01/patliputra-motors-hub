@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
 
-import usedVehiclesImg from "@/assets/used-vehicles.jpg";
+import usedVehiclesImg from "@/assets/hero-jcb.jpg";
 import { getImageUrl } from "@/lib/imageUrl";
 
 interface ApiUsedVehicle {

@@ -9,7 +9,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import heroJcb from "@/assets/hero-jcb.jpg";
 import leylandTrucks from "@/assets/leyland-trucks.jpg";
 import switchEvBus from "@/assets/switch-ev-bus.jpg";
-import usedVehicles from "@/assets/used-vehicles.jpg";
+import usedVehicles from "@/assets/hero-jcb.jpg";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const AboutPage = () => {
