@@ -308,7 +308,7 @@ const CareersPage = () => {
       {/* Job Openings */}
       <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold mb-3">
               {t("careers.openingsTitle")}
             </h2>
@@ -317,8 +317,44 @@ const CareersPage = () => {
             </p>
           </div>
 
+          {/* Search & Filter Bar */}
+          <div className="max-w-3xl mx-auto mb-8">
+            <div className="bg-primary rounded-xl p-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+              <div className="flex-1 relative">
+                <Input
+                  placeholder="Search for jobs by title or keyword"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-4 pr-4 h-11 bg-background border-0 rounded-lg text-sm"
+                />
+              </div>
+              <div className="relative sm:w-48">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full h-11 pl-9 pr-4 bg-background border-0 rounded-lg text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Location</option>
+                  {locations.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+              <Button
+                onClick={() => {}}
+                className="bg-jcb text-jcb-foreground hover:bg-jcb/90 h-11 px-5"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+
           <div className="max-w-3xl mx-auto space-y-4">
-            {jobOpenings.map((job, i) => (
+            {filteredJobs.length === 0 && (
+              <p className="text-center text-muted-foreground py-8">No job openings found matching your criteria.</p>
+            )}
+            {filteredJobs.map((job, i) => (
               <motion.div
                 key={job.id}
                 initial={{ opacity: 0, y: 15 }}
