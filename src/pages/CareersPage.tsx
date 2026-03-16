@@ -130,10 +130,19 @@ const applicationSchema = z.object({
     .optional(),
 });
 
+const locations = [
+  "Arwal", "Patna", "Aurangabad", "Bhojpur", "Buxar", "East Champaran",
+  "Gaya", "Gopalganj", "Jehanabad", "Kaimur", "Muzaffarpur", "Nalanda",
+  "Nawada", "Rohtas", "Saran", "Sasaram", "Sheikhpura", "Sheohar",
+  "Sitamarhi", "Siwan", "Vaishali", "West Champaran", "Others",
+];
+
 const CareersPage = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [selectedJob, setSelectedJob] = useState<(typeof jobOpenings)[0] | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -142,6 +151,12 @@ const CareersPage = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const filteredJobs = jobOpenings.filter((job) => {
+    const matchesSearch = searchQuery === "" || job.title.toLowerCase().includes(searchQuery.toLowerCase()) || job.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = selectedLocation === "" || job.location.toLowerCase().includes(selectedLocation.toLowerCase());
+    return matchesSearch && matchesLocation;
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const whyJoinCards = [
