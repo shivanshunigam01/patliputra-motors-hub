@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 import {
   Briefcase,
   MapPin,
@@ -26,83 +27,84 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 
-const jobOpenings = [
-  {
-    id: 1,
-    title: "Sales Executive – JCB Machines",
-    location: "Patna, Bihar",
-    experience: "2-4 Years",
-    type: "fullTime" as const,
-    description:
-      "Drive sales of JCB earthmoving equipment across Bihar. Meet clients, conduct demos, and close deals. Strong knowledge of construction equipment preferred.",
-    requirements: [
-      "Bachelor's degree in any field",
-      "2+ years of B2B sales experience",
-      "Valid driving license",
-      "Excellent communication in Hindi & English",
-    ],
-  },
-  {
-    id: 2,
-    title: "Service Technician – Ashok Leyland",
-    location: "Patna, Bihar",
-    experience: "3-5 Years",
-    type: "fullTime" as const,
-    description:
-      "Perform maintenance and repair of Ashok Leyland commercial vehicles. Diagnose issues, manage service schedules, and ensure customer satisfaction.",
-    requirements: [
-      "ITI / Diploma in Automobile Engineering",
-      "3+ years in commercial vehicle servicing",
-      "Knowledge of BS-VI engine systems",
-      "Willingness to travel within Bihar",
-    ],
-  },
-  {
-    id: 3,
-    title: "Finance & Insurance Executive",
-    location: "Patna, Bihar",
-    experience: "1-3 Years",
-    type: "fullTime" as const,
-    description:
-      "Process vehicle finance applications, coordinate with banks & NBFCs, and handle insurance documentation for customers purchasing vehicles.",
-    requirements: [
-      "Graduate in Commerce / Finance",
-      "Experience with vehicle finance processing",
-      "Knowledge of NBFC and bank loan procedures",
-      "Good documentation skills",
-    ],
-  },
-  {
-    id: 4,
-    title: "Digital Marketing Executive",
-    location: "Patna, Bihar",
-    experience: "1-2 Years",
-    type: "fullTime" as const,
-    description:
-      "Manage social media accounts, create marketing content, run digital ad campaigns, and track leads for the virtual showroom platform.",
-    requirements: [
-      "Degree in Marketing / Mass Communication",
-      "Experience with Meta Ads and Google Ads",
-      "Content creation skills (graphics & video)",
-      "Analytical mindset with reporting skills",
-    ],
-  },
-  {
-    id: 5,
-    title: "Showroom Receptionist",
-    location: "Patna, Bihar",
-    experience: "0-1 Year",
-    type: "fullTime" as const,
-    description:
-      "Welcome and guide visitors, manage incoming calls, schedule appointments, and support the sales team with administrative tasks.",
-    requirements: [
-      "Graduate in any field",
-      "Pleasant personality and communication skills",
-      "Computer proficiency (MS Office)",
-      "Hindi and English fluency",
-    ],
-  },
-];
+// const jobOpenings = [
+//   {
+//     id: 1,
+//     title: "Sales Executive – JCB Machines",
+//     location: "Patna, Bihar",
+//     experience: "2-4 Years",
+//     type: "fullTime" as const,
+//     description:
+//       "Drive sales of JCB earthmoving equipment across Bihar. Meet clients, conduct demos, and close deals. Strong knowledge of construction equipment preferred.",
+//     requirements: [
+//       "Bachelor's degree in any field",
+//       "2+ years of B2B sales experience",
+//       "Valid driving license",
+//       "Excellent communication in Hindi & English",
+//     ],
+//   },
+//   {
+//     id: 2,
+//     title: "Service Technician – Ashok Leyland",
+//     location: "Patna, Bihar",
+//     experience: "3-5 Years",
+//     type: "fullTime" as const,
+//     description:
+//       "Perform maintenance and repair of Ashok Leyland commercial vehicles. Diagnose issues, manage service schedules, and ensure customer satisfaction.",
+//     requirements: [
+//       "ITI / Diploma in Automobile Engineering",
+//       "3+ years in commercial vehicle servicing",
+//       "Knowledge of BS-VI engine systems",
+//       "Willingness to travel within Bihar",
+//     ],
+//   },
+//   {
+//     id: 3,
+//     title: "Finance & Insurance Executive",
+//     location: "Patna, Bihar",
+//     experience: "1-3 Years",
+//     type: "fullTime" as const,
+//     description:
+//       "Process vehicle finance applications, coordinate with banks & NBFCs, and handle insurance documentation for customers purchasing vehicles.",
+//     requirements: [
+//       "Graduate in Commerce / Finance",
+//       "Experience with vehicle finance processing",
+//       "Knowledge of NBFC and bank loan procedures",
+//       "Good documentation skills",
+//     ],
+//   },
+//   {
+//     id: 4,
+//     title: "Digital Marketing Executive",
+//     location: "Patna, Bihar",
+//     experience: "1-2 Years",
+//     type: "fullTime" as const,
+//     description:
+//       "Manage social media accounts, create marketing content, run digital ad campaigns, and track leads for the virtual showroom platform.",
+//     requirements: [
+//       "Degree in Marketing / Mass Communication",
+//       "Experience with Meta Ads and Google Ads",
+//       "Content creation skills (graphics & video)",
+//       "Analytical mindset with reporting skills",
+//     ],
+//   },
+//   {
+//     id: 5,
+//     title: "Showroom Receptionist",
+//     location: "Patna, Bihar",
+//     experience: "0-1 Year",
+//     type: "fullTime" as const,
+//     description:
+//       "Welcome and guide visitors, manage incoming calls, schedule appointments, and support the sales team with administrative tasks.",
+//     requirements: [
+//       "Graduate in any field",
+//       "Pleasant personality and communication skills",
+//       "Computer proficiency (MS Office)",
+//       "Hindi and English fluency",
+//     ],
+//   },
+// ];
+
 
 const applicationSchema = z.object({
   name: z
@@ -119,11 +121,6 @@ const applicationSchema = z.object({
     .string()
     .trim()
     .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
-  resumeLink: z
-    .string()
-    .trim()
-    .url("Enter a valid URL")
-    .max(500, "URL too long"),
   message: z
     .string()
     .trim()
@@ -137,27 +134,66 @@ const locations = [
   "Nawada", "Rohtas", "Saran", "Sasaram", "Sheikhpura", "Sheohar",
   "Sitamarhi", "Siwan", "Vaishali", "West Champaran", "Others",
 ];
+type ApplicationForm = {
+  name: string;
+  email: string;
+  mobile: string;
+  message: string;
+  resumeFile: File | null;
+};
 
 const CareersPage = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [selectedJob, setSelectedJob] = useState<(typeof jobOpenings)[0] | null>(null);
+const [selectedJob, setSelectedJob] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    mobile: "",
-    resumeLink: "",
-    message: "",
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
+const [formData, setFormData] = useState<ApplicationForm>({
+  name: "",
+  email: "",
+  mobile: "",
+  message: "",
+  resumeFile: null,
+});
+ type FormErrors = {
+  name?: string;
+  email?: string;
+  mobile?: string;
+  message?: string;
+  resumeFile?: string;
+};
 
-  const filteredJobs = jobOpenings.filter((job) => {
-    const matchesSearch = searchQuery === "" || job.title.toLowerCase().includes(searchQuery.toLowerCase()) || job.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = selectedLocation === "" || job.location.toLowerCase().includes(selectedLocation.toLowerCase());
-    return matchesSearch && matchesLocation;
-  });
+const [errors, setErrors] = useState<FormErrors>({});
+  const [jobOpenings, setJobOpenings] = useState<any[]>([]);
+useEffect(() => {
+  const fetchJobs = async () => {
+    try {
+    const res = await fetch("https://api.patliputragroup.com/careers/openings/active");
+      const data = await res.json();
+
+      if (data?.data) {
+        setJobOpenings(data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch jobs", err);
+    }
+  };
+
+  fetchJobs();
+}, []);
+
+const filteredJobs = jobOpenings.filter((job) => {
+  const matchesSearch =
+    searchQuery === "" ||
+    job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const matchesLocation =
+    selectedLocation === "" ||
+    job.location?.toLowerCase().includes(selectedLocation.toLowerCase());
+
+  return matchesSearch && matchesLocation;
+});
   const [submitting, setSubmitting] = useState(false);
 
   const whyJoinCards = [
@@ -192,34 +228,89 @@ const CareersPage = () => {
     { icon: TrendingUp, label: t("careers.benefit6") },
   ];
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setErrors({});
+
+  //   const result = applicationSchema.safeParse(formData);
+  //   if (!result.success) {
+  //     const fieldErrors: Record<string, string> = {};
+  //     result.error.errors.forEach((err) => {
+  //       if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+  //     });
+  //     setErrors(fieldErrors);
+  //     return;
+  //   }
+
+  //   setSubmitting(true);
+  //   // Simulate submission
+  //   await new Promise((resolve) => setTimeout(resolve, 1500));
+  //   setSubmitting(false);
+
+  //   toast({
+  //     title: t("careers.successTitle"),
+  //     description: t("careers.successMessage"),
+  //   });
+
+  //   setFormData({ name: "", email: "", mobile: "", resumeLink: "", message: "" });
+  //   setSelectedJob(null);
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
+  e.preventDefault();
 
-    const result = applicationSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
+  if (!selectedJob) return;
 
+  const form = new FormData();
+  form.append("jobId", selectedJob._id);
+  form.append("name", formData.name);
+  form.append("email", formData.email);
+  form.append("mobile", formData.mobile);
+  form.append("whyShouldWeHire", formData.message);
+
+  if (formData.resumeFile) {
+    form.append("resume", formData.resumeFile);
+  }
+
+  try {
     setSubmitting(true);
-    // Simulate submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setSubmitting(false);
+
+    const res = await fetch(
+      "https://api.patliputragroup.com/careers/applications",
+      {
+        method: "POST",
+        body: form,
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message);
 
     toast({
-      title: t("careers.successTitle"),
-      description: t("careers.successMessage"),
+      title: "Application Submitted",
+      description: "Our HR team will contact you soon.",
     });
 
-    setFormData({ name: "", email: "", mobile: "", resumeLink: "", message: "" });
-    setSelectedJob(null);
-  };
+    setFormData({
+      name: "",
+      email: "",
+      mobile: "",
+      message: "",
+      resumeFile: null,
+    });
 
+    setSelectedJob(null);
+  } catch (err: any) {
+    toast({
+      title: "Error",
+      description: err.message || "Failed to submit application",
+      variant: "destructive",
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -356,7 +447,7 @@ const CareersPage = () => {
             )}
             {filteredJobs.map((job, i) => (
               <motion.div
-                key={job.id}
+              key={job._id}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -374,13 +465,13 @@ const CareersPage = () => {
                         <Clock className="h-4 w-4" /> {job.experience}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Briefcase className="h-4 w-4" /> {t(`careers.${job.type}`)}
+                        <Briefcase className="h-4 w-4" />{job.employmentType}
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-3">{job.description}</p>
-                    {job.requirements.length > 0 && (
+                {job.qualifications?.length > 0 && (
                       <ul className="mt-3 space-y-1">
-                        {job.requirements.map((req, ri) => (
+            {job.qualifications.map((req: string, ri: number) => (
                           <li key={ri} className="text-sm text-muted-foreground flex items-start gap-2">
                             <ChevronRight className="h-4 w-4 text-jcb flex-shrink-0 mt-0.5" />
                             {req}
@@ -471,15 +562,21 @@ const CareersPage = () => {
                 <label className="text-sm font-medium mb-1 block">
                   {t("careers.resumeLabel")}
                 </label>
-                <Input
-                  placeholder={t("careers.resumePlaceholder")}
-                  value={formData.resumeLink}
-                  onChange={(e) => setFormData({ ...formData, resumeLink: e.target.value })}
-                  maxLength={500}
-                />
-                {errors.resumeLink && (
-                  <p className="text-destructive text-xs mt-1">{errors.resumeLink}</p>
-                )}
+     <Input
+  type="file"
+  accept=".pdf,.doc,.docx"
+  onChange={(e) => {
+    const file = (e.target as HTMLInputElement).files?.[0] || null;
+
+    setFormData((prev) => ({
+      ...prev,
+      resumeFile: file,
+    }));
+  }}
+/>
+            {errors.resumeFile && (
+  <p className="text-destructive text-xs mt-1">{errors.resumeFile}</p>
+)}
               </div>
 
               <div>
