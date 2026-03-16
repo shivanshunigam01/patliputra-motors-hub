@@ -22,6 +22,7 @@ import {
   Star,
   ChevronRight,
   X,
+  Search,
 } from "lucide-react";
 import { z } from "zod";
 
