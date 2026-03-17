@@ -250,12 +250,19 @@ const AshokLeylandPage = () => {
                           </div>
                           <div className="pt-4 border-t border-border flex items-center justify-between">
                             <Link to="/contact"><Button size="sm" className="gap-1.5 bg-leyland text-leyland-foreground hover:bg-leyland/90 rounded-full text-xs">{language === 'hi' ? 'नवीनतम कीमत पाएं' : 'Get Latest Price'}</Button></Link>
-                            <a href={getWhatsAppUrl(settings?.whatsapp_number, product.name)} target="_blank" rel="noopener noreferrer">
-                              <Button size="sm" className="gap-1.5 bg-success text-success-foreground hover:bg-success/90 rounded-full text-xs">
-                                <MessageCircle className="h-3.5 w-3.5" />
-                                {language === 'hi' ? 'पूछें' : 'Enquire'}
-                              </Button>
-                            </a>
+                            <a
+  href={getWhatsAppUrl("9264196630", product.name)}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button
+    size="sm"
+    className="gap-1.5 bg-success text-success-foreground hover:bg-success/90 rounded-full text-xs"
+  >
+    <MessageCircle className="h-3.5 w-3.5" />
+    {language === 'hi' ? 'पूछें' : 'Enquire'}
+  </Button>
+</a>
                           </div>
                         </div>
                       </div>

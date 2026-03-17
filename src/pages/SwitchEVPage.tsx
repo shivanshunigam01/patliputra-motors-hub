@@ -160,11 +160,20 @@ const SwitchEVPage = () => {
                     <Phone className="h-5 w-5" />{language === 'hi' ? 'सब्सिडी जानकारी पाएं' : 'Get Subsidy Info'}
                   </Button>
                 </a>
-                <a href={getWhatsAppUrl("9876543210")} target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold">
-                    <MessageCircle className="h-5 w-5" />{language === 'hi' ? 'डेमो शेड्यूल करें' : 'Schedule Demo'}
-                  </Button>
-                </a>
+<a
+  href={getWhatsAppUrl("9264196630")}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Button
+    size="lg"
+    variant="outline"
+    className="w-full sm:w-auto gap-2 border-primary-foreground/30 text-primary hover:bg-primary-foreground/10 font-semibold"
+  >
+    <MessageCircle className="h-5 w-5" />
+    {language === 'hi' ? 'डेमो शेड्यूल करें' : 'Schedule Demo'}
+  </Button>
+</a>
               </div>
             </motion.div>
           </div>
@@ -186,12 +195,12 @@ const SwitchEVPage = () => {
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 rounded-full bg-ev/10 flex items-center justify-center mb-3"><Battery className="h-6 w-6 text-ev" /></div>
-                <p className="font-semibold text-foreground">{language === 'hi' ? '8 साल वारंटी' : '8 Year Warranty'}</p>
+                <p className="font-semibold text-foreground">{language === 'hi' ? '8 साल वारंटी' : '7 Year Warranty'}</p>
                 <p className="text-sm text-muted-foreground">{language === 'hi' ? 'बैटरी पैक पर' : 'On battery pack'}</p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 rounded-full bg-ev/10 flex items-center justify-center mb-3"><CheckCircle className="h-6 w-6 text-ev" /></div>
-                <p className="font-semibold text-foreground">{language === 'hi' ? 'सरकारी सब्सिडी' : 'Govt Subsidy'}</p>
+                <p className="font-semibold text-foreground">{language === 'hi' ? '3 साल तक की वारंटी' : 'Upto 3 Years of Warranty On Vehicle'}</p>
                 <p className="text-sm text-muted-foreground">{language === 'hi' ? 'FAME II लाभ' : 'FAME II benefits'}</p>
               </div>
             </div>
@@ -278,7 +287,7 @@ const SwitchEVPage = () => {
                           </div>
                           <div className="pt-4 border-t border-border flex items-center justify-between">
                             <Link to="/contact"><Button size="sm" className="gap-1.5 bg-ev text-ev-foreground hover:bg-ev/90 rounded-full text-xs">{language === 'hi' ? 'नवीनतम कीमत पाएं' : 'Get Latest Price'}</Button></Link>
-                            <a href={getWhatsAppUrl(settings?.whatsapp_number, product.name)} target="_blank" rel="noopener noreferrer">
+                            <a href={getWhatsAppUrl(undefined, product.name, "9264196630")} target="_blank" rel="noopener noreferrer">
                               <Button size="sm" className="gap-1.5 bg-success text-success-foreground hover:bg-success/90 rounded-full text-xs">
                                 <MessageCircle className="h-3.5 w-3.5" />
                                 {language === 'hi' ? 'पूछें' : 'Enquire'}

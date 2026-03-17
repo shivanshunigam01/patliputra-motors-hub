@@ -33,11 +33,12 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { biharDistricts } from "@/data/dealers";
+import { useAdminSettings } from "@/context/AdminSettingsContext";
 
 const ContactPage = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
-
+const { settings } = useAdminSettings();
   const [submitted, setSubmitted] = useState(false);
   const [referenceId, setReferenceId] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -152,28 +153,28 @@ const ContactPage = () => {
             <div className="grid lg:grid-cols-2 gap-12">
               {/* INFO */}
               <div className="space-y-6">
-                <InfoBlock
-                  icon={<MapPin />}
-                  title={t("contact.addressTitle")}
-                  text={t("contact.address")}
-                />
-                <InfoBlock
-                  icon={<Phone />}
-                  title={t("contact.phoneTitle")}
-                  text="+91 98765 43210"
-                  link="tel:+919876543210"
-                />
-                <InfoBlock
-                  icon={<Mail />}
-                  title={t("contact.emailTitle")}
-                  text="sales@patliputraautos.com"
-                  link="mailto:sales@patliputraautos.com"
-                />
-                <InfoBlock
-                  icon={<Clock />}
-                  title={t("contact.hoursTitle")}
-                  text="Mon–Sat: 9:00 AM – 7:00 PM"
-                />
+             <InfoBlock
+  icon={<MapPin />}
+  title={t("contact.addressTitle")}
+  text={settings?.address || ""}
+/>
+              <InfoBlock
+  icon={<Phone />}
+  title={t("contact.phoneTitle")}
+  text={`+91 ${settings?.primary_phone}`}
+  link={`tel:+91${settings?.primary_phone}`}
+/>
+  <InfoBlock
+  icon={<Mail />}
+  title={t("contact.emailTitle")}
+  text={settings?.email || ""}
+  link={`mailto:${settings?.email}`}
+/>
+             <InfoBlock
+  icon={<Clock />}
+  title={t("contact.hoursTitle")}
+  text={settings?.working_hours || ""}
+/>
               </div>
 
               {/* FORM */}

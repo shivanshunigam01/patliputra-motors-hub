@@ -131,22 +131,26 @@ export function Footer() {
                 </span>
               </li>
               <li>
-                <a
-                  href={`tel:+91${settings?.primary_phone}`}
-                  className="flex items-center gap-3 text-primary-foreground/70 hover:text-jcb transition-colors"
-                >
-                  <Phone className="h-5 w-5 text-jcb flex-shrink-0" />
-                  <span className="text-sm">+91 98765 43210</span>
-                </a>
+             <a
+  href={`tel:+91${settings?.primary_phone}`}
+  className="flex items-center gap-3 text-primary-foreground/70 hover:text-jcb transition-colors"
+>
+  <Phone className="h-5 w-5 text-jcb flex-shrink-0" />
+  <span className="text-sm">
+    +91 {settings?.primary_phone || "9031053514"}
+  </span>
+</a>
               </li>
               <li>
-                <a
-                  href="mailto:sales@patliputraautos.com"
-                  className="flex items-center gap-3 text-primary-foreground/70 hover:text-jcb transition-colors"
-                >
-                  <Mail className="h-5 w-5 text-jcb flex-shrink-0" />
-                  <span className="text-sm">sales@patliputraautos.com</span>
-                </a>
+            <a
+  href={`mailto:${settings?.email}`}
+  className="flex items-center gap-3 text-primary-foreground/70 hover:text-jcb transition-colors"
+>
+  <Mail className="h-5 w-5 text-jcb flex-shrink-0" />
+  <span className="text-sm">
+    {settings?.email || "marketingmanager@jcbpatliputra.com"}
+  </span>
+</a>
               </li>
             </ul>
           </div>

@@ -107,25 +107,49 @@ import { z } from "zod";
 
 
 const applicationSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Name is required")
-    .max(100, "Name must be less than 100 characters"),
-  email: z
-    .string()
-    .trim()
-    .email("Invalid email address")
-    .max(255, "Email must be less than 255 characters"),
+  name: z.string().min(2, "Full name is required"),
+
   mobile: z
     .string()
-    .trim()
-    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
-  message: z
+    .regex(/^[6-9]\d{9}$/, "Enter valid 10 digit mobile number"),
+
+  email: z
     .string()
-    .trim()
-    .max(1000, "Message must be less than 1000 characters")
-    .optional(),
+    .email("Enter valid email address"),
+
+  address: z
+    .string()
+    .min(5, "Address is required"),
+
+  state: z
+    .string()
+    .min(2, "State is required"),
+
+  district: z
+    .string()
+    .min(2, "District is required"),
+
+  pincode: z
+    .string()
+    .regex(/^\d{6}$/, "Enter valid pincode"),
+
+  position: z
+    .string()
+    .min(2, "Select position"),
+
+  qualification: z
+    .string()
+    .min(2, "Qualification required"),
+
+  employmentStatus: z
+    .string()
+    .min(2, "Select employment status"),
+
+  expectedSalary: z
+    .string()
+    .min(1, "Expected salary required"),
+
+  message: z.string().optional(),
 });
 
 const locations = [
@@ -138,6 +162,14 @@ type ApplicationForm = {
   name: string;
   email: string;
   mobile: string;
+  address: string;
+  state: string;
+  district: string;
+  pincode: string;
+  position: string;
+  qualification: string;
+  employmentStatus: string;
+  expectedSalary: string;
   message: string;
   resumeFile: File | null;
 };
@@ -152,17 +184,32 @@ const [formData, setFormData] = useState<ApplicationForm>({
   name: "",
   email: "",
   mobile: "",
+  address: "",
+  state: "",
+  district: "",
+  pincode: "",
+  position: "",
+  qualification: "",
+  employmentStatus: "",
+  expectedSalary: "",
   message: "",
   resumeFile: null,
 });
- type FormErrors = {
+type FormErrors = {
   name?: string;
   email?: string;
   mobile?: string;
+  address?: string;
+  state?: string;
+  district?: string;
+  pincode?: string;
+  position?: string;
+  qualification?: string;
+  employmentStatus?: string;
+  expectedSalary?: string;
   message?: string;
   resumeFile?: string;
 };
-
 const [errors, setErrors] = useState<FormErrors>({});
   const [jobOpenings, setJobOpenings] = useState<any[]>([]);
 useEffect(() => {
@@ -256,16 +303,41 @@ const filteredJobs = jobOpenings.filter((job) => {
   //   setSelectedJob(null);
   // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+
+  const validation = applicationSchema.safeParse(formData);
+
+  if (!validation.success) {
+    const fieldErrors: any = {};
+    validation.error.errors.forEach((err) => {
+      fieldErrors[err.path[0]] = err.message;
+    });
+
+    setErrors(fieldErrors);
+    return;
+  }
+  if (!formData.resumeFile) {
+setErrors((prev)=>({...prev,resumeFile:"Resume is required"}))
+return
+}
 
   if (!selectedJob) return;
 
   const form = new FormData();
+
   form.append("jobId", selectedJob._id);
   form.append("name", formData.name);
-  form.append("email", formData.email);
   form.append("mobile", formData.mobile);
+  form.append("email", formData.email);
+  form.append("address", formData.address);
+  form.append("state", formData.state);
+  form.append("district", formData.district);
+  form.append("pincode", formData.pincode);
+  form.append("position", formData.position);
+  form.append("qualification", formData.qualification);
+  form.append("employmentStatus", formData.employmentStatus);
+  form.append("expectedSalary", formData.expectedSalary);
   form.append("whyShouldWeHire", formData.message);
 
   if (formData.resumeFile) {
@@ -287,20 +359,29 @@ const filteredJobs = jobOpenings.filter((job) => {
 
     if (!res.ok) throw new Error(data.message);
 
-    toast({
-      title: "Application Submitted",
-      description: "Our HR team will contact you soon.",
-    });
+toast({
+  title: "Application Submitted",
+  description: "Our HR team will contact you soon.",
+});
 
-    setFormData({
-      name: "",
-      email: "",
-      mobile: "",
-      message: "",
-      resumeFile: null,
-    });
+setFormData({
+  name: "",
+  email: "",
+  mobile: "",
+  address: "",
+  state: "",
+  district: "",
+  pincode: "",
+  position: "",
+  qualification: "",
+  employmentStatus: "",
+  expectedSalary: "",
+  message: "",
+  resumeFile: null,
+});
 
-    setSelectedJob(null);
+setErrors({});
+setSelectedJob(null);
   } catch (err: any) {
     toast({
       title: "Error",
@@ -556,7 +637,153 @@ const filteredJobs = jobOpenings.filter((job) => {
                   maxLength={10}
                 />
                 {errors.mobile && <p className="text-destructive text-xs mt-1">{errors.mobile}</p>}
+                <div>
+<label className="text-sm font-medium mb-1 block">
+Current Address
+</label>
+
+<Textarea
+rows={3}
+value={formData.address}
+onChange={(e) =>
+setFormData({ ...formData, address: e.target.value })
+}
+/>
+
+{errors.address && (
+<p className="text-destructive text-xs mt-1">{errors.address}</p>
+)}
+</div>
               </div>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+<div>
+<label className="text-sm font-medium mb-1 block">State</label>
+<Input
+value={formData.state}
+onChange={(e)=>setFormData({...formData,state:e.target.value})}
+/>
+{errors.state && <p className="text-destructive text-xs">{errors.state}</p>}
+</div>
+
+<div>
+<label className="text-sm font-medium mb-1 block">District</label>
+<Input
+value={formData.district}
+onChange={(e)=>setFormData({...formData,district:e.target.value})}
+/>
+{errors.district && <p className="text-destructive text-xs">{errors.district}</p>}
+</div>
+
+<div>
+<label className="text-sm font-medium mb-1 block">Pincode</label>
+<Input
+value={formData.pincode}
+onChange={(e)=>setFormData({...formData,pincode:e.target.value})}
+/>
+{errors.pincode && <p className="text-destructive text-xs">{errors.pincode}</p>}
+</div>
+
+</div><div>
+
+<label className="text-sm font-medium mb-1 block">
+Position Applying For
+</label>
+
+<select
+value={formData.position}
+onChange={(e)=>setFormData({...formData,position:e.target.value})}
+className="w-full border rounded-md h-10 px-3"
+>
+
+<option value="">Select Position</option>
+<option value="Sales">Sales</option>
+<option value="Service">Service</option>
+<option value="Technician">Technician</option>
+<option value="Electrician">Electrician</option>
+<option value="Marketing">Marketing</option>
+<option value="Back Office">Back Office</option>
+<option value="Accounts">Accounts</option>
+<option value="Parts">Parts</option>
+
+</select>
+
+{errors.position && (
+<p className="text-destructive text-xs">{errors.position}</p>
+)}
+
+</div><div>
+
+<label className="text-sm font-medium mb-1 block">
+Highest Qualification
+</label>
+
+<Input
+value={formData.qualification}
+onChange={(e)=>setFormData({...formData,qualification:e.target.value})}
+/>
+
+{errors.qualification && (
+<p className="text-destructive text-xs">{errors.qualification}</p>
+)}
+
+</div><div>
+
+<label className="text-sm font-medium mb-2 block">
+Employment Status
+</label>
+
+<div className="flex gap-6">
+
+<label className="flex items-center gap-2">
+
+<input
+type="radio"
+value="Fresher"
+checked={formData.employmentStatus==="Fresher"}
+onChange={(e)=>setFormData({...formData,employmentStatus:e.target.value})}
+/>
+
+Fresher
+
+</label>
+
+<label className="flex items-center gap-2">
+
+<input
+type="radio"
+value="Currently Employed"
+checked={formData.employmentStatus==="Currently Employed"}
+onChange={(e)=>setFormData({...formData,employmentStatus:e.target.value})}
+/>
+
+Currently Employed
+
+</label>
+
+</div>
+
+{errors.employmentStatus && (
+<p className="text-destructive text-xs">{errors.employmentStatus}</p>
+)}
+
+</div><div>
+
+<label className="text-sm font-medium mb-1 block">
+Expected Salary
+</label>
+
+<Input
+value={formData.expectedSalary}
+onChange={(e)=>setFormData({...formData,expectedSalary:e.target.value})}
+/>
+
+{errors.expectedSalary && (
+<p className="text-destructive text-xs">{errors.expectedSalary}</p>
+)}
+
+</div>
+              
 
               <div>
                 <label className="text-sm font-medium mb-1 block">
