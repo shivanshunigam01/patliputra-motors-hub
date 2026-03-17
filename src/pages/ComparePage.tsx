@@ -163,9 +163,9 @@ const ComparePage = () => {
 
                 {/* Comparison Rows */}
                 <div className="divide-y divide-border">
-                  {comparisonRows.map((row, index) => (
+                  {comparisonRows.rows.map((row, index) => (
                     <div
-                      key={row.key}
+                      key={row.normalizedKey}
                       className={`${
                         index % 2 === 0 ? 'bg-background' : 'bg-muted/30'
                       }`}
@@ -180,10 +180,10 @@ const ComparePage = () => {
                       <div className={`grid gap-3 sm:gap-4 px-4 pb-3 sm:py-3 ${
                         selectedProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                       }`}>
-                        {selectedProducts.map((product) => (
+                        {selectedProducts.map((product, pIdx) => (
                           <div key={product.id} className="sm:text-center">
                             <p className="text-sm sm:text-base font-medium text-foreground break-words">
-                              {getValue(product, row.key, row.isStatic)}
+                              {getValue(product, pIdx, row.normalizedKey, row.isStatic)}
                             </p>
                           </div>
                         ))}
