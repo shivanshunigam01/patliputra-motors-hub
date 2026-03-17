@@ -50,40 +50,47 @@ export function Footer() {
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
               {t("footer.tagline")}
             </p>
-            <div className="flex gap-4">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-jcb hover:text-jcb-foreground transition-all duration-300"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-jcb hover:text-jcb-foreground transition-all duration-300"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-leyland hover:text-leyland-foreground transition-all duration-300"
-              >
-                <Youtube className="h-5 w-5" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-ev hover:text-ev-foreground transition-all duration-300"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-            </div>
+           <div className="flex gap-4">
+  {/* Facebook */}
+  <a
+    href="https://www.facebook.com/JCBPEPL"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-jcb hover:text-jcb-foreground transition-all duration-300"
+  >
+    <Facebook className="h-5 w-5" />
+  </a>
+
+  {/* Instagram */}
+  <a
+    href="https://www.instagram.com/patliputra_jcb"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-jcb hover:text-jcb-foreground transition-all duration-300"
+  >
+    <Instagram className="h-5 w-5" />
+  </a>
+
+  {/* Youtube (Common Channel) */}
+  <a
+    href="https://www.youtube.com/@Patliputragroup"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-leyland hover:text-leyland-foreground transition-all duration-300"
+  >
+    <Youtube className="h-5 w-5" />
+  </a>
+
+  {/* Linkedin */}
+  <a
+    href="https://www.linkedin.com/company/patliputra-equipments-private-limited-pepl/posts/?feedView=all"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-ev hover:text-ev-foreground transition-all duration-300"
+  >
+    <Linkedin className="h-5 w-5" />
+  </a>
+</div>
           </div>
 
           {/* Quick Links */}
