@@ -14,42 +14,53 @@ const ComparePage = () => {
   const navigate = useNavigate();
   const { settings } = useAdminSettings();
 
-  // Dynamically build comparison rows from all specification keys
-  const comparisonRows = useMemo(() => {
-    const allKeys = new Set<string>();
+  // Normalize a spec key for matching: lowercase, remove parenthetical units, trim
+  const normalizeKey = (key: string) =>
+    key.toLowerCase().replace(/\s*\(.*?\)\s*/g, '').replace(/[^a-z0-9]/g, '').trim();
 
-    selectedProducts.forEach((product) => {
+  // Dynamically build comparison rows from all specification keys, merging similar keys
+  const comparisonRows = useMemo(() => {
+    // Map: normalizedKey -> { label (first seen), originalKeys per product index }
+    const keyMap = new Map<string, { label: string; originals: Map<number, string> }>();
+
+    selectedProducts.forEach((product, pIdx) => {
       if (product.specifications) {
         Object.keys(product.specifications).forEach((key) => {
-          // Skip subcategory or internal keys
-          if (key.toLowerCase() !== 'subcategory' && key.toLowerCase() !== 'application') {
-            allKeys.add(key);
+          if (key.toLowerCase() === 'subcategory' || key.toLowerCase() === 'application') return;
+          const nk = normalizeKey(key);
+          if (!keyMap.has(nk)) {
+            keyMap.set(nk, { label: key, originals: new Map() });
           }
+          keyMap.get(nk)!.originals.set(pIdx, key);
         });
       }
     });
 
-    // Also add brand and category as static rows
-    const rows: { label: string; key: string; isStatic?: boolean }[] = [
-      { label: 'Brand', key: 'brand', isStatic: true },
-      { label: 'Category', key: 'category', isStatic: true },
+    const rows: { label: string; normalizedKey: string; isStatic?: boolean }[] = [
+      { label: 'Brand', normalizedKey: 'brand', isStatic: true },
+      { label: 'Category', normalizedKey: 'category', isStatic: true },
     ];
 
-    allKeys.forEach((key) => {
-      rows.push({ label: key, key });
+    keyMap.forEach((val, nk) => {
+      rows.push({ label: val.label, normalizedKey: nk });
     });
 
-    return rows;
+    return { rows, keyMap };
   }, [selectedProducts]);
 
-  const getValue = (product: typeof selectedProducts[0], key: string, isStatic?: boolean): string => {
+  const getValue = (product: typeof selectedProducts[0], pIdx: number, normalizedKey: string, isStatic?: boolean): string => {
     if (isStatic) {
-      if (key === 'brand') return product.brand || '-';
-      if (key === 'category') return product.category || '-';
+      if (normalizedKey === 'brand') return product.brand || '-';
+      if (normalizedKey === 'category') return product.category || '-';
       return '-';
     }
-    // Look up in specifications
-    return product.specifications?.[key] || '-';
+    // Find the original key this product uses for this normalized key
+    const entry = comparisonRows.keyMap.get(normalizedKey);
+    const origKey = entry?.originals.get(pIdx);
+    if (origKey && product.specifications?.[origKey]) {
+      return product.specifications[origKey];
+    }
+    return '-';
   };
 
   if (selectedProducts.length === 0) {
@@ -152,9 +163,9 @@ const ComparePage = () => {
 
                 {/* Comparison Rows */}
                 <div className="divide-y divide-border">
-                  {comparisonRows.map((row, index) => (
+                  {comparisonRows.rows.map((row, index) => (
                     <div
-                      key={row.key}
+                      key={row.normalizedKey}
                       className={`${
                         index % 2 === 0 ? 'bg-background' : 'bg-muted/30'
                       }`}
@@ -169,10 +180,10 @@ const ComparePage = () => {
                       <div className={`grid gap-3 sm:gap-4 px-4 pb-3 sm:py-3 ${
                         selectedProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-2'
                       }`}>
-                        {selectedProducts.map((product) => (
+                        {selectedProducts.map((product, pIdx) => (
                           <div key={product.id} className="sm:text-center">
                             <p className="text-sm sm:text-base font-medium text-foreground break-words">
-                              {getValue(product, row.key, row.isStatic)}
+                              {getValue(product, pIdx, row.normalizedKey, row.isStatic)}
                             </p>
                           </div>
                         ))}
