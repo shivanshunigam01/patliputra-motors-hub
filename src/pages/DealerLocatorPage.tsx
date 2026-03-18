@@ -137,11 +137,11 @@ const DealerLocatorPage = () => {
                   >
                     {/* Map */}
                     {dealer.latitude && dealer.longitude && (
-                      <iframe
-                        className="w-full h-44"
-                        src={`https://maps.google.com/maps?q=${dealer.latitude},${dealer.longitude}&z=14&output=embed`}
-                        loading="lazy"
-                      />
+                     <iframe
+  className="w-full h-44 rounded-t-2xl border-0"
+  src={`https://maps.google.com/maps?hl=en&q=${dealer.latitude},${dealer.longitude}&z=13&output=embed`}
+  loading="lazy"
+/>
                     )}
 
                     <div className="p-5">
