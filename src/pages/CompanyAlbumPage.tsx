@@ -104,17 +104,17 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { useLanguage } from "@/i18n/LanguageContext";
-import { galleryItems } from "@/data/gallery";
+
 import { Skeleton } from "@/components/ui/skeleton";
 
-type AlbumItem = (typeof galleryItems)[number];
+// type AlbumItem = (typeof galleryItems)[number];
 
-interface GroupedAlbum {
-  monthKey: string;
-  label: string;
-  labelHi: string;
-  items: AlbumItem[];
-}
+// interface GroupedAlbum {
+//   monthKey: string;
+//   label: string;
+//   labelHi: string;
+//   items: AlbumItem[];
+// }
 
 const MONTHS_EN = [
   "January",
@@ -188,10 +188,39 @@ const CompanyAlbumPage = () => {
   const { t, language } = useLanguage();
 
   const [activeTab, setActiveTab] = useState("all");
-  const [selectedItem, setSelectedItem] = useState<AlbumItem | null>(null);
+  // const [selectedItem, setSelectedItem] = useState<AlbumItem | null>(null);
   const [loaded, setLoaded] = useState<Record<string | number, boolean>>({});
   const [activeMonth, setActiveMonth] = useState("");
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // const [galleryItems, setGalleryItems] = useState<AlbumItem[]>([]);
+const [loadingData, setLoadingData] = useState(true);
+useEffect(() => {
+  const fetchTimeline = async () => {
+    try {
+      const res = await fetch("https://api.patliputragroup.com/timeline");
+      const data = await res.json();
+
+      if (data.success) {
+        const mappedData = data.data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          url: item.image,
+          type: "image",
+          category: "Events", // you can customize later
+          date: item.createdAt || `${item.year}-01-01`,
+        }));
+
+        setGalleryItems(mappedData);
+      }
+    } catch (err) {
+      console.error("Timeline API Error:", err);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  fetchTimeline();
+}, []);
 
   const tabs = [
     { id: "all", label: t("companyAlbum.all") },
@@ -199,17 +228,18 @@ const CompanyAlbumPage = () => {
     { id: "testimonials", label: t("gallery.testimonials") },
   ];
 
-  const filteredItems = useMemo(() => {
-    return galleryItems.filter((item) => {
-      if (activeTab === "all") {
-        return item.category === "Events" || item.category === "Delivery";
-      }
-      if (activeTab === "events") return item.category === "Events";
-      if (activeTab === "testimonials") return item.category === "Delivery";
-      return true;
-    });
-  }, [activeTab]);
+const filteredItems = useMemo(() => {
+  if (loadingData) return [];
 
+  return galleryItems.filter((item) => {
+    if (activeTab === "all") {
+      return item.category === "Events" || item.category === "Delivery";
+    }
+    if (activeTab === "events") return item.category === "Events";
+    if (activeTab === "testimonials") return item.category === "Delivery";
+    return true;
+  });
+}, [activeTab, galleryItems, loadingData]);
   const groups = useMemo(() => groupByMonth(filteredItems), [filteredItems]);
 
   useEffect(() => {
@@ -576,7 +606,7 @@ const CompanyAlbumPage = () => {
         )}
       </AnimatePresence>
 
-      <Footer />
+      <Footer />  
       <FloatingCTA />
     </div>
   );
