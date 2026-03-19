@@ -137,9 +137,15 @@ const DealerLocatorPage = () => {
                   >
                     {/* Map */}
                     {dealer.latitude && dealer.longitude && (
-                     <iframe
+            <iframe
   className="w-full h-44 rounded-t-2xl border-0"
-  src={`https://maps.google.com/maps?hl=en&q=${dealer.latitude},${dealer.longitude}&z=13&output=embed`}
+  src={
+    dealer.latitude && dealer.longitude
+      ? `https://maps.google.com/maps?q=${dealer.latitude},${dealer.longitude}&z=15&output=embed`
+      : `https://maps.google.com/maps?q=${encodeURIComponent(
+          dealer.address + " " + dealer.city
+        )}&z=14&output=embed`
+  }
   loading="lazy"
 />
                     )}
