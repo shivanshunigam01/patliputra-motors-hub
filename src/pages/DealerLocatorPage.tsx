@@ -136,19 +136,17 @@ const DealerLocatorPage = () => {
                     className="bg-white rounded-2xl border shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
                   >
                     {/* Map */}
-                    {dealer.latitude && dealer.longitude && (
-            <iframe
+                 <iframe
   className="w-full h-44 rounded-t-2xl border-0"
   src={
-    dealer.latitude && dealer.longitude
+    dealer.latitude !== 0 && dealer.longitude !== 0
       ? `https://maps.google.com/maps?q=${dealer.latitude},${dealer.longitude}&z=15&output=embed`
       : `https://maps.google.com/maps?q=${encodeURIComponent(
-          dealer.address + " " + dealer.city
+          dealer.address + " " + dealer.city + " " + dealer.pincode
         )}&z=14&output=embed`
   }
   loading="lazy"
 />
-                    )}
 
                     <div className="p-5">
                       {/* Name */}
@@ -210,7 +208,13 @@ const DealerLocatorPage = () => {
                         </a>
 
                         <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${dealer.latitude},${dealer.longitude}`}
+                      href={
+  dealer.latitude !== 0 && dealer.longitude !== 0
+    ? `https://www.google.com/maps/dir/?api=1&destination=${dealer.latitude},${dealer.longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        dealer.address + " " + dealer.city
+      )}`
+}
                           target="_blank"
                         >
                           <Button size="sm" variant="secondary">
