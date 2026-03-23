@@ -96,7 +96,7 @@ const CheckCibilScore = () => {
   order_id: order.id,
   amount: order.amount,
   currency: "INR",
-  name: "Patliputra Autos",
+  name: "Patliputra Group",
   description: "CIBIL Check",
   prefill: {
     name: form.name,
