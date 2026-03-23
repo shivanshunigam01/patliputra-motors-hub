@@ -20,6 +20,31 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { t } = useLanguage();
+  const { settings } = useAdminSettings();
+
+  // ✅ Dynamic WhatsApp Message Logic
+  const getWhatsAppMessage = () => {
+    const path = location.pathname;
+
+    if (path === "/jcb") {
+      return "Hi, I am looking for JCB machines from Patliputra JCB. Please connect with me for further details.";
+    }
+
+    if (path === "/ashok-leyland") {
+      return "Hi, I am looking for Ashok Leyland vehicles from Patliputra Motors. Please connect with me for further details.";
+    }
+
+    if (path === "/switch-ev") {
+      return "Hi, I am looking for Switch Mobility E-Vehicles from Patliputra JCB. Please connect with me for further details.";
+    }
+
+    if (path === "/used-vehicles") {
+      return "Hi, I am looking for Pre-Owned JCB machines from Patliputra JCB. Please connect with me for further details.";
+    }
+
+    // Default (Home + others)
+    return "Hi, I am looking for Product & Services from Patliputra Group. Please connect with me for further details.";
+  };
 
   const navLinks = [
     { name: t("nav.home"), path: "/" },
@@ -56,17 +81,16 @@ export function Navbar() {
     setIsOpen(false);
   }, [location]);
 
-   const { settings } = useAdminSettings();
-
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-primary ${
-         isScrolled ? "py-1 shadow-lg" : "py-2"
+          isScrolled ? "py-1 shadow-lg" : "py-2"
         }`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
+
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
@@ -93,13 +117,11 @@ export function Navbar() {
                   {link.name}
                 </Link>
               ))}
-              
+
               {/* More Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10`}
-                  >
+                  <button className="px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
                     More <ChevronDown className="h-4 w-4" />
                   </button>
                 </DropdownMenuTrigger>
@@ -118,25 +140,24 @@ export function Navbar() {
             {/* Desktop CTAs */}
             <div className="hidden lg:flex items-center gap-2">
               <LanguageToggle isScrolled={false} />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-primary-foreground"
-              >
+
+              <Button variant="ghost" size="icon" className="text-primary-foreground">
                 <Search className="h-5 w-5" />
               </Button>
+
               <a href={`tel:+91${settings?.primary_phone}`}>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="gap-2 hover:bg-jcb hover:text-jcb-foreground hover:border-jcb transition-all"
-                >
+                <Button variant="secondary" size="sm" className="gap-2">
                   <Phone className="h-4 w-4" />
                   {t("common.call")}
                 </Button>
               </a>
+
+              {/* ✅ WhatsApp Button */}
               <a
-                href={getWhatsAppUrl(settings?.whatsapp_number)}
+                href={getWhatsAppUrl(
+                  settings?.whatsapp_number,
+                  getWhatsAppMessage()
+                )}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -153,82 +174,52 @@ export function Navbar() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg transition-colors text-primary-foreground hover:bg-primary-foreground/10"
+              className="lg:hidden p-2 text-primary-foreground"
             >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isOpen ? <X /> : <Menu />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 lg:hidden"
-          >
-            <div className="absolute inset-0 bg-primary/95 backdrop-blur-lg overflow-y-auto">
-              <div className="flex flex-col min-h-full pt-20 px-6 pb-8">
-                {/* Language Toggle */}
-                <div className="mb-4">
-                  <LanguageToggle variant="mobile" />
-                </div>
+          <motion.div className="fixed inset-0 z-40 lg:hidden">
+            <div className="bg-primary min-h-full pt-20 px-6 pb-8">
 
-                <nav className="flex-1 flex flex-col gap-2">
-                  {[...navLinks, ...moreLinks].map((link, index) => (
-                    <motion.div
-                      key={link.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                    >
-                      <Link
-                        to={link.path}
-                        className={`block py-3 px-4 text-base font-medium rounded-xl transition-all ${
-                          location.pathname === link.path
-                            ? "bg-primary-foreground/20 text-primary-foreground"
-                            : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                        }`}
-                      >
-                        {link.name}
-                      </Link>
-                    </motion.div>
-                  ))}
-                </nav>
+              <nav className="flex flex-col gap-2">
+                {[...navLinks, ...moreLinks].map((link) => (
+                  <Link key={link.path} to={link.path} className="py-3">
+                    {link.name}
+                  </Link>
+                ))}
+              </nav>
 
-                <div className="flex flex-col gap-3 mt-auto pt-4">
-                  <a href={`tel:+91${settings?.primary_phone}`} className="w-full">
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="w-full gap-2 hover:bg-jcb hover:text-jcb-foreground transition-all"
-                    >
-                      <Phone className="h-5 w-5" />
-                      {t("common.callNow")}
-                    </Button>
-                  </a>
-                  <a
-                    href={getWhatsAppUrl(settings?.whatsapp_number)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full"
-                  >
-                    <Button
-                      size="lg"
-                      className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground"
-                    >
-                      <MessageCircle className="h-5 w-5" />
-                      {t("common.whatsapp")}
-                    </Button>
-                  </a>
-                </div>
+              <div className="mt-6 flex flex-col gap-3">
+
+                <a href={`tel:+91${settings?.primary_phone}`}>
+                  <Button className="w-full gap-2">
+                    <Phone className="h-5 w-5" />
+                    {t("common.callNow")}
+                  </Button>
+                </a>
+
+                {/* ✅ Mobile WhatsApp */}
+                <a
+                  href={getWhatsAppUrl(
+                    settings?.whatsapp_number,
+                    getWhatsAppMessage()
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button className="w-full gap-2 bg-success">
+                    <MessageCircle className="h-5 w-5" />
+                    {t("common.whatsapp")}
+                  </Button>
+                </a>
+
               </div>
             </div>
           </motion.div>
