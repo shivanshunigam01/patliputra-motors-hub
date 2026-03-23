@@ -24,7 +24,7 @@ interface ProductCardProps {
     brochureUrl?: string | null;
     specs: Record<string, string>;
   };
-  brand: 'JCB' | 'Ashok Leyland' | 'Switch Mobility' | 'Certified Refurbished';
+  brand: 'JCB' | 'Ashok Leyland' | 'Switch Mobility' | 'Pre-Owned Machines';
   brandColor: string;
   brandTextColor: string;
   index: number;

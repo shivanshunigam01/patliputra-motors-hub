@@ -96,7 +96,7 @@ const UsedVehiclesPage = () => {
       removeProduct(vehicle.id);
     } else {
       const result = addProduct({
-        id: vehicle.id, name: vehicle.name, brand: 'Certified Refurbished',
+        id: vehicle.id, name: vehicle.name, brand: 'Pre-Owned Machines',
         price: vehicle.price, image: vehicle.image, category: 'Used',
         specifications: { Year: vehicle.year, Kilometers: vehicle.km },
         specs: {},

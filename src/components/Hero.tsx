@@ -158,7 +158,7 @@ export function Hero() {
             </Link>
           </motion.div>
 
-          {/* Certified Refurbished Link */}
+          {/* Pre-Owned Machines Link */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -168,7 +168,7 @@ export function Hero() {
               to="/used-vehicles"
               className="inline-flex items-center gap-2 text-jcb hover:text-jcb/80 font-medium transition-colors group"
             >
-              <span>👉 {language === 'hi' ? 'सर्टिफाइड रिफर्बिश्ड डील्स देखें' : 'View Certified Refurbished Deals'}</span>
+              <span>👉 {language === 'hi' ? 'सर्टिफाइड रिफर्बिश्ड डील्स देखें' : 'View Pre-Owned Machines Deals'}</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </motion.div>

@@ -41,7 +41,7 @@ const testimonials = [
     roleEn: 'Farmer & Contractor',
     roleHi: 'किसान और ठेकेदार',
     rating: 5,
-    textEn: 'Bought a certified refurbished tipper truck from Patliputra. The 150-point inspection gave me confidence. Price was below market!',
+    textEn: 'Bought a Pre-Owned Machines tipper truck from Patliputra. The 150-point inspection gave me confidence. Price was below market!',
     textHi: 'पाटलिपुत्र से सर्टिफाइड रिफर्बिश्ड टिपर ट्रक खरीदा। 150-पॉइंट निरीक्षण से विश्वास मिला। कीमत बाजार से कम थी!',
     avatar: 'SC',
   },

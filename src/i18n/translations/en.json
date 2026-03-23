@@ -24,8 +24,8 @@
     "jcb": "JCB",
     "ashokLeyland": "Ashok Leyland",
     "switchEv": "Switch EV",
-    "certifiedRefurbished": "Certified Refurbished",
-    "usedVehicles": "Certified Refurbished",
+    "certifiedRefurbished": "Pre-Owned Machines",
+    "usedVehicles": "Pre-Owned Machines",
     "finance": "Finance",
     "cibilScore": "CIBIL Score",
     "gallery": "Gallery",
@@ -42,7 +42,7 @@
   "hero": {
     "badge": "Bihar's Trusted Partner Since 1995",
     "title": "Your Dreams, Our Machines",
-    "subtitle": "JCB • Ashok Leyland • Switch EV • Certified Refurbished Vehicles",
+    "subtitle": "JCB • Ashok Leyland • Switch EV • Pre-Owned Machines Vehicles",
     "cta1": "Explore Vehicles",
     "cta2": "Get Quote"
   },
@@ -62,7 +62,7 @@
       "description": "Electric Buses for Smart Cities"
     },
     "used": {
-      "title": "Certified Refurbished",
+      "title": "Pre-Owned Machines",
       "description": "Quality Pre-Owned Commercial Vehicles"
     }
   },
@@ -285,7 +285,7 @@
   },
   "footer": {
     "brand": "Patliputra Autos",
-    "tagline": "Bihar's trusted partner for JCB Machines, Ashok Leyland Trucks, Switch Electric Vehicles, and Certified Refurbished Commercial Vehicles.",
+    "tagline": "Bihar's trusted partner for JCB Machines, Ashok Leyland Trucks, Switch Electric Vehicles, and Pre-Owned Machines Commercial Vehicles.",
     "quickLinks": "Quick Links",
     "contactUs": "Contact Us",
     "workingHours": "Working Hours",
