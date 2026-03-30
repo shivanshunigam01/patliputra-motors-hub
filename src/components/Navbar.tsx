@@ -211,7 +211,11 @@ export function Navbar() {
             <div className="bg-primary min-h-full pt-20 px-6 pb-8">
               <nav className="flex flex-col gap-2">
                 {[...navLinks, ...moreLinks].map((link) => (
-                  <Link key={link.path} to={link.path} className="py-3">
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="py-3 text-primary-foreground text-base font-medium border-b border-primary-foreground/10 last:border-0"
+                  >
                     {link.name}
                   </Link>
                 ))}
