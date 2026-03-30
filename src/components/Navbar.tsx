@@ -216,7 +216,7 @@ export function Navbar() {
                   </Link>
                 ))}
               </nav>
-
+              {/* code */}
               <div className="mt-6 flex flex-col gap-3">
                 <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button className="w-full gap-2">
