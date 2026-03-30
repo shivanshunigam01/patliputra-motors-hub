@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MessageCircle, Search, ChevronDown } from "lucide-react";
+import {
+  Menu,
+  X,
+  Phone,
+  MessageCircle,
+  Search,
+  ChevronDown,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -21,6 +28,21 @@ export function Navbar() {
   const location = useLocation();
   const { t } = useLanguage();
   const { settings } = useAdminSettings();
+
+  // ✅ Dynamic WhatsApp Number Logic
+  const getWhatsAppNumber = () => {
+    const path = location.pathname;
+
+    if (path === "/ashok-leyland" || path === "/switch-ev") {
+      return "9264196630";
+    }
+
+    if (path === "/jcb" || path === "/used-vehicles") {
+      return "9031053514";
+    }
+
+    return settings?.whatsapp_number;
+  };
 
   // ✅ Dynamic WhatsApp Message Logic
   const getWhatsAppMessage = () => {
@@ -90,7 +112,6 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
-
             {/* Logo */}
             <Link to="/" className="flex items-center">
               <img
@@ -141,7 +162,11 @@ export function Navbar() {
             <div className="hidden lg:flex items-center gap-2">
               <LanguageToggle isScrolled={false} />
 
-              <Button variant="ghost" size="icon" className="text-primary-foreground">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground"
+              >
                 <Search className="h-5 w-5" />
               </Button>
 
@@ -154,10 +179,7 @@ export function Navbar() {
 
               {/* ✅ WhatsApp Button */}
               <a
-                href={getWhatsAppUrl(
-                  settings?.whatsapp_number,
-                  getWhatsAppMessage()
-                )}
+                href={getWhatsAppUrl(getWhatsAppNumber(), getWhatsAppMessage())}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -187,7 +209,6 @@ export function Navbar() {
         {isOpen && (
           <motion.div className="fixed inset-0 z-40 lg:hidden">
             <div className="bg-primary min-h-full pt-20 px-6 pb-8">
-
               <nav className="flex flex-col gap-2">
                 {[...navLinks, ...moreLinks].map((link) => (
                   <Link key={link.path} to={link.path} className="py-3">
@@ -197,7 +218,6 @@ export function Navbar() {
               </nav>
 
               <div className="mt-6 flex flex-col gap-3">
-
                 <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button className="w-full gap-2">
                     <Phone className="h-5 w-5" />
@@ -208,8 +228,8 @@ export function Navbar() {
                 {/* ✅ Mobile WhatsApp */}
                 <a
                   href={getWhatsAppUrl(
-                    settings?.whatsapp_number,
-                    getWhatsAppMessage()
+                    getWhatsAppNumber(),
+                    getWhatsAppMessage(),
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -219,7 +239,6 @@ export function Navbar() {
                     {t("common.whatsapp")}
                   </Button>
                 </a>
-
               </div>
             </div>
           </motion.div>
