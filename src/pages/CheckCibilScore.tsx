@@ -19,6 +19,13 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -43,6 +50,8 @@ const CheckCibilScore = () => {
   const [score, setScore] = useState<number | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  /** Full-screen message while auto PDF is fetched so the user knows to wait. */
+  const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
   const resolvePendingCibil = async (
     razorpayOrderId: string,
     razorpayPaymentId: string
@@ -80,10 +89,9 @@ const CheckCibilScore = () => {
 
     setPdfLoading(true);
     const toastId = fromAuto ? "cibil-pdf-auto" : "cibil-pdf";
-    toast.loading(
-      fromAuto ? "Downloading your CIBIL PDF…" : "Generating CIBIL PDF…",
-      { id: toastId }
-    );
+    if (!fromAuto) {
+      toast.loading("Generating CIBIL PDF…", { id: toastId });
+    }
 
     try {
       const res = await fetch(
@@ -116,19 +124,18 @@ const CheckCibilScore = () => {
       }
 
       if (!res.ok || !data.ok || !data.credit_report_link) {
-        toast.error(
-          fromAuto
-            ? "Automatic PDF download failed. Use the button below to try again."
-            : data?.error || `Failed to generate CIBIL PDF (${res.status})`,
-          { id: toastId }
-        );
+        const errMsg = fromAuto
+          ? "Automatic PDF download failed. Use the button below to try again."
+          : data?.error || `Failed to generate CIBIL PDF (${res.status})`;
+        toast.error(errMsg, { id: toastId });
         return;
       }
 
-      toast.success(
-        fromAuto ? "CIBIL PDF opened in a new tab" : "CIBIL PDF ready",
-        { id: toastId }
-      );
+      if (!fromAuto) {
+        toast.success("CIBIL PDF ready", { id: toastId });
+      } else {
+        toast.success("CIBIL PDF ready", { id: toastId });
+      }
 
       const link = document.createElement("a");
       link.href = data.credit_report_link;
@@ -140,11 +147,14 @@ const CheckCibilScore = () => {
       setPdfDownloaded(true);
     } catch {
       toast.error(
-        fromAuto ? "Automatic PDF download failed. Use the button below." : "PDF download failed",
+        fromAuto ? "Automatic PDF download failed. Use the button below to try again." : "PDF download failed",
         { id: toastId }
       );
     } finally {
       setPdfLoading(false);
+      if (fromAuto) {
+        setAutoPdfPreparing(false);
+      }
     }
   };
 
@@ -237,6 +247,7 @@ const CheckCibilScore = () => {
           );
 
           if (resolved?.ok) {
+            setAutoPdfPreparing(true);
             setScore(resolved.score);
             setSubmitted(true);
             toast.success("CIBIL report fetched successfully.");
@@ -255,6 +266,7 @@ const CheckCibilScore = () => {
           return;
         }
 
+        setAutoPdfPreparing(true);
         setScore(data.score);
         setSubmitted(true);
         void downloadCibilPdf(true);
@@ -322,6 +334,32 @@ const CheckCibilScore = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog
+        open={autoPdfPreparing}
+        onOpenChange={() => {
+          /* Dismissal is blocked via Content handlers; `open` is only cleared after PDF finishes. */
+        }}
+      >
+        <DialogContent
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md border-jcb/30 bg-card/95 backdrop-blur-sm [&>button]:hidden"
+          aria-describedby="cibil-pdf-prepare-desc"
+        >
+          <div className="flex flex-col items-center gap-4 py-2 text-center">
+            <Loader2 className="h-12 w-12 shrink-0 animate-spin text-jcb" aria-hidden />
+            <DialogHeader className="space-y-2 text-center sm:text-center">
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                {t("cibil.preparingPdfTitle")}
+              </DialogTitle>
+              <DialogDescription id="cibil-pdf-prepare-desc" className="text-sm text-muted-foreground">
+                {t("cibil.preparingPdfDescription")}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Navbar />
 
       <main className="pt-20">
@@ -553,6 +591,7 @@ const CheckCibilScore = () => {
                     onClick={() => {
                       setSubmitted(false);
                       setPdfDownloaded(false);
+                      setAutoPdfPreparing(false);
                     }}
                   >
                     {t("cibil.checkAnother")}

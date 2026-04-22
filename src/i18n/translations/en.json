@@ -211,6 +211,8 @@
     "eligibleMessage": "You are eligible for commercial vehicle loan. Finance approval will be fast-tracked.",
     "downloadReport": "Download CIBIL Report (PDF)",
     "checkAnother": "Check Another Customer",
+    "preparingPdfTitle": "Preparing your CIBIL report",
+    "preparingPdfDescription": "Please wait while we open your PDF. It will open in a new tab. You can stay on this page—this may take a few seconds.",
     "whyTitle": "Why Check CIBIL with Patliputra?",
     "reason1": "RBI & NBFC finance ready eligibility",
     "reason2": "No impact on your actual CIBIL score",
