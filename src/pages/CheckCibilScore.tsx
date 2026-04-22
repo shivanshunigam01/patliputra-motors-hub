@@ -42,6 +42,7 @@ const CheckCibilScore = () => {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
   const resolvePendingCibil = async (
     razorpayOrderId: string,
     razorpayPaymentId: string
@@ -72,6 +73,79 @@ const CheckCibilScore = () => {
     }
 
     return null;
+  };
+
+  const downloadCibilPdf = async (fromAuto = false) => {
+    if (pdfDownloaded) return;
+
+    setPdfLoading(true);
+    const toastId = fromAuto ? "cibil-pdf-auto" : "cibil-pdf";
+    toast.loading(
+      fromAuto ? "Downloading your CIBIL PDF…" : "Generating CIBIL PDF…",
+      { id: toastId }
+    );
+
+    try {
+      const res = await fetch(
+        "https://api.patliputragroup.com/payments/experian-pdf",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: form.name,
+            mobile: form.mobile,
+            pan: form.pan,
+            consent: "Y",
+          }),
+        }
+      );
+
+      let data: { ok?: boolean; credit_report_link?: string; error?: string };
+      try {
+        data = await res.json();
+      } catch {
+        toast.error(
+          fromAuto
+            ? "Automatic PDF download failed. Use the button below to try again."
+            : "Invalid response from server",
+          { id: toastId }
+        );
+        return;
+      }
+
+      if (!res.ok || !data.ok || !data.credit_report_link) {
+        toast.error(
+          fromAuto
+            ? "Automatic PDF download failed. Use the button below to try again."
+            : data?.error || `Failed to generate CIBIL PDF (${res.status})`,
+          { id: toastId }
+        );
+        return;
+      }
+
+      toast.success(
+        fromAuto ? "CIBIL PDF opened in a new tab" : "CIBIL PDF ready",
+        { id: toastId }
+      );
+
+      const link = document.createElement("a");
+      link.href = data.credit_report_link;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setPdfDownloaded(true);
+    } catch {
+      toast.error(
+        fromAuto ? "Automatic PDF download failed. Use the button below." : "PDF download failed",
+        { id: toastId }
+      );
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
 
@@ -166,6 +240,7 @@ const CheckCibilScore = () => {
             setScore(resolved.score);
             setSubmitted(true);
             toast.success("CIBIL report fetched successfully.");
+            void downloadCibilPdf(true);
             return;
           }
 
@@ -182,6 +257,7 @@ const CheckCibilScore = () => {
 
         setScore(data.score);
         setSubmitted(true);
+        void downloadCibilPdf(true);
       })
       .catch((err) => {
         console.error(err);
@@ -201,49 +277,10 @@ const CheckCibilScore = () => {
 
 
 
- const handleDownloadPdf = async () => {
-  setPdfLoading(true);
-  toast.loading("Generating CIBIL PDF…", { id: "cibil-pdf" });
-
-  try {
-    const res = await fetch(
-      "https://api.patliputragroup.com/payments/experian-pdf",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name,
-          mobile: form.mobile,
-          pan: form.pan,
-          consent: "Y",
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (!data.ok || !data.credit_report_link) {
-      toast.error("Failed to generate CIBIL PDF", {
-        id: "cibil-pdf",
-      });
-      return;
-    }
-
-    toast.success("CIBIL PDF ready", {
-      id: "cibil-pdf",
-    });
-
-    window.open(data.credit_report_link, "_blank");
-  } catch (err) {
-    toast.error("PDF download failed", {
-      id: "cibil-pdf",
-    });
-  } finally {
-    setPdfLoading(false);
-  }
-};
+  const handleDownloadPdf = () => {
+    if (pdfDownloaded) return;
+    void downloadCibilPdf(false);
+  };
 
 
 
@@ -484,31 +521,39 @@ const CheckCibilScore = () => {
                   <p className="text-muted-foreground mb-6">
                     {t("cibil.eligibleMessage")}
                   </p>
-                 <Button
-  size="lg"
-  className="w-full gap-2 bg-primary text-primary-foreground mb-4"
-  onClick={handleDownloadPdf}
-  disabled={pdfLoading}
->
-  {pdfLoading ? (
-    <span className="flex items-center justify-center gap-2">
-      <Loader2 className="h-5 w-5 animate-spin" />
-      Generating PDF…
-    </span>
-  ) : (
-    <>
-      <FileDown className="h-5 w-5" />
-      Download CIBIL Report (PDF)
-    </>
-  )}
-</Button>
+                  <Button
+                    size="lg"
+                    className="w-full gap-2 bg-primary text-primary-foreground mb-4"
+                    onClick={handleDownloadPdf}
+                    disabled={pdfLoading || pdfDownloaded}
+                  >
+                    {pdfLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Generating PDF…
+                      </span>
+                    ) : pdfDownloaded ? (
+                      <>
+                        <CheckCircle className="h-5 w-5" />
+                        Report downloaded
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-5 w-5" />
+                        Download CIBIL Report (PDF)
+                      </>
+                    )}
+                  </Button>
 
 
                   <Button
                     size="lg"
                     variant="outline"
                     className="w-full"
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setSubmitted(false);
+                      setPdfDownloaded(false);
+                    }}
                   >
                     {t("cibil.checkAnother")}
                   </Button>
