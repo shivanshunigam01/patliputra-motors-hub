@@ -57,6 +57,73 @@ const CheckCibilScore = () => {
 
   const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
 
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  /** CIBIL precheck: transient 502/503/504 and browser network flakiness. */
+  async function postCibilPrecheck(
+    body: Record<string, string>
+  ): Promise<
+    { ok: true; data: { ok: true; precheck_id: string;[k: string]: unknown } } | { ok: false; data: { error?: string }; status: number }
+  > {
+    const max = 3;
+    const baseDelay = 800;
+    let lastStatus = 0;
+    for (let attempt = 0; attempt < max; attempt += 1) {
+      try {
+        const preRes = await fetch(`${PAYMENTS_BASE}/cibil-precheck`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const preData = (await preRes.json().catch(() => ({}))) as {
+          ok?: boolean;
+          precheck_id?: string;
+          error?: string;
+        };
+        lastStatus = preRes.status;
+        if (preRes.ok && preData?.ok && preData?.precheck_id) {
+          return { ok: true, data: preData as { ok: true; precheck_id: string } };
+        }
+        const retriable =
+          [502, 503, 504].includes(preRes.status) ||
+          (preData as { retry_suggested?: boolean })?.retry_suggested;
+        if (retriable && attempt < max - 1) {
+          if (attempt === 0) {
+            toast.info("Connection hiccup — retrying…", { id: "cibil-retry" });
+          }
+          await sleep(baseDelay * (attempt + 1));
+          continue;
+        }
+        return { ok: false, data: preData, status: preRes.status };
+      } catch (e) {
+        const err = e as { message?: string; name?: string };
+        if (attempt < max - 1) {
+          if (attempt === 0) {
+            toast.info("Connection interrupted — retrying…", { id: "cibil-retry" });
+          }
+          await sleep(baseDelay * (attempt + 1));
+          continue;
+        }
+        const raw = err?.message || "Network error";
+        const human =
+          /ECONNRESET|Failed to fetch|Load failed|network/i.test(raw) ||
+          err?.name === "TypeError"
+            ? "Connection was interrupted. Check your network and try again."
+            : raw;
+        return {
+          ok: false,
+          data: { error: human },
+          status: lastStatus || 0,
+        };
+      }
+    }
+    return {
+      ok: false,
+      data: { error: "Request failed after several tries. Please try again." },
+      status: lastStatus,
+    };
+  }
+
   const openPdfInNewTab = (href: string) => {
     const link = document.createElement("a");
     link.href = href;
@@ -168,32 +235,28 @@ const CheckCibilScore = () => {
     let precheckId: string;
 
     try {
-      const preRes = await fetch(`${PAYMENTS_BASE}/cibil-precheck`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          mobile: form.mobile,
-          pan: form.pan,
-          consent: "Y",
-        }),
+      const pre = await postCibilPrecheck({
+        name: form.name,
+        mobile: form.mobile,
+        pan: form.pan,
+        consent: "Y",
       });
-
-      const preData = await preRes.json().catch(() => ({}));
-      if (!preRes.ok || !preData?.ok) {
+      if (!pre.ok) {
         toast.error(
-          preData?.error ||
+          pre.data?.error ||
             "We could not verify your details. Check your name, mobile, and PAN. No payment was made."
         );
         return;
       }
 
+      const preData = pre.data;
       if (!preData.precheck_id) {
         toast.error("Verification incomplete. Please try again.");
         return;
       }
 
       precheckId = preData.precheck_id;
+      toast.dismiss("cibil-retry");
       try {
         sessionStorage.setItem("cibil_precheck_id", precheckId);
       } catch {
