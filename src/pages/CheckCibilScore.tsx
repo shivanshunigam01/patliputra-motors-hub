@@ -42,6 +42,38 @@ const CheckCibilScore = () => {
   const [loading, setLoading] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const resolvePendingCibil = async (
+    razorpayOrderId: string,
+    razorpayPaymentId: string
+  ) => {
+    // Retry a few times so paid users still get output when provider recovers.
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
+      const retryRes = await fetch(
+        "https://api.patliputragroup.com/payments/razorpay/retry-cibil",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_order_id: razorpayOrderId,
+            razorpay_payment_id: razorpayPaymentId,
+            name: form.name,
+            mobile: form.mobile,
+            pan: form.pan,
+          }),
+        }
+      );
+
+      const retryData = await retryRes.json();
+      if (retryData?.ok && retryData?.cibil_status === "success") {
+        return retryData;
+      }
+    }
+
+    return null;
+  };
+
 
   const dummyScore = 742
 
@@ -121,13 +153,39 @@ const CheckCibilScore = () => {
       }),
     })
       .then((res) => res.json())
-      .then((data) => {
+      .then(async (data) => {
         console.log("VERIFY RESPONSE:", data);
+        if (data?.ok && data?.cibil_status === "pending") {
+          toast.info("Payment successful. Fetching CIBIL data, please wait...");
+          const resolved = await resolvePendingCibil(
+            resp.razorpay_order_id,
+            resp.razorpay_payment_id
+          );
+
+          if (resolved?.ok) {
+            setScore(resolved.score);
+            setSubmitted(true);
+            toast.success("CIBIL report fetched successfully.");
+            return;
+          }
+
+          toast.warning(
+            "Payment is successful, but CIBIL provider is busy. Please retry after a few minutes."
+          );
+          return;
+        }
+
+        if (!data?.ok) {
+          toast.error(data?.error || "Failed to fetch CIBIL report");
+          return;
+        }
+
         setScore(data.score);
         setSubmitted(true);
       })
       .catch((err) => {
         console.error(err);
+        toast.error("Payment was successful, but CIBIL fetch failed. Please retry shortly.");
       });
   },
 });
