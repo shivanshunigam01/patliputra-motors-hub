@@ -52,36 +52,19 @@ const CheckCibilScore = () => {
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
   /** Full-screen message while auto PDF is fetched so the user knows to wait. */
   const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
-  const resolvePendingCibil = async (
-    razorpayOrderId: string,
-    razorpayPaymentId: string
-  ) => {
-    // Retry a few times so paid users still get output when provider recovers.
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+  /** Surepass CIBIL + PDF pre-check (no charge) before Razorpay. */
+  const [precheckRunning, setPrecheckRunning] = useState(false);
 
-      const retryRes = await fetch(
-        "https://api.patliputragroup.com/payments/razorpay/retry-cibil",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            razorpay_order_id: razorpayOrderId,
-            razorpay_payment_id: razorpayPaymentId,
-            name: form.name,
-            mobile: form.mobile,
-            pan: form.pan,
-          }),
-        }
-      );
+  const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
 
-      const retryData = await retryRes.json();
-      if (retryData?.ok && retryData?.cibil_status === "success") {
-        return retryData;
-      }
-    }
-
-    return null;
+  const openPdfInNewTab = (href: string) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const downloadCibilPdf = async (fromAuto = false) => {
@@ -137,13 +120,7 @@ const CheckCibilScore = () => {
         toast.success("CIBIL PDF ready", { id: toastId });
       }
 
-      const link = document.createElement("a");
-      link.href = data.credit_report_link;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      openPdfInNewTab(data.credit_report_link);
       setPdfDownloaded(true);
     } catch {
       toast.error(
@@ -158,8 +135,6 @@ const CheckCibilScore = () => {
     }
   };
 
-
-  const dummyScore = 742
 
   const scoreLabel =
     score && score >= 750
@@ -188,102 +163,147 @@ const CheckCibilScore = () => {
     }
 
     setLoading(true);
+    setPrecheckRunning(true);
+
+    let precheckId: string;
 
     try {
-      const ok = await loadRazorpay();
-      if (!ok) {
+      const preRes = await fetch(`${PAYMENTS_BASE}/cibil-precheck`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          mobile: form.mobile,
+          pan: form.pan,
+          consent: "Y",
+        }),
+      });
+
+      const preData = await preRes.json().catch(() => ({}));
+      if (!preRes.ok || !preData?.ok) {
+        toast.error(
+          preData?.error ||
+            "We could not verify your details. Check your name, mobile, and PAN. No payment was made."
+        );
+        return;
+      }
+
+      if (!preData.precheck_id) {
+        toast.error("Verification incomplete. Please try again.");
+        return;
+      }
+
+      precheckId = preData.precheck_id;
+      try {
+        sessionStorage.setItem("cibil_precheck_id", precheckId);
+      } catch {
+        /* ignore */
+      }
+
+      setPrecheckRunning(false);
+
+      const sdkOk = await loadRazorpay();
+      if (!sdkOk) {
         toast.error("Razorpay SDK failed to load");
         return;
       }
 
-      const orderRes = await fetch(
-        "https://api.patliputragroup.com/payments/razorpay/order",
-        { method: "POST" }
-      );
+      const orderRes = await fetch(`${PAYMENTS_BASE}/razorpay/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ precheck_id: precheckId }),
+      });
 
       const order = await orderRes.json();
-         console.log("ORDER RESPONSE:", order);
-      if (!order.id) {
-        throw new Error("Order creation failed");
+      if (!orderRes.ok || !order.id) {
+        toast.error(
+          (order as { error?: string })?.error ||
+            "Could not start payment. Try again."
+        );
+        return;
       }
 
-     const rzp = new (window as any).Razorpay({
-  key: order.key_id,
-  order_id: order.id,
-  amount: order.amount,
-  currency: "INR",
-  name: "Patliputra Group",
-  description: "CIBIL Check",
-  prefill: {
-    name: form.name,
-    contact: form.mobile,
-  },
-  theme: {
-    color: "#facc15",
-  },
-  handler: function (resp: any) {
-    console.log("RAZORPAY SUCCESS:", resp);
+      const rzp = new (window as any).Razorpay({
+        key: order.key_id,
+        order_id: order.id,
+        amount: order.amount,
+        currency: "INR",
+        name: "Patliputra Group",
+        description: "CIBIL Check",
+        prefill: {
+          name: form.name,
+          contact: form.mobile,
+        },
+        theme: {
+          color: "#facc15",
+        },
+        handler: function (resp: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) {
+          setAutoPdfPreparing(true);
 
-    fetch("https://api.patliputragroup.com/payments/razorpay/verify-cibil", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        razorpay_order_id: resp.razorpay_order_id,
-        razorpay_payment_id: resp.razorpay_payment_id,
-        razorpay_signature: resp.razorpay_signature,
-        name: form.name,
-        mobile: form.mobile,
-        pan: form.pan,
-      }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        console.log("VERIFY RESPONSE:", data);
-        if (data?.ok && data?.cibil_status === "pending") {
-          toast.info("Payment successful. Fetching CIBIL data, please wait...");
-          const resolved = await resolvePendingCibil(
-            resp.razorpay_order_id,
-            resp.razorpay_payment_id
-          );
+          fetch(`${PAYMENTS_BASE}/razorpay/verify-cibil`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: resp.razorpay_order_id,
+              razorpay_payment_id: resp.razorpay_payment_id,
+              razorpay_signature: resp.razorpay_signature,
+              precheck_id: precheckId,
+              name: form.name,
+              mobile: form.mobile,
+              pan: form.pan,
+            }),
+          })
+            .then((r) => r.json())
+            .then(
+              (data: {
+                ok?: boolean;
+                error?: string;
+                score?: number;
+                credit_report_link?: string;
+              }) => {
+                if (!data?.ok) {
+                  toast.error(
+                    data?.error || "Could not complete your CIBIL report. Contact support with your payment id."
+                  );
+                  setAutoPdfPreparing(false);
+                  return;
+                }
 
-          if (resolved?.ok) {
-            setAutoPdfPreparing(true);
-            setScore(resolved.score);
-            setSubmitted(true);
-            toast.success("CIBIL report fetched successfully.");
-            void downloadCibilPdf(true);
-            return;
-          }
+                setScore(
+                  typeof data.score === "number" ? data.score : null
+                );
+                setSubmitted(true);
 
-          toast.warning(
-            "Payment is successful, but CIBIL provider is busy. Please retry after a few minutes."
-          );
-          return;
-        }
-
-        if (!data?.ok) {
-          toast.error(data?.error || "Failed to fetch CIBIL report");
-          return;
-        }
-
-        setAutoPdfPreparing(true);
-        setScore(data.score);
-        setSubmitted(true);
-        void downloadCibilPdf(true);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Payment was successful, but CIBIL fetch failed. Please retry shortly.");
+                if (data.credit_report_link) {
+                  openPdfInNewTab(data.credit_report_link);
+                  setPdfDownloaded(true);
+                  toast.success("CIBIL report opened in a new tab.");
+                } else {
+                  void downloadCibilPdf(true);
+                }
+                setAutoPdfPreparing(false);
+              }
+            )
+            .catch((err) => {
+              console.error(err);
+              toast.error(
+                "Payment may have succeeded but we could not finish the report. Please contact support."
+              );
+              setAutoPdfPreparing(false);
+            });
+        },
       });
-  },
-});
-
 
       rzp.open();
-    } catch (err) {
+    } catch {
       toast.error("CIBIL check failed");
     } finally {
       setLoading(false);
+      setPrecheckRunning(false);
     }
   };
 
@@ -334,6 +354,33 @@ const CheckCibilScore = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={precheckRunning} onOpenChange={() => {}}>
+        <DialogContent
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md border-jcb/30 bg-card/95 backdrop-blur-sm [&>button]:hidden"
+          aria-describedby="cibil-precheck-desc"
+        >
+          <div className="flex flex-col items-center gap-4 py-2 text-center">
+            <Loader2
+              className="h-12 w-12 shrink-0 animate-spin text-jcb"
+              aria-hidden
+            />
+            <DialogHeader className="space-y-2 text-center sm:text-center">
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                {t("cibil.precheckTitle")}
+              </DialogTitle>
+              <DialogDescription
+                id="cibil-precheck-desc"
+                className="text-sm text-muted-foreground"
+              >
+                {t("cibil.precheckDescription")}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog
         open={autoPdfPreparing}
         onOpenChange={() => {
@@ -516,12 +563,14 @@ const CheckCibilScore = () => {
                       size="lg"
                       className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover font-semibold mt-4"
                       onClick={handleCheckCibil}
-                      disabled={loading}
+                      disabled={loading || precheckRunning}
                     >
-                      {loading ? (
+                      {loading || precheckRunning ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Processing…
+                          {precheckRunning
+                            ? t("cibil.verifyingDetails")
+                            : "Processing…"}
                         </span>
                       ) : (
                         t("cibil.checkScore")
@@ -592,6 +641,11 @@ const CheckCibilScore = () => {
                       setSubmitted(false);
                       setPdfDownloaded(false);
                       setAutoPdfPreparing(false);
+                      try {
+                        sessionStorage.removeItem("cibil_precheck_id");
+                      } catch {
+                        /* ignore */
+                      }
                     }}
                   >
                     {t("cibil.checkAnother")}
