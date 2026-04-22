@@ -44,6 +44,7 @@ const CheckCibilScore = () => {
     name: "",
     mobile: "",
     pan: "",
+    aadhaar: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -229,6 +230,16 @@ const CheckCibilScore = () => {
       return;
     }
 
+    const aadhaar12 = form.aadhaar.replace(/\D/g, "").slice(0, 12);
+    if (aadhaar12.length !== 12) {
+      toast.warning("Please enter a valid 12-digit Aadhaar number");
+      return;
+    }
+    if (!aadhaarFile) {
+      toast.warning("Please upload your Aadhaar card (PDF, PNG, or JPG)");
+      return;
+    }
+
     setLoading(true);
     setPrecheckRunning(true);
 
@@ -239,6 +250,7 @@ const CheckCibilScore = () => {
         name: form.name,
         mobile: form.mobile,
         pan: form.pan,
+        aadhaar: aadhaar12,
         consent: "Y",
       });
       if (!pre.ok) {
@@ -270,6 +282,12 @@ const CheckCibilScore = () => {
         toast.error("Razorpay SDK failed to load");
         return;
       }
+
+      const nameSnap = form.name;
+      const mobileSnap = form.mobile;
+      const panSnap = form.pan;
+      const aadhaarSnap = aadhaar12;
+      const aadhaarFileSnap = aadhaarFile;
 
       const orderRes = await fetch(`${PAYMENTS_BASE}/razorpay/order`, {
         method: "POST",
@@ -307,18 +325,26 @@ const CheckCibilScore = () => {
         }) {
           setAutoPdfPreparing(true);
 
+          if (!aadhaarFileSnap) {
+            toast.error("Aadhaar document is required. Please start again and upload your Aadhaar file.");
+            setAutoPdfPreparing(false);
+            return;
+          }
+
+          const fd = new FormData();
+          fd.append("razorpay_order_id", resp.razorpay_order_id);
+          fd.append("razorpay_payment_id", resp.razorpay_payment_id);
+          fd.append("razorpay_signature", resp.razorpay_signature);
+          fd.append("precheck_id", precheckId);
+          fd.append("name", nameSnap);
+          fd.append("mobile", mobileSnap);
+          fd.append("pan", panSnap);
+          fd.append("aadhaar", aadhaarSnap);
+          fd.append("aadhaar_document", aadhaarFileSnap);
+
           fetch(`${PAYMENTS_BASE}/razorpay/verify-cibil`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_order_id: resp.razorpay_order_id,
-              razorpay_payment_id: resp.razorpay_payment_id,
-              razorpay_signature: resp.razorpay_signature,
-              precheck_id: precheckId,
-              name: form.name,
-              mobile: form.mobile,
-              pan: form.pan,
-            }),
+            body: fd,
           })
             .then((r) => r.json())
             .then(
@@ -538,12 +564,22 @@ const CheckCibilScore = () => {
                         setForm({ ...form, pan: v.toUpperCase().slice(0, 10) })
                       }
                     />
-                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} />
+                    <Input
+                      icon={Lock}
+                      label={t("cibil.aadhaarLabel")}
+                      value={form.aadhaar}
+                      onChange={(v) =>
+                        setForm({
+                          ...form,
+                          aadhaar: v.replace(/\D/g, "").slice(0, 12),
+                        })
+                      }
+                    />
 
                     {/* Aadhaar Upload */}
                     <div>
                       <label className="text-sm font-medium text-muted-foreground mb-1 block">
-                        {t("cibil.aadhaarUploadLabel")} ({t("common.optional")})
+                        {t("cibil.aadhaarUploadLabel")}
                       </label>
                       <input
                         ref={aadhaarInputRef}
