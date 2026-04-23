@@ -7,8 +7,6 @@ import {
   CreditCard,
   User,
   Phone,
-  FileDown,
-  Gauge,
   Lock,
   Upload,
   X,
@@ -26,7 +24,6 @@ import { Loader2 } from "lucide-react";
 
 const CheckCibilScore = () => {
   const { t } = useLanguage();
-  const [submitted, setSubmitted] = useState(false);
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
   const [panFile, setPanFile] = useState<File | null>(null);
   const aadhaarInputRef = useRef<HTMLInputElement>(null);
@@ -40,49 +37,7 @@ const CheckCibilScore = () => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState<number | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const resolvePendingCibil = async (
-    razorpayOrderId: string,
-    razorpayPaymentId: string
-  ) => {
-    // Retry a few times so paid users still get output when provider recovers.
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-
-      const retryRes = await fetch(
-        "https://api.patliputragroup.com/payments/razorpay/retry-cibil",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            razorpay_order_id: razorpayOrderId,
-            razorpay_payment_id: razorpayPaymentId,
-            name: form.name,
-            mobile: form.mobile,
-            pan: form.pan,
-          }),
-        }
-      );
-
-      const retryData = await retryRes.json();
-      if (retryData?.ok && retryData?.cibil_status === "success") {
-        return retryData;
-      }
-    }
-
-    return null;
-  };
-
-
-  const dummyScore = 742
-
-  const scoreLabel =
-    score && score >= 750
-      ? t("cibil.excellent")
-      : score && score >= 700
-        ? t("cibil.good")
-        : t("cibil.needsImprovement");
 
   const loadRazorpay = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -96,6 +51,40 @@ const CheckCibilScore = () => {
     });
   };
 
+  const handleDownloadPdf = async () => {
+    setPdfLoading(true);
+    toast.loading("Generating CIBIL PDF…", { id: "cibil-pdf" });
+    try {
+      const res = await fetch(
+        "https://api.patliputragroup.com/payments/experian-pdf",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: form.name,
+            mobile: form.mobile,
+            pan: form.pan,
+            consent: "Y",
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!data.ok || !data.credit_report_link) {
+        toast.error("Failed to generate CIBIL PDF", { id: "cibil-pdf" });
+        return;
+      }
+
+      toast.success("CIBIL PDF ready", { id: "cibil-pdf" });
+      window.open(data.credit_report_link, "_blank");
+    } catch (err) {
+      toast.error("PDF download failed", { id: "cibil-pdf" });
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const handleCheckCibil = async () => {
     if (!form.name || !form.mobile || !form.pan) {
@@ -137,56 +126,10 @@ const CheckCibilScore = () => {
   theme: {
     color: "#facc15",
   },
-  handler: function (resp: any) {
+  handler: async function (resp: any) {
     console.log("RAZORPAY SUCCESS:", resp);
-
-    fetch("https://api.patliputragroup.com/payments/razorpay/verify-cibil", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        razorpay_order_id: resp.razorpay_order_id,
-        razorpay_payment_id: resp.razorpay_payment_id,
-        razorpay_signature: resp.razorpay_signature,
-        name: form.name,
-        mobile: form.mobile,
-        pan: form.pan,
-      }),
-    })
-      .then((res) => res.json())
-      .then(async (data) => {
-        console.log("VERIFY RESPONSE:", data);
-        if (data?.ok && data?.cibil_status === "pending") {
-          toast.info("Payment successful. Fetching CIBIL data, please wait...");
-          const resolved = await resolvePendingCibil(
-            resp.razorpay_order_id,
-            resp.razorpay_payment_id
-          );
-
-          if (resolved?.ok) {
-            setScore(resolved.score);
-            setSubmitted(true);
-            toast.success("CIBIL report fetched successfully.");
-            return;
-          }
-
-          toast.warning(
-            "Payment is successful, but CIBIL provider is busy. Please retry after a few minutes."
-          );
-          return;
-        }
-
-        if (!data?.ok) {
-          toast.error(data?.error || "Failed to fetch CIBIL report");
-          return;
-        }
-
-        setScore(data.score);
-        setSubmitted(true);
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Payment was successful, but CIBIL fetch failed. Please retry shortly.");
-      });
+    toast.success("Payment successful. Downloading CIBIL PDF...");
+    await handleDownloadPdf();
   },
 });
 
@@ -198,55 +141,6 @@ const CheckCibilScore = () => {
       setLoading(false);
     }
   };
-
-
-
- const handleDownloadPdf = async () => {
-  setPdfLoading(true);
-  toast.loading("Generating CIBIL PDF…", { id: "cibil-pdf" });
-
-  try {
-    const res = await fetch(
-      "https://api.patliputragroup.com/payments/experian-pdf",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name,
-          mobile: form.mobile,
-          pan: form.pan,
-          consent: "Y",
-        }),
-      }
-    );
-
-    const data = await res.json();
-
-    if (!data.ok || !data.credit_report_link) {
-      toast.error("Failed to generate CIBIL PDF", {
-        id: "cibil-pdf",
-      });
-      return;
-    }
-
-    toast.success("CIBIL PDF ready", {
-      id: "cibil-pdf",
-    });
-
-    window.open(data.credit_report_link, "_blank");
-  } catch (err) {
-    toast.error("PDF download failed", {
-      id: "cibil-pdf",
-    });
-  } finally {
-    setPdfLoading(false);
-  }
-};
-
-
-
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -317,13 +211,12 @@ const CheckCibilScore = () => {
           <div className="container mx-auto px-4 max-w-5xl">
             <div className="grid lg:grid-cols-2 gap-10 items-start">
               {/* FORM */}
-              {!submitted && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-card border border-border rounded-2xl p-6 shadow-lg"
-                >
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="bg-card border border-border rounded-2xl p-6 shadow-lg"
+              >
                   <h2 className="text-2xl font-bold mb-6">
                     {t("cibil.formTitle")}
                   </h2>
@@ -441,15 +334,15 @@ const CheckCibilScore = () => {
                       size="lg"
                       className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover font-semibold mt-4"
                       onClick={handleCheckCibil}
-                      disabled={loading}
+                      disabled={loading || pdfLoading}
                     >
-                      {loading ? (
+                      {loading || pdfLoading ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Processing…
+                          Processing payment...
                         </span>
                       ) : (
-                        t("cibil.checkScore")
+                        "Pay & Download CIBIL Report"
                       )}
                     </Button>
 
@@ -458,62 +351,6 @@ const CheckCibilScore = () => {
                     </p>
                   </div>
                 </motion.div>
-              )}
-
-              {/* RESULT */}
-              {submitted && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="bg-card border border-border rounded-2xl p-8 shadow-xl text-center"
-                >
-                  <Gauge className="h-12 w-12 text-jcb mx-auto mb-4" />
-
-                  <p className="text-muted-foreground mb-2">
-                    {t("cibil.resultTitle")}
-                  </p>
-
-                  <h3 className="text-6xl font-bold text-foreground mb-2">
-                    {score ?? "—"}
-                  </h3>
-
-                  <span className="inline-block px-4 py-1 rounded-full bg-success/20 text-success text-sm font-medium mb-4">
-                    {scoreLabel}
-                  </span>
-
-                  <p className="text-muted-foreground mb-6">
-                    {t("cibil.eligibleMessage")}
-                  </p>
-                 <Button
-  size="lg"
-  className="w-full gap-2 bg-primary text-primary-foreground mb-4"
-  onClick={handleDownloadPdf}
-  disabled={pdfLoading}
->
-  {pdfLoading ? (
-    <span className="flex items-center justify-center gap-2">
-      <Loader2 className="h-5 w-5 animate-spin" />
-      Generating PDF…
-    </span>
-  ) : (
-    <>
-      <FileDown className="h-5 w-5" />
-      Download CIBIL Report (PDF)
-    </>
-  )}
-</Button>
-
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setSubmitted(false)}
-                  >
-                    {t("cibil.checkAnother")}
-                  </Button>
-                </motion.div>
-              )}
 
               {/* TRUST PANEL */}
               <motion.div
