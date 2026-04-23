@@ -11,18 +11,33 @@ import {
   Upload,
   X,
   CheckCircle,
+  Gauge,
+  FileDown,
+  Loader2,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 
 
 const CheckCibilScore = () => {
+  type RazorpayCtor = new (
+    options: Record<string, unknown>
+  ) => { open: () => void };
+  const browserWindow = window as Window & { Razorpay?: RazorpayCtor };
+
   const { t } = useLanguage();
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
   const [panFile, setPanFile] = useState<File | null>(null);
@@ -34,26 +49,107 @@ const CheckCibilScore = () => {
     name: "",
     mobile: "",
     pan: "",
+    aadhaar: "",
   });
 
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  /** Full-screen message while auto PDF is fetched so the user knows to wait. */
+  const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
+  /** Surepass CIBIL + PDF pre-check (no charge) before Razorpay. */
+  const [precheckRunning, setPrecheckRunning] = useState(false);
 
-  const loadRazorpay = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if ((window as any).Razorpay) return resolve(true);
+  const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
 
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  /** CIBIL precheck: transient 502/503/504 and browser network flakiness. */
+  async function postCibilPrecheck(
+    body: Record<string, string>
+  ): Promise<
+    { ok: true; data: { ok: true; precheck_id: string;[k: string]: unknown } } | { ok: false; data: { error?: string }; status: number }
+  > {
+    const max = 3;
+    const baseDelay = 800;
+    let lastStatus = 0;
+    for (let attempt = 0; attempt < max; attempt += 1) {
+      try {
+        const preRes = await fetch(`${PAYMENTS_BASE}/cibil-precheck`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const preData = (await preRes.json().catch(() => ({}))) as {
+          ok?: boolean;
+          precheck_id?: string;
+          error?: string;
+        };
+        lastStatus = preRes.status;
+        if (preRes.ok && preData?.ok && preData?.precheck_id) {
+          return { ok: true, data: preData as { ok: true; precheck_id: string } };
+        }
+        const retriable =
+          [502, 503, 504].includes(preRes.status) ||
+          (preData as { retry_suggested?: boolean })?.retry_suggested;
+        if (retriable && attempt < max - 1) {
+          if (attempt === 0) {
+            toast.info("Connection hiccup — retrying…", { id: "cibil-retry" });
+          }
+          await sleep(baseDelay * (attempt + 1));
+          continue;
+        }
+        return { ok: false, data: preData, status: preRes.status };
+      } catch (e) {
+        const err = e as { message?: string; name?: string };
+        if (attempt < max - 1) {
+          if (attempt === 0) {
+            toast.info("Connection interrupted — retrying…", { id: "cibil-retry" });
+          }
+          await sleep(baseDelay * (attempt + 1));
+          continue;
+        }
+        const raw = err?.message || "Network error";
+        const human =
+          /ECONNRESET|Failed to fetch|Load failed|network/i.test(raw) ||
+          err?.name === "TypeError"
+            ? "Connection was interrupted. Check your network and try again."
+            : raw;
+        return {
+          ok: false,
+          data: { error: human },
+          status: lastStatus || 0,
+        };
+      }
+    }
+    return {
+      ok: false,
+      data: { error: "Request failed after several tries. Please try again." },
+      status: lastStatus,
+    };
+  }
+
+  const openPdfInNewTab = (href: string) => {
+    const link = document.createElement("a");
+    link.href = href;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleDownloadPdf = async () => {
+  const downloadCibilPdf = async (fromAuto = false) => {
+    if (pdfDownloaded) return;
+
     setPdfLoading(true);
-    toast.loading("Generating CIBIL PDF…", { id: "cibil-pdf" });
+    const toastId = fromAuto ? "cibil-pdf-auto" : "cibil-pdf";
+    if (!fromAuto) {
+      toast.loading("Generating CIBIL PDF…", { id: toastId });
+    }
+
     try {
       const res = await fetch(
         "https://api.patliputragroup.com/payments/experian-pdf",
@@ -71,19 +167,62 @@ const CheckCibilScore = () => {
         }
       );
 
-      const data = await res.json();
-      if (!data.ok || !data.credit_report_link) {
-        toast.error("Failed to generate CIBIL PDF", { id: "cibil-pdf" });
+      let data: { ok?: boolean; credit_report_link?: string; error?: string };
+      try {
+        data = await res.json();
+      } catch {
+        toast.error(
+          fromAuto
+            ? "Automatic PDF download failed. Use the button below to try again."
+            : "Invalid response from server",
+          { id: toastId }
+        );
         return;
       }
 
-      toast.success("CIBIL PDF ready", { id: "cibil-pdf" });
-      window.open(data.credit_report_link, "_blank");
-    } catch (err) {
-      toast.error("PDF download failed", { id: "cibil-pdf" });
+      if (!res.ok || !data.ok || !data.credit_report_link) {
+        const errMsg = fromAuto
+          ? "Automatic PDF download failed. Use the button below to try again."
+          : data?.error || `Failed to generate CIBIL PDF (${res.status})`;
+        toast.error(errMsg, { id: toastId });
+        return;
+      }
+
+      toast.success("CIBIL PDF ready", { id: toastId });
+
+      openPdfInNewTab(data.credit_report_link);
+      setPdfDownloaded(true);
+    } catch {
+      toast.error(
+        fromAuto ? "Automatic PDF download failed. Use the button below to try again." : "PDF download failed",
+        { id: toastId }
+      );
     } finally {
       setPdfLoading(false);
+      if (fromAuto) {
+        setAutoPdfPreparing(false);
+      }
     }
+  };
+
+
+  const scoreLabel =
+    score && score >= 750
+      ? t("cibil.excellent")
+      : score && score >= 700
+        ? t("cibil.good")
+        : t("cibil.needsImprovement");
+
+  const loadRazorpay = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if (browserWindow.Razorpay) return resolve(true);
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   };
 
   const handleCheckCibil = async () => {
@@ -92,56 +231,184 @@ const CheckCibilScore = () => {
       return;
     }
 
+    const aadhaar12 = form.aadhaar.replace(/\D/g, "").slice(0, 12);
+    if (aadhaar12.length !== 12) {
+      toast.warning("Please enter a valid 12-digit Aadhaar number");
+      return;
+    }
+    if (!aadhaarFile) {
+      toast.warning("Please upload your Aadhaar card (PDF, PNG, or JPG)");
+      return;
+    }
+
     setLoading(true);
+    setPrecheckRunning(true);
+
+    let precheckId: string;
 
     try {
-      const ok = await loadRazorpay();
-      if (!ok) {
+      const pre = await postCibilPrecheck({
+        name: form.name,
+        mobile: form.mobile,
+        pan: form.pan,
+        aadhaar: aadhaar12,
+        consent: "Y",
+      });
+      if (!pre.ok) {
+        const preError =
+          typeof pre.data?.error === "string" ? pre.data.error : undefined;
+        toast.error(
+          preError ||
+            "We could not verify your details. Check your name, mobile, and PAN. No payment was made."
+        );
+        return;
+      }
+
+      const preData = pre.data;
+      if (!preData.precheck_id) {
+        toast.error("Verification incomplete. Please try again.");
+        return;
+      }
+
+      precheckId = preData.precheck_id;
+      toast.dismiss("cibil-retry");
+      try {
+        sessionStorage.setItem("cibil_precheck_id", precheckId);
+      } catch {
+        /* ignore */
+      }
+
+      setPrecheckRunning(false);
+
+      const sdkOk = await loadRazorpay();
+      if (!sdkOk) {
         toast.error("Razorpay SDK failed to load");
         return;
       }
 
-      const orderRes = await fetch(
-        "https://api.patliputragroup.com/payments/razorpay/order",
-        { method: "POST" }
-      );
+      const nameSnap = form.name;
+      const mobileSnap = form.mobile;
+      const panSnap = form.pan;
+      const aadhaarSnap = aadhaar12;
+      const aadhaarFileSnap = aadhaarFile;
+
+      const orderRes = await fetch(`${PAYMENTS_BASE}/razorpay/order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ precheck_id: precheckId }),
+      });
 
       const order = await orderRes.json();
-         console.log("ORDER RESPONSE:", order);
-      if (!order.id) {
-        throw new Error("Order creation failed");
+      if (!orderRes.ok || !order.id) {
+        toast.error(
+          (order as { error?: string })?.error ||
+            "Could not start payment. Try again."
+        );
+        return;
       }
 
-     const rzp = new (window as any).Razorpay({
-  key: order.key_id,
-  order_id: order.id,
-  amount: order.amount,
-  currency: "INR",
-  name: "Patliputra Group",
-  description: "CIBIL Check",
-  prefill: {
-    name: form.name,
-    contact: form.mobile,
-  },
-  theme: {
-    color: "#facc15",
-  },
-  handler: async function (resp: any) {
-    console.log("RAZORPAY SUCCESS:", resp);
-    toast.success("Payment successful. Downloading CIBIL PDF...");
-    await handleDownloadPdf();
-  },
-});
+      const Razorpay = browserWindow.Razorpay;
+      if (!Razorpay) {
+        toast.error("Razorpay SDK failed to initialize");
+        return;
+      }
 
+      const rzp = new Razorpay({
+        key: order.key_id,
+        order_id: order.id,
+        amount: order.amount,
+        currency: "INR",
+        name: "Patliputra Group",
+        description: "CIBIL Check",
+        prefill: {
+          name: form.name,
+          contact: form.mobile,
+        },
+        theme: {
+          color: "#facc15",
+        },
+        handler: function (resp: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) {
+          setAutoPdfPreparing(true);
+
+          if (!aadhaarFileSnap) {
+            toast.error("Aadhaar document is required. Please start again and upload your Aadhaar file.");
+            setAutoPdfPreparing(false);
+            return;
+          }
+
+          const fd = new FormData();
+          fd.append("razorpay_order_id", resp.razorpay_order_id);
+          fd.append("razorpay_payment_id", resp.razorpay_payment_id);
+          fd.append("razorpay_signature", resp.razorpay_signature);
+          fd.append("precheck_id", precheckId);
+          fd.append("name", nameSnap);
+          fd.append("mobile", mobileSnap);
+          fd.append("pan", panSnap);
+          fd.append("aadhaar", aadhaarSnap);
+          fd.append("aadhaar_document", aadhaarFileSnap);
+
+          fetch(`${PAYMENTS_BASE}/razorpay/verify-cibil`, {
+            method: "POST",
+            body: fd,
+          })
+            .then((r) => r.json())
+            .then(
+              (data: {
+                ok?: boolean;
+                error?: string;
+                score?: number;
+                credit_report_link?: string;
+              }) => {
+                if (!data?.ok) {
+                  toast.error(
+                    data?.error || "Could not complete your CIBIL report. Contact support with your payment id."
+                  );
+                  setAutoPdfPreparing(false);
+                  return;
+                }
+
+                setScore(
+                  typeof data.score === "number" ? data.score : null
+                );
+                setSubmitted(true);
+
+                if (data.credit_report_link) {
+                  openPdfInNewTab(data.credit_report_link);
+                  setPdfDownloaded(true);
+                  toast.success("CIBIL report opened in a new tab.");
+                } else {
+                  void downloadCibilPdf(true);
+                }
+                setAutoPdfPreparing(false);
+              }
+            )
+            .catch((err) => {
+              console.error(err);
+              toast.error(
+                "Payment may have succeeded but we could not finish the report. Please contact support."
+              );
+              setAutoPdfPreparing(false);
+            });
+        },
+      });
 
       rzp.open();
-    } catch (err) {
+    } catch {
       toast.error("CIBIL check failed");
     } finally {
       setLoading(false);
+      setPrecheckRunning(false);
     }
   };
 
+  const handleDownloadPdf = () => {
+    if (pdfDownloaded) return;
+    void downloadCibilPdf(false);
+  };
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "aadhaar" | "pan"
@@ -179,6 +446,59 @@ const CheckCibilScore = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={precheckRunning} onOpenChange={() => {}}>
+        <DialogContent
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md border-jcb/30 bg-card/95 backdrop-blur-sm [&>button]:hidden"
+          aria-describedby="cibil-precheck-desc"
+        >
+          <div className="flex flex-col items-center gap-4 py-2 text-center">
+            <Loader2
+              className="h-12 w-12 shrink-0 animate-spin text-jcb"
+              aria-hidden
+            />
+            <DialogHeader className="space-y-2 text-center sm:text-center">
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                {t("cibil.precheckTitle")}
+              </DialogTitle>
+              <DialogDescription
+                id="cibil-precheck-desc"
+                className="text-sm text-muted-foreground"
+              >
+                {t("cibil.precheckDescription")}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={autoPdfPreparing}
+        onOpenChange={() => {
+          /* Dismissal is blocked via Content handlers; `open` is only cleared after PDF finishes. */
+        }}
+      >
+        <DialogContent
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md border-jcb/30 bg-card/95 backdrop-blur-sm [&>button]:hidden"
+          aria-describedby="cibil-pdf-prepare-desc"
+        >
+          <div className="flex flex-col items-center gap-4 py-2 text-center">
+            <Loader2 className="h-12 w-12 shrink-0 animate-spin text-jcb" aria-hidden />
+            <DialogHeader className="space-y-2 text-center sm:text-center">
+              <DialogTitle className="text-lg font-semibold text-foreground">
+                {t("cibil.preparingPdfTitle")}
+              </DialogTitle>
+              <DialogDescription id="cibil-pdf-prepare-desc" className="text-sm text-muted-foreground">
+                {t("cibil.preparingPdfDescription")}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Navbar />
 
       <main className="pt-20">
@@ -246,12 +566,22 @@ const CheckCibilScore = () => {
                         setForm({ ...form, pan: v.toUpperCase().slice(0, 10) })
                       }
                     />
-                    <Input icon={Lock} label={t("cibil.aadhaarLabel")} />
+                    <Input
+                      icon={Lock}
+                      label={t("cibil.aadhaarLabel")}
+                      value={form.aadhaar}
+                      onChange={(v) =>
+                        setForm({
+                          ...form,
+                          aadhaar: v.replace(/\D/g, "").slice(0, 12),
+                        })
+                      }
+                    />
 
                     {/* Aadhaar Upload */}
                     <div>
                       <label className="text-sm font-medium text-muted-foreground mb-1 block">
-                        {t("cibil.aadhaarUploadLabel")} ({t("common.optional")})
+                        {t("cibil.aadhaarUploadLabel")}
                       </label>
                       <input
                         ref={aadhaarInputRef}
@@ -334,12 +664,14 @@ const CheckCibilScore = () => {
                       size="lg"
                       className="w-full bg-jcb text-jcb-foreground hover:bg-jcb-hover font-semibold mt-4"
                       onClick={handleCheckCibil}
-                      disabled={loading || pdfLoading}
+                      disabled={loading || precheckRunning}
                     >
-                      {loading || pdfLoading ? (
+                      {loading || precheckRunning ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Processing payment...
+                          {precheckRunning
+                            ? t("cibil.verifyingDetails")
+                            : "Processing…"}
                         </span>
                       ) : (
                         "Pay & Download CIBIL Report"
@@ -351,6 +683,75 @@ const CheckCibilScore = () => {
                     </p>
                   </div>
                 </motion.div>
+
+              {/* RESULT */}
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-card border border-border rounded-2xl p-8 shadow-xl text-center"
+                >
+                  <Gauge className="h-12 w-12 text-jcb mx-auto mb-4" />
+
+                  <p className="text-muted-foreground mb-2">
+                    {t("cibil.resultTitle")}
+                  </p>
+
+                  <h3 className="text-6xl font-bold text-foreground mb-2">
+                    {score ?? "—"}
+                  </h3>
+
+                  <span className="inline-block px-4 py-1 rounded-full bg-success/20 text-success text-sm font-medium mb-4">
+                    {scoreLabel}
+                  </span>
+
+                  <p className="text-muted-foreground mb-6">
+                    {t("cibil.eligibleMessage")}
+                  </p>
+                  <Button
+                    size="lg"
+                    className="w-full gap-2 bg-primary text-primary-foreground mb-4"
+                    onClick={handleDownloadPdf}
+                    disabled={pdfLoading || pdfDownloaded}
+                  >
+                    {pdfLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        Generating PDF…
+                      </span>
+                    ) : pdfDownloaded ? (
+                      <>
+                        <CheckCircle className="h-5 w-5" />
+                        Report downloaded
+                      </>
+                    ) : (
+                      <>
+                        <FileDown className="h-5 w-5" />
+                        Download CIBIL Report (PDF)
+                      </>
+                    )}
+                  </Button>
+
+
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => {
+                      setSubmitted(false);
+                      setPdfDownloaded(false);
+                      setAutoPdfPreparing(false);
+                      try {
+                        sessionStorage.removeItem("cibil_precheck_id");
+                      } catch {
+                        /* ignore */
+                      }
+                    }}
+                  >
+                    {t("cibil.checkAnother")}
+                  </Button>
+                </motion.div>
+              )}
 
               {/* TRUST PANEL */}
               <motion.div
@@ -391,7 +792,7 @@ const Input = ({
   onChange,
 }: {
   label: string;
-  icon: any;
+  icon: LucideIcon;
   type?: string;
   value?: string;
   onChange?: (v: string) => void;
