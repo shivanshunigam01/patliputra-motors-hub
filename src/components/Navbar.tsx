@@ -103,6 +103,15 @@ export function Navbar() {
     setIsOpen(false);
   }, [location]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
   return (
     <>
       <header
@@ -204,24 +213,51 @@ export function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu: above header (z-50) & compare bar so links receive touches; scroll for long lists */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div className="fixed inset-0 z-40 lg:hidden">
-            <div className="bg-primary min-h-full pt-20 px-6 pb-8">
-              <nav className="flex flex-col gap-2">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[100] flex flex-col bg-primary lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("nav.menu") || "Navigation menu"}
+          >
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-primary-foreground/15 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+              <span className="text-sm font-semibold uppercase tracking-wide text-primary-foreground/90">
+                {t("nav.menu")}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg p-2 text-primary-foreground hover:bg-primary-foreground/10"
+                aria-label="Close menu"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+              <div className="py-3">
+                <LanguageToggle variant="mobile" />
+              </div>
+              <nav className="flex flex-col gap-0 py-2">
                 {[...navLinks, ...moreLinks].map((link) => (
                   <Link
                     key={link.path}
                     to={link.path}
-                    className="py-3 text-primary-foreground text-base font-medium border-b border-primary-foreground/10 last:border-0"
+                    onClick={() => setIsOpen(false)}
+                    className="py-3.5 text-primary-foreground text-base font-medium border-b border-primary-foreground/10 last:border-0 active:bg-primary-foreground/5"
                   >
                     {link.name}
                   </Link>
                 ))}
               </nav>
-              {/* code */}
-              <div className="mt-6 flex flex-col gap-3">
+
+              <div className="mt-4 flex flex-col gap-3 pb-4">
                 <a href={`tel:+91${settings?.primary_phone}`}>
                   <Button className="w-full gap-2">
                     <Phone className="h-5 w-5" />
@@ -229,7 +265,6 @@ export function Navbar() {
                   </Button>
                 </a>
 
-                {/* ✅ Mobile WhatsApp */}
                 <a
                   href={getWhatsAppUrl(
                     getWhatsAppNumber(),
