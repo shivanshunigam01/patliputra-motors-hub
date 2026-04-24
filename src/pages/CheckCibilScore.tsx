@@ -107,8 +107,8 @@ const CheckCibilScore = () => {
   type ReportKind = "experian" | "cibil_credit_report";
   const [reportKind, setReportKind] = useState<ReportKind>("experian");
   const [gender, setGender] = useState<"male" | "female" | "other">("male");
-  const [feeExperian, setFeeExperian] = useState(1);
-  const [feeCibil, setFeeCibil] = useState(1);
+  const [feeExperian, setFeeExperian] = useState(79);
+  const [feeCibil, setFeeCibil] = useState(125);
   const [checkoutInr, setCheckoutInr] = useState<number | null>(null);
 
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
