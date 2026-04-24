@@ -317,6 +317,9 @@ const CheckCibilScore = () => {
 
       openPdfInNewTab(data.credit_report_link);
       setPdfDownloaded(true);
+      if (fromAuto) {
+        clearFormForNextApplication();
+      }
     } catch {
       toast.error(
         fromAuto ? "Automatic PDF download failed. Use the button below to try again." : "PDF download failed",
@@ -555,6 +558,7 @@ const CheckCibilScore = () => {
                   openPdfInNewTab(data.credit_report_link);
                   setPdfDownloaded(true);
                   toast.success("Credit report PDF opened in a new tab.");
+                  clearFormForNextApplication();
                 } else {
                   void downloadCibilPdf(true);
                 }
@@ -617,6 +621,21 @@ const CheckCibilScore = () => {
       setPanFile(null);
       if (panInputRef.current) panInputRef.current.value = "";
     }
+  };
+
+  /** After a successful paid report is opened, clear PII fields for the next application. */
+  const clearFormForNextApplication = () => {
+    setForm({
+      name: "",
+      mobile: "",
+      pan: "",
+      aadhaar: "",
+    });
+    setAadhaarFile(null);
+    setPanFile(null);
+    if (aadhaarInputRef.current) aadhaarInputRef.current.value = "";
+    if (panInputRef.current) panInputRef.current.value = "";
+    setCheckoutInr(null);
   };
 
   return (
