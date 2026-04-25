@@ -36,6 +36,14 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import experianLogo from "@/assets/cibil-experian-logo.png";
 
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+    };
+  }
+}
+
 function CibilScoreRing({
   score,
   strokeColor,
@@ -143,16 +151,22 @@ const CheckCibilScore = () => {
   const [loading, setLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   /** Full-screen message while auto PDF is fetched so the user knows to wait. */
   const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
   /** Dialog state kept for compatibility with existing UI */
   const [precheckRunning, setPrecheckRunning] = useState(false);
+  const [leadSaved, setLeadSaved] = useState(false);
 
   const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
 
   useEffect(() => {
     // Only Experian PDF flow is active right now.
   }, []);
+
+  useEffect(() => {
+    setLeadSaved(false);
+  }, [form.name, form.mobile, form.pan, form.aadhaar, aadhaarFile, panFile]);
 
   const openPdfInNewTab = (href: string) => {
     const link = document.createElement("a");
@@ -162,6 +176,210 @@ const CheckCibilScore = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const loadRazorpayScript = async () => {
+    if (window.Razorpay) return true;
+    const scriptTag = document.querySelector<HTMLScriptElement>(
+      "script[data-razorpay-checkout='true']"
+    );
+    if (scriptTag) {
+      return new Promise<boolean>((resolve) => {
+        scriptTag.addEventListener("load", () => resolve(true), { once: true });
+        scriptTag.addEventListener("error", () => resolve(false), { once: true });
+      });
+    }
+    return new Promise<boolean>((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.dataset.razorpayCheckout = "true";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  /**
+   * Save KYC details to backend/admin before payment:
+   * - Aadhaar number
+   * - PAN number
+   * - uploaded Aadhaar/PAN files
+   */
+  const saveCibilLeadAndDocs = async () => {
+    const formData = new FormData();
+    formData.append("source", "Website");
+    formData.append("source_page", "CIBIL Score");
+    formData.append("customer_name", form.name.trim());
+    formData.append("customer_mobile", form.mobile.trim());
+    formData.append("customer_pan", form.pan.trim().toUpperCase());
+    formData.append("customer_aadhaar", form.aadhaar.trim());
+    formData.append("name", form.name.trim());
+    formData.append("mobile", form.mobile.trim());
+    formData.append("pan", form.pan.trim().toUpperCase());
+    formData.append("aadhaar", form.aadhaar.trim());
+    formData.append("consent", "Y");
+    formData.append("lead_type", "cibil");
+    if (aadhaarFile) {
+      formData.append("aadhaar_file", aadhaarFile);
+      formData.append("document_aadhaar", aadhaarFile);
+      formData.append("aadhaar_card", aadhaarFile);
+    }
+    if (panFile) {
+      formData.append("pan_file", panFile);
+      formData.append("document_pan", panFile);
+      formData.append("pan_card", panFile);
+    }
+
+    // Try primary + fallback endpoints to preserve existing backend compatibility.
+    const endpoints = [
+      `${PAYMENTS_BASE}/cibil-intake`,
+      `${PAYMENTS_BASE}/precheck`,
+      `${PAYMENTS_BASE}/lead-intake`,
+      "https://api.patliputragroup.com/leads",
+    ];
+
+    let lastError = "Unable to save lead details.";
+    for (const endpoint of endpoints) {
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
+        const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        if (res.ok && data.ok !== false && data.success !== false) {
+          return;
+        }
+        lastError = pickApiError(
+          data,
+          `Lead upload failed at ${new URL(endpoint).pathname}.`
+        );
+      } catch (e: unknown) {
+        lastError =
+          e instanceof Error && e.message?.trim()
+            ? e.message
+            : "Lead upload failed.";
+      }
+    }
+
+    throw new Error(lastError);
+  };
+
+  const createRazorpayOrder = async () => {
+    const payload = {
+      amount: Math.round(feeExperian * 100),
+      currency: "INR",
+      purpose: "experian_cibil_report",
+      name: form.name,
+      mobile: form.mobile,
+      pan: form.pan,
+      aadhaar: form.aadhaar,
+    };
+
+    const res = await fetch(`${PAYMENTS_BASE}/create-order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!res.ok) {
+      throw new Error(
+        pickApiError(data, `Unable to initiate payment (${res.status}).`)
+      );
+    }
+
+    const orderId =
+      (typeof data.order_id === "string" && data.order_id) ||
+      (typeof data.id === "string" && data.id) ||
+      (typeof data.razorpay_order_id === "string" && data.razorpay_order_id) ||
+      "";
+    const amount =
+      typeof data.amount === "number" && Number.isFinite(data.amount)
+        ? data.amount
+        : payload.amount;
+    const currency =
+      typeof data.currency === "string" && data.currency ? data.currency : "INR";
+    const key =
+      (typeof data.key_id === "string" && data.key_id) ||
+      (typeof data.key === "string" && data.key) ||
+      "";
+
+    if (!orderId || !key) {
+      throw new Error("Payment setup failed. Missing Razorpay key or order id.");
+    }
+
+    return { key, orderId, amount, currency };
+  };
+
+  const verifyRazorpayPayment = async (
+    response: Record<string, unknown>
+  ): Promise<void> => {
+    const res = await fetch(`${PAYMENTS_BASE}/verify-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...response,
+        name: form.name,
+        mobile: form.mobile,
+        pan: form.pan,
+        aadhaar: form.aadhaar,
+        amount: Math.round(feeExperian * 100),
+      }),
+    });
+
+    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    if (!res.ok || data.ok === false) {
+      throw new Error(
+        pickApiError(data, `Payment verification failed (${res.status}).`)
+      );
+    }
+  };
+
+  const startRazorpayPayment = async () => {
+    const loaded = await loadRazorpayScript();
+    if (!loaded) {
+      throw new Error("Razorpay checkout failed to load. Please try again.");
+    }
+    if (!window.Razorpay) {
+      throw new Error("Razorpay is unavailable right now. Please try again.");
+    }
+
+    const { key, orderId, amount, currency } = await createRazorpayOrder();
+
+    await new Promise<void>((resolve, reject) => {
+      const razorpay = new window.Razorpay({
+        key,
+        amount,
+        currency,
+        order_id: orderId,
+        name: "Patliputra Motors",
+        description: "Experian CIBIL Report",
+        prefill: {
+          name: form.name,
+          contact: form.mobile,
+        },
+        notes: {
+          pan: form.pan,
+        },
+        theme: {
+          color: "#f97316",
+        },
+        modal: {
+          ondismiss: () => reject(new Error("Payment was cancelled.")),
+        },
+        handler: async (resp: Record<string, unknown>) => {
+          try {
+            await verifyRazorpayPayment(resp);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
+        },
+      });
+
+      razorpay.open();
+    });
   };
 
   const downloadCibilPdf = async (fromAuto = false) => {
@@ -239,6 +457,9 @@ const CheckCibilScore = () => {
         openPdfInNewTab(pdfLink.trim());
         setPdfDownloaded(true);
         toast.success("Credit report PDF opened in a new tab.", { id: toastId });
+        if (fromAuto) {
+          clearFormForNextApplication();
+        }
         return;
       }
 
@@ -300,16 +521,59 @@ const CheckCibilScore = () => {
       return;
     }
     setLoading(true);
+    setPaymentLoading(true);
+    setPrecheckRunning(true);
     try {
-      await downloadCibilPdf(false);
+      if (!leadSaved) {
+        toast.loading("Saving Aadhaar details and uploaded documents…", {
+          id: "cibil-lead-save",
+        });
+        await saveCibilLeadAndDocs();
+        setLeadSaved(true);
+        toast.success("Details saved to admin panel successfully.", {
+          id: "cibil-lead-save",
+        });
+      }
+      toast.loading("Opening Razorpay payment…", { id: "cibil-payment" });
+      await startRazorpayPayment();
+      toast.success("Payment successful. Preparing your report…", {
+        id: "cibil-payment",
+      });
+      setAutoPdfPreparing(true);
+      await downloadCibilPdf(true);
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error && e.message?.trim()
+          ? e.message
+          : "Unable to complete payment.";
+      toast.error(msg, { id: "cibil-payment" });
     } finally {
+      setPrecheckRunning(false);
+      setPaymentLoading(false);
       setLoading(false);
     }
   };
 
-  const handleDownloadPdf = () => {
-    if (pdfDownloaded) return;
-    void downloadCibilPdf(false);
+  const handleDownloadPdf = async () => {
+    if (pdfDownloaded || paymentLoading) return;
+    setPaymentLoading(true);
+    try {
+      toast.loading("Opening Razorpay payment…", { id: "cibil-payment-manual" });
+      await startRazorpayPayment();
+      toast.success("Payment successful. Preparing your report…", {
+        id: "cibil-payment-manual",
+      });
+      setAutoPdfPreparing(true);
+      await downloadCibilPdf(true);
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error && e.message?.trim()
+          ? e.message
+          : "Unable to complete payment.";
+      toast.error(msg, { id: "cibil-payment-manual" });
+    } finally {
+      setPaymentLoading(false);
+    }
   };
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -358,6 +622,15 @@ const CheckCibilScore = () => {
     setPanFile(null);
     if (aadhaarInputRef.current) aadhaarInputRef.current.value = "";
     if (panInputRef.current) panInputRef.current.value = "";
+  };
+
+  const startFreshCibilPage = () => {
+    setSubmitted(false);
+    setScore(null);
+    setPdfDownloaded(false);
+    setAutoPdfPreparing(false);
+    setLeadSaved(false);
+    clearFormForNextApplication();
   };
 
   return (
@@ -651,14 +924,16 @@ const CheckCibilScore = () => {
                       size="lg"
                       className="mt-2 h-12 w-full font-semibold shadow-md shadow-jcb/10 transition-transform hover:bg-jcb-hover active:scale-[0.99] sm:h-12 bg-jcb text-jcb-foreground"
                       onClick={handleCheckCibil}
-                      disabled={loading || precheckRunning}
+                      disabled={loading || precheckRunning || paymentLoading}
                     >
-                      {loading || precheckRunning ? (
+                      {loading || precheckRunning || paymentLoading ? (
                         <span className="flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
                           {precheckRunning
                             ? t("cibil.verifyingDetails")
-                            : "Processing…"}
+                            : paymentLoading
+                              ? "Opening payment…"
+                              : "Processing…"}
                         </span>
                       ) : (
                         t("cibil.payCta").replace(
@@ -712,12 +987,12 @@ const CheckCibilScore = () => {
                           size="lg"
                           className="h-12 w-full gap-2 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                           onClick={handleDownloadPdf}
-                          disabled={pdfLoading || pdfDownloaded}
+                          disabled={pdfLoading || pdfDownloaded || paymentLoading}
                         >
-                          {pdfLoading ? (
+                          {pdfLoading || paymentLoading ? (
                             <span className="flex items-center justify-center gap-2">
                               <Loader2 className="h-5 w-5 animate-spin" />
-                              Generating PDF…
+                              {paymentLoading ? "Opening payment…" : "Generating PDF…"}
                             </span>
                           ) : pdfDownloaded ? (
                             <>
