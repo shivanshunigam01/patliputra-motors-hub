@@ -137,6 +137,8 @@ const CheckCibilScore = () => {
   const [panFile, setPanFile] = useState<File | null>(null);
   const aadhaarInputRef = useRef<HTMLInputElement>(null);
   const panInputRef = useRef<HTMLInputElement>(null);
+  /** Relative `/uploads/cibil-aadhaar/...` from POST /payments/lead-intake — sent to /experian-pdf for admin CibilCheck. */
+  const intakeAadhaarDocPathRef = useRef<string | null>(null);
 
 
   const [form, setForm] = useState({
@@ -166,6 +168,7 @@ const CheckCibilScore = () => {
 
   useEffect(() => {
     setLeadSaved(false);
+    intakeAadhaarDocPathRef.current = null;
   }, [form.name, form.mobile, form.pan, form.aadhaar, aadhaarFile, panFile]);
 
   const openPdfInNewTab = (href: string) => {
@@ -201,25 +204,38 @@ const CheckCibilScore = () => {
   };
 
   const saveCibilLeadAndDocs = async (): Promise<boolean> => {
-    // Keep this single and lightweight so payment flow never gets blocked by retry storms.
-    const payload = {
-      source: "Website",
-      source_page: "CIBIL Score",
-      customer_name: form.name.trim(),
-      customer_mobile: form.mobile.trim(),
-      customer_district: "Patna",
-      customer_pan: form.pan.trim().toUpperCase(),
-      note: `CIBIL lead | Aadhaar: ${form.aadhaar.trim()} | Aadhaar file: ${
-        aadhaarFile?.name ?? "Not uploaded"
-      } | PAN file: ${panFile?.name ?? "Not uploaded"}`,
-    };
-    const res = await fetch("https://api.patliputragroup.com/leads", {
+    const fd = new FormData();
+    fd.append("name", form.name.trim());
+    fd.append("mobile", form.mobile.replace(/\D/g, "").slice(0, 10));
+    fd.append("pan", form.pan.trim().toUpperCase());
+    fd.append("aadhaar", form.aadhaar.replace(/\D/g, "").slice(0, 12));
+    fd.append("customer_district", "Patna");
+    if (aadhaarFile) fd.append("aadhaar_file", aadhaarFile);
+    if (panFile) fd.append("pan_file", panFile);
+
+    const res = await fetch(`${PAYMENTS_BASE}/lead-intake`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: fd,
     });
     const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    return res.ok && data.success !== false && data.ok !== false;
+    if (!res.ok || data.ok === false || data.success === false) {
+      return false;
+    }
+    const rel =
+      typeof data.aadhaar_document_path === "string" && data.aadhaar_document_path.trim()
+        ? data.aadhaar_document_path.trim()
+        : null;
+    if (rel) {
+      intakeAadhaarDocPathRef.current = rel;
+    } else if (typeof data.aadhaar_document_url === "string" && data.aadhaar_document_url) {
+      try {
+        const u = new URL(data.aadhaar_document_url);
+        if (u.pathname.startsWith("/uploads/")) intakeAadhaarDocPathRef.current = u.pathname;
+      } catch {
+        /* ignore */
+      }
+    }
+    return true;
   };
 
   const createRazorpayOrder = async () => {
@@ -281,6 +297,7 @@ const CheckCibilScore = () => {
         mobile: form.mobile,
         pan: form.pan,
         aadhaar: form.aadhaar,
+        aadhaar_document_url: intakeAadhaarDocPathRef.current || undefined,
         amount: Math.round(feeExperian * 100),
       }),
     });
@@ -293,7 +310,10 @@ const CheckCibilScore = () => {
     }
   };
 
-  const startRazorpayPayment = async () => {
+  const startRazorpayPayment = async (): Promise<{
+    razorpay_payment_id: string;
+    razorpay_order_id: string;
+  }> => {
     const loaded = await loadRazorpayScript();
     if (!loaded) {
       throw new Error("Razorpay checkout failed to load. Please try again.");
@@ -304,7 +324,7 @@ const CheckCibilScore = () => {
 
     const { key, orderId, amount, currency } = await createRazorpayOrder();
 
-    await new Promise<void>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const razorpay = new window.Razorpay({
         key,
         amount,
@@ -328,7 +348,12 @@ const CheckCibilScore = () => {
         handler: async (resp: Record<string, unknown>) => {
           try {
             await verifyRazorpayPayment(resp);
-            resolve();
+            const razorpay_payment_id = String(resp.razorpay_payment_id ?? "").trim();
+            const razorpay_order_id = String(resp.razorpay_order_id ?? orderId).trim();
+            if (!razorpay_payment_id) {
+              throw new Error("Payment succeeded but payment id was missing. Please contact support.");
+            }
+            resolve({ razorpay_payment_id, razorpay_order_id });
           } catch (err) {
             reject(err);
           }
@@ -341,32 +366,20 @@ const CheckCibilScore = () => {
 
   const ensureLeadSavedBeforePayment = async () => {
     if (leadSaved) return;
-    try {
-      toast.loading("Saving your details in admin…", {
+    toast.loading("Saving your details and documents…", {
+      id: "cibil-lead-save",
+    });
+    const saved = await saveCibilLeadAndDocs();
+    if (!saved) {
+      toast.error("Could not save Aadhaar and documents. Please try again.", {
         id: "cibil-lead-save",
       });
-      const saved = await Promise.race<boolean>([
-        saveCibilLeadAndDocs(),
-        new Promise<boolean>((resolve) => {
-          window.setTimeout(() => resolve(false), 2500);
-        }),
-      ]);
-      if (saved) {
-        setLeadSaved(true);
-        toast.success("Details saved to admin panel successfully.", {
-          id: "cibil-lead-save",
-        });
-      } else {
-        toast.warning("Admin save skipped. Continuing to payment.", {
-          id: "cibil-lead-save",
-        });
-      }
-    } catch {
-      // Do not block Razorpay if admin endpoint is unavailable.
-      toast.warning("Could not save to admin right now. Continuing to payment.", {
-        id: "cibil-lead-save",
-      });
+      throw new Error("KYC upload failed. Check your connection and try again.");
     }
+    setLeadSaved(true);
+    toast.success("Details saved successfully.", {
+      id: "cibil-lead-save",
+    });
   };
 
   const validateCibilForm = () => {
@@ -399,7 +412,10 @@ const CheckCibilScore = () => {
     return true;
   };
 
-  const downloadCibilPdf = async (fromAuto = false) => {
+  const downloadCibilPdf = async (
+    fromAuto = false,
+    rzp?: { razorpay_payment_id: string; razorpay_order_id: string }
+  ) => {
     if (!form.name || !form.mobile || !form.pan) {
       toast.error("Please fill name, mobile, and PAN before generating PDF.");
       return;
@@ -417,6 +433,7 @@ const CheckCibilScore = () => {
         mobile: form.mobile,
         pan: form.pan,
       });
+      const aadhaar12 = form.aadhaar.replace(/\D/g, "").slice(0, 12);
       const res = await fetch(`${PAYMENTS_BASE}/experian-pdf`, {
         method: "POST",
         headers: {
@@ -427,6 +444,10 @@ const CheckCibilScore = () => {
           mobile: form.mobile,
           pan: form.pan,
           consent: "Y",
+          aadhaar: aadhaar12,
+          aadhaar_document_url: intakeAadhaarDocPathRef.current || undefined,
+          razorpay_payment_id: rzp?.razorpay_payment_id,
+          razorpay_order_id: rzp?.razorpay_order_id,
         }),
       });
       console.log("[cibil-ui] /experian-pdf response received", {
@@ -531,12 +552,12 @@ const CheckCibilScore = () => {
     try {
       await ensureLeadSavedBeforePayment();
       toast.loading("Opening Razorpay payment…", { id: "cibil-payment" });
-      await startRazorpayPayment();
+      const rzp = await startRazorpayPayment();
       toast.success("Payment successful. Preparing your report…", {
         id: "cibil-payment",
       });
       setAutoPdfPreparing(true);
-      await downloadCibilPdf(true);
+      await downloadCibilPdf(true, rzp);
     } catch (e: unknown) {
       const msg =
         e instanceof Error && e.message?.trim()
@@ -556,12 +577,12 @@ const CheckCibilScore = () => {
     try {
       await ensureLeadSavedBeforePayment();
       toast.loading("Opening Razorpay payment…", { id: "cibil-payment-manual" });
-      await startRazorpayPayment();
+      const rzp = await startRazorpayPayment();
       toast.success("Payment successful. Preparing your report…", {
         id: "cibil-payment-manual",
       });
       setAutoPdfPreparing(true);
-      await downloadCibilPdf(true);
+      await downloadCibilPdf(true, rzp);
     } catch (e: unknown) {
       const msg =
         e instanceof Error && e.message?.trim()
@@ -617,6 +638,7 @@ const CheckCibilScore = () => {
     });
     setAadhaarFile(null);
     setPanFile(null);
+    intakeAadhaarDocPathRef.current = null;
     if (aadhaarInputRef.current) aadhaarInputRef.current.value = "";
     if (panInputRef.current) panInputRef.current.value = "";
   };
