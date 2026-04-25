@@ -154,8 +154,8 @@ const CheckCibilScore = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   /** Full-screen message while auto PDF is fetched so the user knows to wait. */
   const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
-  /** Dialog state kept for compatibility with existing UI */
-  const [precheckRunning, setPrecheckRunning] = useState(false);
+  /** Kept for compatibility with existing UI copy and button states */
+  const [precheckRunning] = useState(false);
   const [leadSaved, setLeadSaved] = useState(false);
 
   const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
@@ -200,69 +200,26 @@ const CheckCibilScore = () => {
     });
   };
 
-  /**
-   * Save KYC details to backend/admin before payment:
-   * - Aadhaar number
-   * - PAN number
-   * - uploaded Aadhaar/PAN files
-   */
-  const saveCibilLeadAndDocs = async () => {
-    const formData = new FormData();
-    formData.append("source", "Website");
-    formData.append("source_page", "CIBIL Score");
-    formData.append("customer_name", form.name.trim());
-    formData.append("customer_mobile", form.mobile.trim());
-    formData.append("customer_pan", form.pan.trim().toUpperCase());
-    formData.append("customer_aadhaar", form.aadhaar.trim());
-    formData.append("name", form.name.trim());
-    formData.append("mobile", form.mobile.trim());
-    formData.append("pan", form.pan.trim().toUpperCase());
-    formData.append("aadhaar", form.aadhaar.trim());
-    formData.append("consent", "Y");
-    formData.append("lead_type", "cibil");
-    if (aadhaarFile) {
-      formData.append("aadhaar_file", aadhaarFile);
-      formData.append("document_aadhaar", aadhaarFile);
-      formData.append("aadhaar_card", aadhaarFile);
-    }
-    if (panFile) {
-      formData.append("pan_file", panFile);
-      formData.append("document_pan", panFile);
-      formData.append("pan_card", panFile);
-    }
-
-    // Try primary + fallback endpoints to preserve existing backend compatibility.
-    const endpoints = [
-      `${PAYMENTS_BASE}/cibil-intake`,
-      `${PAYMENTS_BASE}/precheck`,
-      `${PAYMENTS_BASE}/lead-intake`,
-      "https://api.patliputragroup.com/leads",
-    ];
-
-    let lastError = "Unable to save lead details.";
-    for (const endpoint of endpoints) {
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          body: formData,
-        });
-        const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-        if (res.ok && data.ok !== false && data.success !== false) {
-          return;
-        }
-        lastError = pickApiError(
-          data,
-          `Lead upload failed at ${new URL(endpoint).pathname}.`
-        );
-      } catch (e: unknown) {
-        lastError =
-          e instanceof Error && e.message?.trim()
-            ? e.message
-            : "Lead upload failed.";
-      }
-    }
-
-    throw new Error(lastError);
+  const saveCibilLeadAndDocs = async (): Promise<boolean> => {
+    // Keep this single and lightweight so payment flow never gets blocked by retry storms.
+    const payload = {
+      source: "Website",
+      source_page: "CIBIL Score",
+      customer_name: form.name.trim(),
+      customer_mobile: form.mobile.trim(),
+      customer_district: "Patna",
+      customer_pan: form.pan.trim().toUpperCase(),
+      note: `CIBIL lead | Aadhaar: ${form.aadhaar.trim()} | Aadhaar file: ${
+        aadhaarFile?.name ?? "Not uploaded"
+      } | PAN file: ${panFile?.name ?? "Not uploaded"}`,
+    };
+    const res = await fetch("https://api.patliputragroup.com/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    return res.ok && data.success !== false && data.ok !== false;
   };
 
   const createRazorpayOrder = async () => {
@@ -384,20 +341,62 @@ const CheckCibilScore = () => {
 
   const ensureLeadSavedBeforePayment = async () => {
     if (leadSaved) return;
-    setPrecheckRunning(true);
     try {
-      toast.loading("Saving Aadhaar details and uploaded documents…", {
+      toast.loading("Saving your details in admin…", {
         id: "cibil-lead-save",
       });
-      await saveCibilLeadAndDocs();
-      setLeadSaved(true);
-      toast.success("Details saved to admin panel successfully.", {
+      const saved = await Promise.race<boolean>([
+        saveCibilLeadAndDocs(),
+        new Promise<boolean>((resolve) => {
+          window.setTimeout(() => resolve(false), 2500);
+        }),
+      ]);
+      if (saved) {
+        setLeadSaved(true);
+        toast.success("Details saved to admin panel successfully.", {
+          id: "cibil-lead-save",
+        });
+      } else {
+        toast.warning("Admin save skipped. Continuing to payment.", {
+          id: "cibil-lead-save",
+        });
+      }
+    } catch {
+      // Do not block Razorpay if admin endpoint is unavailable.
+      toast.warning("Could not save to admin right now. Continuing to payment.", {
         id: "cibil-lead-save",
       });
-    } finally {
-      // Important: close precheck overlay before opening Razorpay checkout.
-      setPrecheckRunning(false);
     }
+  };
+
+  const validateCibilForm = () => {
+    const name = form.name.trim();
+    const mobile = form.mobile.replace(/\D/g, "");
+    const pan = form.pan.trim().toUpperCase();
+    const aadhaar = form.aadhaar.replace(/\D/g, "").slice(0, 12);
+
+    if (!name) {
+      toast.warning("Please enter full name.");
+      return false;
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+      toast.warning("Please enter a valid 10-digit mobile number.");
+      return false;
+    }
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+      toast.warning("Please enter a valid PAN number.");
+      return false;
+    }
+    if (aadhaar.length !== 12) {
+      toast.warning("Please enter a valid 12-digit Aadhaar number.");
+      return false;
+    }
+    if (!aadhaarFile) {
+      toast.warning("Please upload your Aadhaar card (PDF, PNG, or JPG).");
+      return false;
+    }
+
+    return true;
   };
 
   const downloadCibilPdf = async (fromAuto = false) => {
@@ -524,18 +523,7 @@ const CheckCibilScore = () => {
           : "bg-amber-500/15 text-amber-800 dark:text-amber-200";
 
   const handleCheckCibil = async () => {
-    if (!form.name || !form.mobile || !form.pan) {
-      toast.warning("Please fill all required fields");
-      return;
-    }
-
-    const aadhaar12 = form.aadhaar.replace(/\D/g, "").slice(0, 12);
-    if (aadhaar12.length !== 12) {
-      toast.warning("Please enter a valid 12-digit Aadhaar number");
-      return;
-    }
-    if (!aadhaarFile) {
-      toast.warning("Please upload your Aadhaar card (PDF, PNG, or JPG)");
+    if (!validateCibilForm()) {
       return;
     }
     setLoading(true);
@@ -563,6 +551,7 @@ const CheckCibilScore = () => {
 
   const handleDownloadPdf = async () => {
     if (pdfDownloaded || paymentLoading) return;
+    if (!validateCibilForm()) return;
     setPaymentLoading(true);
     try {
       await ensureLeadSavedBeforePayment();
