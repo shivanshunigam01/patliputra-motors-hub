@@ -96,6 +96,32 @@ function CibilScoreRing({
   );
 }
 
+/** Prefer server / Surepass fields so toasts show the real API message. */
+function pickApiError(
+  body: Record<string, unknown> | null | undefined,
+  fallback: string
+): string {
+  if (!body || typeof body !== "object") return fallback;
+  const data = body.data;
+  const dataObj =
+    data != null && typeof data === "object" && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : null;
+  const candidates = [
+    body.error,
+    body.message,
+    body.details,
+    dataObj?.error,
+    dataObj?.message,
+  ];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  const code = body.message_code;
+  if (typeof code === "string" && code.trim()) return code.trim();
+  return fallback;
+}
+
 const CheckCibilScore = () => {
   type RazorpayCtor = new (
     options: Record<string, unknown>
@@ -196,18 +222,20 @@ const CheckCibilScore = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        const preData = (await preRes.json().catch(() => ({}))) as {
-          ok?: boolean;
-          precheck_id?: string;
-          error?: string;
-        };
+        const preData = (await preRes.json().catch(() => ({}))) as Record<
+          string,
+          unknown
+        >;
         lastStatus = preRes.status;
-        if (preRes.ok && preData?.ok && preData?.precheck_id) {
-          return { ok: true, data: preData as { ok: true; precheck_id: string } };
+        if (preRes.ok && preData?.ok === true && typeof preData.precheck_id === "string") {
+          return {
+            ok: true,
+            data: preData as { ok: true; precheck_id: string },
+          };
         }
         const retriable =
           [502, 503, 504].includes(preRes.status) ||
-          (preData as { retry_suggested?: boolean })?.retry_suggested;
+          preData?.retry_suggested === true;
         if (retriable && attempt < max - 1) {
           if (attempt === 0) {
             toast.info("Connection hiccup — retrying…", { id: "cibil-retry" });
@@ -215,7 +243,11 @@ const CheckCibilScore = () => {
           await sleep(baseDelay * (attempt + 1));
           continue;
         }
-        return { ok: false, data: preData, status: preRes.status };
+        const msg = pickApiError(
+          preData,
+          `Verification failed (${preRes.status}). Please try again.`
+        );
+        return { ok: false, data: { error: msg }, status: preRes.status };
       } catch (e) {
         const err = e as { message?: string; name?: string };
         if (attempt < max - 1) {
@@ -292,9 +324,9 @@ const CheckCibilScore = () => {
         body: JSON.stringify(payload),
       });
 
-      let data: { ok?: boolean; credit_report_link?: string; error?: string };
+      let data: Record<string, unknown>;
       try {
-        data = await res.json();
+        data = (await res.json()) as Record<string, unknown>;
       } catch {
         toast.error(
           fromAuto
@@ -305,26 +337,32 @@ const CheckCibilScore = () => {
         return;
       }
 
-      if (!res.ok || !data.ok || !data.credit_report_link) {
-        const errMsg = fromAuto
+      const pdfLink = data.credit_report_link;
+      const hasLink = typeof pdfLink === "string" && pdfLink.trim();
+
+      if (!res.ok || !data.ok || !hasLink) {
+        const fallback = fromAuto
           ? "Automatic PDF download failed. Use the button below to try again."
-          : data?.error || `Failed to generate CIBIL PDF (${res.status})`;
-        toast.error(errMsg, { id: toastId });
+          : `Failed to generate CIBIL PDF (${res.status})`;
+        toast.error(pickApiError(data, fallback), { id: toastId });
         return;
       }
 
       toast.success("CIBIL PDF ready", { id: toastId });
 
-      openPdfInNewTab(data.credit_report_link);
+      openPdfInNewTab(String(pdfLink).trim());
       setPdfDownloaded(true);
       if (fromAuto) {
         clearFormForNextApplication();
       }
-    } catch {
-      toast.error(
-        fromAuto ? "Automatic PDF download failed. Use the button below to try again." : "PDF download failed",
-        { id: toastId }
-      );
+    } catch (e: unknown) {
+      const net =
+        e instanceof Error && e.message?.trim()
+          ? e.message
+          : fromAuto
+            ? "Automatic PDF download failed. Use the button below to try again."
+            : "PDF download failed";
+      toast.error(net, { id: toastId });
     } finally {
       setPdfLoading(false);
       if (fromAuto) {
@@ -411,11 +449,9 @@ const CheckCibilScore = () => {
 
       const pre = await postCibilPrecheck(precheckBody);
       if (!pre.ok) {
-        const preError =
-          typeof pre.data?.error === "string" ? pre.data.error : undefined;
         toast.error(
-          preError ||
-            "We could not verify your details. Check your name, mobile, and PAN. No payment was made."
+          pre.data?.error ||
+            "We could not verify your details. No payment was made."
         );
         return;
       }
@@ -461,11 +497,16 @@ const CheckCibilScore = () => {
         body: JSON.stringify({ precheck_id: precheckId }),
       });
 
-      const order = await orderRes.json();
+      const order = (await orderRes.json().catch(() => ({}))) as Record<
+        string,
+        unknown
+      >;
       if (!orderRes.ok || !order.id) {
         toast.error(
-          (order as { error?: string })?.error ||
-            "Could not start payment. Try again."
+          pickApiError(
+            order,
+            `Could not start payment (${orderRes.status}). Try again.`
+          )
         );
         return;
       }
@@ -477,9 +518,12 @@ const CheckCibilScore = () => {
       }
 
       const rzp = new Razorpay({
-        key: order.key_id,
-        order_id: order.id,
-        amount: order.amount,
+        key: String(order.key_id ?? ""),
+        order_id: String(order.id ?? ""),
+        amount:
+          typeof order.amount === "number"
+            ? order.amount
+            : Number(order.amount) || 0,
         currency: "INR",
         name: "Patliputra Group",
         description:
@@ -522,62 +566,80 @@ const CheckCibilScore = () => {
             method: "POST",
             body: fd,
           })
-            .then((r) => r.json())
-            .then(
-              (data: {
-                ok?: boolean;
-                error?: string;
-                score?: number;
-                credit_report_link?: string;
-              }) => {
-                if (!data?.ok) {
-                  toast.error(
-                    data?.error || "Could not complete your CIBIL report. Contact support with your payment id."
-                  );
-                  setAutoPdfPreparing(false);
-                  return;
-                }
-
-                const rawScore = (data as { score?: number | string | null }).score;
-                const parsedScore =
-                  typeof rawScore === "number" && Number.isFinite(rawScore)
-                    ? rawScore
-                    : rawScore != null && String(rawScore).trim() !== ""
-                      ? Number.parseFloat(String(rawScore).replace(/,/g, ""))
-                      : NaN;
-                setScore(Number.isFinite(parsedScore) ? parsedScore : null);
-                setSubmitted(true);
-
-                try {
-                  sessionStorage.removeItem("cibil_precheck_id");
-                } catch {
-                  /* ignore */
-                }
-
-                if (data.credit_report_link) {
-                  openPdfInNewTab(data.credit_report_link);
-                  setPdfDownloaded(true);
-                  toast.success("Credit report PDF opened in a new tab.");
-                  clearFormForNextApplication();
-                } else {
-                  void downloadCibilPdf(true);
-                }
-                setAutoPdfPreparing(false);
+            .then(async (r) => {
+              const text = await r.text();
+              let data: Record<string, unknown> = {};
+              try {
+                data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+              } catch {
+                data = {
+                  error: text?.trim()
+                    ? text.trim().slice(0, 500)
+                    : `Invalid response (${r.status})`,
+                };
               }
-            )
-            .catch((err) => {
+              return { r, data };
+            })
+            .then(({ r, data }) => {
+              if (!data?.ok) {
+                toast.error(
+                  pickApiError(
+                    data,
+                    r.ok
+                      ? "Could not complete your CIBIL report."
+                      : `Could not complete your CIBIL report (${r.status}).`
+                  )
+                );
+                setAutoPdfPreparing(false);
+                return;
+              }
+
+              const rawScore = data.score as number | string | null | undefined;
+              const parsedScore =
+                typeof rawScore === "number" && Number.isFinite(rawScore)
+                  ? rawScore
+                  : rawScore != null && String(rawScore).trim() !== ""
+                    ? Number.parseFloat(String(rawScore).replace(/,/g, ""))
+                    : NaN;
+              setScore(Number.isFinite(parsedScore) ? parsedScore : null);
+              setSubmitted(true);
+
+              try {
+                sessionStorage.removeItem("cibil_precheck_id");
+              } catch {
+                /* ignore */
+              }
+
+              const pdfLink = data.credit_report_link;
+              if (typeof pdfLink === "string" && pdfLink.trim()) {
+                openPdfInNewTab(pdfLink.trim());
+                setPdfDownloaded(true);
+                toast.success("Credit report PDF opened in a new tab.");
+                clearFormForNextApplication();
+              } else {
+                void downloadCibilPdf(true);
+              }
+              setAutoPdfPreparing(false);
+            })
+            .catch((err: unknown) => {
               console.error(err);
-              toast.error(
-                "Payment may have succeeded but we could not finish the report. Please contact support."
-              );
+              const msg =
+                err instanceof Error && err.message?.trim()
+                  ? err.message
+                  : "Payment may have succeeded but we could not finish the report. Please contact support.";
+              toast.error(msg);
               setAutoPdfPreparing(false);
             });
         },
       });
 
       rzp.open();
-    } catch {
-      toast.error("CIBIL check failed");
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error && e.message?.trim()
+          ? e.message
+          : "CIBIL check failed";
+      toast.error(msg);
     } finally {
       setLoading(false);
       setPrecheckRunning(false);
