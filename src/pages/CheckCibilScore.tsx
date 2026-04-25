@@ -35,7 +35,6 @@ import {
 import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 import experianLogo from "@/assets/cibil-experian-logo.png";
-import cibilBureauLogo from "@/assets/cibil-bureau-logo.png";
 
 function CibilScoreRing({
   score,
@@ -123,19 +122,8 @@ function pickApiError(
 }
 
 const CheckCibilScore = () => {
-  type RazorpayCtor = new (
-    options: Record<string, unknown>
-  ) => { open: () => void };
-  const browserWindow = window as Window & { Razorpay?: RazorpayCtor };
-
   const { t } = useLanguage();
-
-  type ReportKind = "experian" | "cibil_credit_report";
-  const [reportKind, setReportKind] = useState<ReportKind>("experian");
-  const [gender, setGender] = useState<"male" | "female" | "other">("male");
   const [feeExperian, setFeeExperian] = useState(79);
-  const [feeCibil, setFeeCibil] = useState(125);
-  const [checkoutInr, setCheckoutInr] = useState<number | null>(null);
 
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
   const [panFile, setPanFile] = useState<File | null>(null);
@@ -157,34 +145,14 @@ const CheckCibilScore = () => {
   const [pdfDownloaded, setPdfDownloaded] = useState(false);
   /** Full-screen message while auto PDF is fetched so the user knows to wait. */
   const [autoPdfPreparing, setAutoPdfPreparing] = useState(false);
-  /** Surepass CIBIL + PDF pre-check (no charge) before Razorpay. */
+  /** Dialog state kept for compatibility with existing UI */
   const [precheckRunning, setPrecheckRunning] = useState(false);
 
   const PAYMENTS_BASE = "https://api.patliputragroup.com/payments";
 
-  /** Wipe CIBIL-related session keys, full reload the route — clean form, modals, uploads, and React state. */
-  function startFreshCibilPage() {
-    try {
-      sessionStorage.removeItem("cibil_precheck_id");
-    } catch {
-      /* ignore */
-    }
-    try {
-      toast.dismiss();
-    } catch {
-      /* ignore */
-    }
-    window.location.reload();
-  }
-
   useEffect(() => {
     // Only Experian PDF flow is active right now.
   }, []);
-
-  const displayFeeInr =
-    reportKind === "cibil_credit_report" ? feeCibil : feeExperian;
-
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const openPdfInNewTab = (href: string) => {
     const link = document.createElement("a");
@@ -316,8 +284,6 @@ const CheckCibilScore = () => {
           ? "bg-leyland/10 text-leyland"
           : "bg-amber-500/15 text-amber-800 dark:text-amber-200";
 
-  const loadRazorpay = (): Promise<boolean> => Promise.resolve(false);
-
   const handleCheckCibil = async () => {
     if (!form.name || !form.mobile || !form.pan) {
       toast.warning("Please fill all required fields");
@@ -333,11 +299,6 @@ const CheckCibilScore = () => {
       toast.warning("Please upload your Aadhaar card (PDF, PNG, or JPG)");
       return;
     }
-    if (reportKind === "cibil_credit_report" && !gender) {
-      toast.warning(t("cibil.genderLabel"));
-      return;
-    }
-
     setLoading(true);
     try {
       await downloadCibilPdf(false);
@@ -397,7 +358,6 @@ const CheckCibilScore = () => {
     setPanFile(null);
     if (aadhaarInputRef.current) aadhaarInputRef.current.value = "";
     if (panInputRef.current) panInputRef.current.value = "";
-    setCheckoutInr(null);
   };
 
   return (
@@ -523,21 +483,16 @@ const CheckCibilScore = () => {
                   </div>
 
                   <p className="mb-4 text-pretty text-sm leading-relaxed text-muted-foreground sm:mb-5 sm:text-base">
-                    {t("cibil.apiChoiceIntro")}
+                    Experian credit report (PDF) is currently active.
                   </p>
 
-                  <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+                  <div className="mb-4 grid grid-cols-1 gap-3 sm:gap-4">
                     <button
                       type="button"
-                      onClick={() => {
-                        setReportKind("experian");
-                        setCheckoutInr(null);
-                      }}
+                      onClick={() => {}}
                       className={cn(
                         "group flex min-h-[200px] flex-col rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.99] sm:min-h-[220px] sm:p-5",
-                        reportKind === "experian"
-                          ? "border-jcb bg-jcb/5 shadow-md ring-2 ring-jcb/25"
-                          : "border-border/80 bg-background/50 hover:border-jcb/50 hover:shadow-sm"
+                        "border-jcb bg-jcb/5 shadow-md ring-2 ring-jcb/25"
                       )}
                     >
                       <div className="mb-3 flex min-h-[4.25rem] items-center justify-center rounded-xl border border-border/50 bg-white px-3 py-2.5 shadow-sm sm:min-h-[4.5rem]">
@@ -558,85 +513,13 @@ const CheckCibilScore = () => {
                           {t("cibil.rupee")}
                           {feeExperian}
                         </p>
-                        {reportKind === "experian" && (
-                          <CheckCircle2
-                            className="h-5 w-5 shrink-0 text-jcb"
-                            aria-hidden
-                          />
-                        )}
-                      </div>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setReportKind("cibil_credit_report");
-                        setCheckoutInr(null);
-                      }}
-                      className={cn(
-                        "group flex min-h-[200px] flex-col rounded-2xl border-2 p-4 text-left transition-all active:scale-[0.99] sm:min-h-[220px] sm:p-5",
-                        reportKind === "cibil_credit_report"
-                          ? "border-jcb bg-jcb/5 shadow-md ring-2 ring-jcb/25"
-                          : "border-border/80 bg-background/50 hover:border-jcb/50 hover:shadow-sm"
-                      )}
-                    >
-                      <div className="mb-3 flex min-h-[5rem] items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 px-2 py-2.5 shadow-inner sm:min-h-[5.5rem]">
-                        <img
-                          src={cibilBureauLogo}
-                          alt="CIBIL"
-                          className="max-h-[4.5rem] w-full object-contain object-center sm:max-h-[5rem]"
+                        <CheckCircle2
+                          className="h-5 w-5 shrink-0 text-jcb"
+                          aria-hidden
                         />
-                      </div>
-                      <p className="font-semibold text-foreground">
-                        {t("cibil.apiCibilTitle")}
-                      </p>
-                      <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                        {t("cibil.apiCibilDescription")}
-                      </p>
-                      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                        <p className="text-sm font-bold text-jcb sm:text-base">
-                          {t("cibil.rupee")}
-                          {feeCibil}
-                        </p>
-                        {reportKind === "cibil_credit_report" && (
-                          <CheckCircle2
-                            className="h-5 w-5 shrink-0 text-jcb"
-                            aria-hidden
-                          />
-                        )}
                       </div>
                     </button>
                   </div>
-
-                  {reportKind === "cibil_credit_report" && (
-                    <div className="mb-5">
-                      <label className="mb-2 block text-sm font-medium text-foreground">
-                        {t("cibil.genderLabel")}
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        {(
-                          [
-                            ["male", t("cibil.genderMale")],
-                            ["female", t("cibil.genderFemale")],
-                            ["other", t("cibil.genderOther")],
-                          ] as const
-                        ).map(([v, label]) => (
-                          <button
-                            key={v}
-                            type="button"
-                            onClick={() => setGender(v)}
-                            className={cn(
-                              "min-h-10 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all active:scale-[0.98]",
-                              gender === v
-                                ? "border-jcb bg-jcb text-jcb-foreground shadow-sm"
-                                : "border-border/80 bg-background text-muted-foreground hover:border-jcb/40 hover:bg-muted/60"
-                            )}
-                          >
-                            {label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   <div className="space-y-4">
                     <Input
@@ -780,7 +663,7 @@ const CheckCibilScore = () => {
                       ) : (
                         t("cibil.payCta").replace(
                           "{amount}",
-                          String(checkoutInr ?? displayFeeInr)
+                          String(feeExperian)
                         )
                       )}
                     </Button>
