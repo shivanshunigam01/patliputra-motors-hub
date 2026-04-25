@@ -178,104 +178,13 @@ const CheckCibilScore = () => {
   }
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetch(`${PAYMENTS_BASE}/cibil-pricing`);
-        const j = (await r.json()) as {
-          ok?: boolean;
-          experian_in_inr?: number;
-          cibil_credit_report_in_inr?: number;
-        };
-        if (cancelled || !j?.ok) return;
-        if (typeof j.experian_in_inr === "number")
-          setFeeExperian(j.experian_in_inr);
-        if (typeof j.cibil_credit_report_in_inr === "number")
-          setFeeCibil(j.cibil_credit_report_in_inr);
-      } catch {
-        /* keep defaults */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    // Only Experian PDF flow is active right now.
   }, []);
 
   const displayFeeInr =
     reportKind === "cibil_credit_report" ? feeCibil : feeExperian;
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-  /** CIBIL precheck: transient 502/503/504 and browser network flakiness. */
-  async function postCibilPrecheck(
-    body: Record<string, string>
-  ): Promise<
-    { ok: true; data: { ok: true; precheck_id: string;[k: string]: unknown } } | { ok: false; data: { error?: string }; status: number }
-  > {
-    const max = 3;
-    const baseDelay = 800;
-    let lastStatus = 0;
-    for (let attempt = 0; attempt < max; attempt += 1) {
-      try {
-        const preRes = await fetch(`${PAYMENTS_BASE}/cibil-precheck`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const preData = (await preRes.json().catch(() => ({}))) as Record<
-          string,
-          unknown
-        >;
-        lastStatus = preRes.status;
-        if (preRes.ok && preData?.ok === true && typeof preData.precheck_id === "string") {
-          return {
-            ok: true,
-            data: preData as { ok: true; precheck_id: string },
-          };
-        }
-        const retriable =
-          [502, 503, 504].includes(preRes.status) ||
-          preData?.retry_suggested === true;
-        if (retriable && attempt < max - 1) {
-          if (attempt === 0) {
-            toast.info("Connection hiccup — retrying…", { id: "cibil-retry" });
-          }
-          await sleep(baseDelay * (attempt + 1));
-          continue;
-        }
-        const msg = pickApiError(
-          preData,
-          `Verification failed (${preRes.status}). Please try again.`
-        );
-        return { ok: false, data: { error: msg }, status: preRes.status };
-      } catch (e) {
-        const err = e as { message?: string; name?: string };
-        if (attempt < max - 1) {
-          if (attempt === 0) {
-            toast.info("Connection interrupted — retrying…", { id: "cibil-retry" });
-          }
-          await sleep(baseDelay * (attempt + 1));
-          continue;
-        }
-        const raw = err?.message || "Network error";
-        const human =
-          /ECONNRESET|Failed to fetch|Load failed|network/i.test(raw) ||
-          err?.name === "TypeError"
-            ? "Connection was interrupted. Check your network and try again."
-            : raw;
-        return {
-          ok: false,
-          data: { error: human },
-          status: lastStatus || 0,
-        };
-      }
-    }
-    return {
-      ok: false,
-      data: { error: "Request failed after several tries. Please try again." },
-      status: lastStatus,
-    };
-  }
 
   const openPdfInNewTab = (href: string) => {
     const link = document.createElement("a");
@@ -288,86 +197,96 @@ const CheckCibilScore = () => {
   };
 
   const downloadCibilPdf = async (fromAuto = false) => {
-    if (pdfDownloaded) return;
+    if (!form.name || !form.mobile || !form.pan) {
+      toast.error("Please fill name, mobile, and PAN before generating PDF.");
+      return;
+    }
 
     setPdfLoading(true);
     const toastId = fromAuto ? "cibil-pdf-auto" : "cibil-pdf";
     if (!fromAuto) {
-      toast.loading("Generating CIBIL PDF…", { id: toastId });
+      toast.loading("Generating credit report PDF…", { id: toastId });
     }
 
     try {
-      const isCibilCredit = reportKind === "cibil_credit_report";
-      const url = isCibilCredit
-        ? `${PAYMENTS_BASE}/cibil-credit-pdf`
-        : `${PAYMENTS_BASE}/experian-pdf`;
-      const payload = isCibilCredit
-        ? {
-            name: form.name,
-            mobile: form.mobile,
-            pan: form.pan,
-            gender,
-            consent: "Y",
-          }
-        : {
-            name: form.name,
-            mobile: form.mobile,
-            pan: form.pan,
-            consent: "Y",
-          };
-
-      const res = await fetch(url, {
+      console.log("[cibil-ui] /experian-pdf request start", {
+        name: form.name,
+        mobile: form.mobile,
+        pan: form.pan,
+      });
+      const res = await fetch(`${PAYMENTS_BASE}/experian-pdf`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: form.name,
+          mobile: form.mobile,
+          pan: form.pan,
+          consent: "Y",
+        }),
+      });
+      console.log("[cibil-ui] /experian-pdf response received", {
+        status: res.status,
+        ok: res.ok,
       });
 
-      let data: Record<string, unknown>;
-      try {
-        data = (await res.json()) as Record<string, unknown>;
-      } catch {
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      console.log("[cibil-ui] /experian-pdf payload summary", {
+        ok: data.ok === true,
+        hasScore: data.score != null,
+        hasLink:
+          typeof data.credit_report_link === "string" &&
+          String(data.credit_report_link).trim().length > 0,
+        error:
+          typeof data.error === "string"
+            ? data.error
+            : typeof data.message === "string"
+              ? data.message
+              : undefined,
+      });
+      if (!res.ok || data.ok !== true) {
         toast.error(
-          fromAuto
-            ? "Automatic PDF download failed. Use the button below to try again."
-            : "Invalid response from server",
+          pickApiError(
+            data,
+            `Failed to generate report PDF (${res.status}).`
+          ),
           { id: toastId }
         );
         return;
       }
 
-      const pdfLink = data.credit_report_link;
-      const hasLink = typeof pdfLink === "string" && pdfLink.trim();
+      const rawScore = data.score as number | string | null | undefined;
+      const parsedScore =
+        typeof rawScore === "number" && Number.isFinite(rawScore)
+          ? rawScore
+          : rawScore != null && String(rawScore).trim() !== ""
+            ? Number.parseFloat(String(rawScore).replace(/,/g, ""))
+            : NaN;
+      setScore(Number.isFinite(parsedScore) ? parsedScore : null);
+      setSubmitted(true);
 
-      if (!res.ok || !data.ok || !hasLink) {
-        const fallback = fromAuto
-          ? "Automatic PDF download failed. Use the button below to try again."
-          : `Failed to generate CIBIL PDF (${res.status})`;
-        toast.error(pickApiError(data, fallback), { id: toastId });
+      const pdfLink = data.credit_report_link;
+      if (typeof pdfLink === "string" && pdfLink.trim()) {
+        openPdfInNewTab(pdfLink.trim());
+        setPdfDownloaded(true);
+        toast.success("Credit report PDF opened in a new tab.", { id: toastId });
         return;
       }
 
-      toast.success("CIBIL PDF ready", { id: toastId });
-
-      openPdfInNewTab(String(pdfLink).trim());
-      setPdfDownloaded(true);
-      if (fromAuto) {
-        clearFormForNextApplication();
-      }
+      toast.error(
+        pickApiError(data, "Credit report link not found in provider response."),
+        { id: toastId }
+      );
     } catch (e: unknown) {
-      const net =
+      const msg =
         e instanceof Error && e.message?.trim()
           ? e.message
-          : fromAuto
-            ? "Automatic PDF download failed. Use the button below to try again."
-            : "PDF download failed";
-      toast.error(net, { id: toastId });
+          : "Failed to generate credit report PDF.";
+      toast.error(msg, { id: toastId });
     } finally {
       setPdfLoading(false);
-      if (fromAuto) {
-        setAutoPdfPreparing(false);
-      }
+      if (fromAuto) setAutoPdfPreparing(false);
     }
   };
 
@@ -397,17 +316,7 @@ const CheckCibilScore = () => {
           ? "bg-leyland/10 text-leyland"
           : "bg-amber-500/15 text-amber-800 dark:text-amber-200";
 
-  const loadRazorpay = (): Promise<boolean> => {
-    return new Promise((resolve) => {
-      if (browserWindow.Razorpay) return resolve(true);
-
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
+  const loadRazorpay = (): Promise<boolean> => Promise.resolve(false);
 
   const handleCheckCibil = async () => {
     if (!form.name || !form.mobile || !form.pan) {
@@ -430,219 +339,10 @@ const CheckCibilScore = () => {
     }
 
     setLoading(true);
-    setPrecheckRunning(true);
-
-    let precheckId: string;
-
     try {
-      const precheckBody: Record<string, string> = {
-        name: form.name,
-        mobile: form.mobile,
-        pan: form.pan,
-        aadhaar: aadhaar12,
-        consent: "Y",
-        report_kind: reportKind,
-      };
-      if (reportKind === "cibil_credit_report") {
-        precheckBody.gender = gender;
-      }
-
-      const pre = await postCibilPrecheck(precheckBody);
-      if (!pre.ok) {
-        toast.error(
-          pre.data?.error ||
-            "We could not verify your details. No payment was made."
-        );
-        return;
-      }
-
-      const preData = pre.data;
-      if (!preData.precheck_id) {
-        toast.error("Verification incomplete. Please try again.");
-        return;
-      }
-
-      precheckId = preData.precheck_id;
-      const amt = (preData as { amount_in_inr?: number }).amount_in_inr;
-      if (typeof amt === "number") setCheckoutInr(amt);
-      else
-        setCheckoutInr(
-          reportKind === "cibil_credit_report" ? feeCibil : feeExperian
-        );
-      toast.dismiss("cibil-retry");
-      try {
-        sessionStorage.setItem("cibil_precheck_id", precheckId);
-      } catch {
-        /* ignore */
-      }
-
-      setPrecheckRunning(false);
-
-      const sdkOk = await loadRazorpay();
-      if (!sdkOk) {
-        toast.error("Razorpay SDK failed to load");
-        return;
-      }
-
-      const nameSnap = form.name;
-      const mobileSnap = form.mobile;
-      const panSnap = form.pan;
-      const aadhaarSnap = aadhaar12;
-      const aadhaarFileSnap = aadhaarFile;
-      const reportKindSnap = reportKind;
-
-      const orderRes = await fetch(`${PAYMENTS_BASE}/razorpay/order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ precheck_id: precheckId }),
-      });
-
-      const order = (await orderRes.json().catch(() => ({}))) as Record<
-        string,
-        unknown
-      >;
-      if (!orderRes.ok || !order.id) {
-        toast.error(
-          pickApiError(
-            order,
-            `Could not start payment (${orderRes.status}). Try again.`
-          )
-        );
-        return;
-      }
-
-      const Razorpay = browserWindow.Razorpay;
-      if (!Razorpay) {
-        toast.error("Razorpay SDK failed to initialize");
-        return;
-      }
-
-      const rzp = new Razorpay({
-        key: String(order.key_id ?? ""),
-        order_id: String(order.id ?? ""),
-        amount:
-          typeof order.amount === "number"
-            ? order.amount
-            : Number(order.amount) || 0,
-        currency: "INR",
-        name: "Patliputra Group",
-        description:
-          reportKindSnap === "cibil_credit_report"
-            ? "CIBIL Credit Report PDF"
-            : "Experian CIBIL Check",
-        prefill: {
-          name: form.name,
-          contact: form.mobile,
-        },
-        theme: {
-          color: "#facc15",
-        },
-        handler: function (resp: {
-          razorpay_order_id: string;
-          razorpay_payment_id: string;
-          razorpay_signature: string;
-        }) {
-          setAutoPdfPreparing(true);
-
-          if (!aadhaarFileSnap) {
-            toast.error("Aadhaar document is required. Please start again and upload your Aadhaar file.");
-            setAutoPdfPreparing(false);
-            return;
-          }
-
-          const fd = new FormData();
-          fd.append("razorpay_order_id", resp.razorpay_order_id);
-          fd.append("razorpay_payment_id", resp.razorpay_payment_id);
-          fd.append("razorpay_signature", resp.razorpay_signature);
-          fd.append("precheck_id", precheckId);
-          fd.append("name", nameSnap);
-          fd.append("mobile", mobileSnap);
-          fd.append("pan", panSnap);
-          fd.append("aadhaar", aadhaarSnap);
-          fd.append("aadhaar_document", aadhaarFileSnap);
-          fd.append("report_kind", reportKindSnap);
-
-          fetch(`${PAYMENTS_BASE}/razorpay/verify-cibil`, {
-            method: "POST",
-            body: fd,
-          })
-            .then(async (r) => {
-              const text = await r.text();
-              let data: Record<string, unknown> = {};
-              try {
-                data = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-              } catch {
-                data = {
-                  error: text?.trim()
-                    ? text.trim().slice(0, 500)
-                    : `Invalid response (${r.status})`,
-                };
-              }
-              return { r, data };
-            })
-            .then(({ r, data }) => {
-              if (!data?.ok) {
-                toast.error(
-                  pickApiError(
-                    data,
-                    r.ok
-                      ? "Could not complete your CIBIL report."
-                      : `Could not complete your CIBIL report (${r.status}).`
-                  )
-                );
-                setAutoPdfPreparing(false);
-                return;
-              }
-
-              const rawScore = data.score as number | string | null | undefined;
-              const parsedScore =
-                typeof rawScore === "number" && Number.isFinite(rawScore)
-                  ? rawScore
-                  : rawScore != null && String(rawScore).trim() !== ""
-                    ? Number.parseFloat(String(rawScore).replace(/,/g, ""))
-                    : NaN;
-              setScore(Number.isFinite(parsedScore) ? parsedScore : null);
-              setSubmitted(true);
-
-              try {
-                sessionStorage.removeItem("cibil_precheck_id");
-              } catch {
-                /* ignore */
-              }
-
-              const pdfLink = data.credit_report_link;
-              if (typeof pdfLink === "string" && pdfLink.trim()) {
-                openPdfInNewTab(pdfLink.trim());
-                setPdfDownloaded(true);
-                toast.success("Credit report PDF opened in a new tab.");
-                clearFormForNextApplication();
-              } else {
-                void downloadCibilPdf(true);
-              }
-              setAutoPdfPreparing(false);
-            })
-            .catch((err: unknown) => {
-              console.error(err);
-              const msg =
-                err instanceof Error && err.message?.trim()
-                  ? err.message
-                  : "Payment may have succeeded but we could not finish the report. Please contact support.";
-              toast.error(msg);
-              setAutoPdfPreparing(false);
-            });
-        },
-      });
-
-      rzp.open();
-    } catch (e: unknown) {
-      const msg =
-        e instanceof Error && e.message?.trim()
-          ? e.message
-          : "CIBIL check failed";
-      toast.error(msg);
+      await downloadCibilPdf(false);
     } finally {
       setLoading(false);
-      setPrecheckRunning(false);
     }
   };
 
