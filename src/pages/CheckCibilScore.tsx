@@ -382,6 +382,24 @@ const CheckCibilScore = () => {
     });
   };
 
+  const ensureLeadSavedBeforePayment = async () => {
+    if (leadSaved) return;
+    setPrecheckRunning(true);
+    try {
+      toast.loading("Saving Aadhaar details and uploaded documents…", {
+        id: "cibil-lead-save",
+      });
+      await saveCibilLeadAndDocs();
+      setLeadSaved(true);
+      toast.success("Details saved to admin panel successfully.", {
+        id: "cibil-lead-save",
+      });
+    } finally {
+      // Important: close precheck overlay before opening Razorpay checkout.
+      setPrecheckRunning(false);
+    }
+  };
+
   const downloadCibilPdf = async (fromAuto = false) => {
     if (!form.name || !form.mobile || !form.pan) {
       toast.error("Please fill name, mobile, and PAN before generating PDF.");
@@ -522,18 +540,8 @@ const CheckCibilScore = () => {
     }
     setLoading(true);
     setPaymentLoading(true);
-    setPrecheckRunning(true);
     try {
-      if (!leadSaved) {
-        toast.loading("Saving Aadhaar details and uploaded documents…", {
-          id: "cibil-lead-save",
-        });
-        await saveCibilLeadAndDocs();
-        setLeadSaved(true);
-        toast.success("Details saved to admin panel successfully.", {
-          id: "cibil-lead-save",
-        });
-      }
+      await ensureLeadSavedBeforePayment();
       toast.loading("Opening Razorpay payment…", { id: "cibil-payment" });
       await startRazorpayPayment();
       toast.success("Payment successful. Preparing your report…", {
@@ -548,7 +556,6 @@ const CheckCibilScore = () => {
           : "Unable to complete payment.";
       toast.error(msg, { id: "cibil-payment" });
     } finally {
-      setPrecheckRunning(false);
       setPaymentLoading(false);
       setLoading(false);
     }
@@ -558,6 +565,7 @@ const CheckCibilScore = () => {
     if (pdfDownloaded || paymentLoading) return;
     setPaymentLoading(true);
     try {
+      await ensureLeadSavedBeforePayment();
       toast.loading("Opening Razorpay payment…", { id: "cibil-payment-manual" });
       await startRazorpayPayment();
       toast.success("Payment successful. Preparing your report…", {
