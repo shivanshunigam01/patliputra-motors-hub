@@ -29,6 +29,11 @@ import { AdminSettingsProvider } from "./context/AdminSettingsContext";
 import ProductDetail from "./pages/ProductDetail";
 import { LeadReviewPage } from "./pages/LeadReviewPage";
 import CareersPage from "./pages/CareersPage";
+import JcbServiceKit100Page from "./pages/jcbServiceKits/JcbServiceKit100Page";
+import JcbServiceKit500Page from "./pages/jcbServiceKits/JcbServiceKit500Page";
+import JcbServiceKit1000Page from "./pages/jcbServiceKits/JcbServiceKit1000Page";
+import JcbServiceKit1500Page from "./pages/jcbServiceKits/JcbServiceKit1500Page";
+import JcbServiceKit2000Page from "./pages/jcbServiceKits/JcbServiceKit2000Page";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +66,11 @@ const App = () => (
               <Route path="/dealer-locator" element={<DealerLocatorPage />} />
               <Route path="/service-warranty" element={<ServiceWarrantyPage />} />
               <Route path="/parts-lubricants" element={<PartsLubricantsPage />} />
+              <Route path="/jcb-service-kit/100-hrs" element={<JcbServiceKit100Page />} />
+              <Route path="/jcb-service-kit/500-hrs" element={<JcbServiceKit500Page />} />
+              <Route path="/jcb-service-kit/1000-hrs" element={<JcbServiceKit1000Page />} />
+              <Route path="/jcb-service-kit/1500-hrs" element={<JcbServiceKit1500Page />} />
+              <Route path="/jcb-service-kit/2000-hrs" element={<JcbServiceKit2000Page />} />
               <Route path="/company-album" element={<CompanyAlbumPage />} />
               <Route path="/careers" element={<CareersPage />} />
               <Route path="/review" element={<LeadReviewPage />} />

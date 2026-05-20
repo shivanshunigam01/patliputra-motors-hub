@@ -1,5 +1,4 @@
 import api from "./api";
-import type { ServiceKit } from "@/data/jcbServiceKits";
 
 export interface ServiceKitEnquiryPayload {
   kit_id: string;
@@ -37,11 +36,4 @@ export async function submitServiceKitEnquiry(
     }
     throw err;
   }
-}
-
-export async function fetchServiceKits(): Promise<ServiceKit[]> {
-  const res = await api.get<{ success: boolean; data: ServiceKit[] }>(
-    "/service-kit-enquiries/kits"
-  );
-  return res.data?.data ?? [];
 }

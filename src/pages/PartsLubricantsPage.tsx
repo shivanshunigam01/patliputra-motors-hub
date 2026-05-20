@@ -7,7 +7,6 @@ import { FloatingCTA } from "@/components/FloatingCTA";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
-import { ServiceKitsSection } from "@/components/ServiceKitsSection";
 
 const PartsLubricantsPage = () => {
   const { t } = useLanguage();
@@ -69,8 +68,6 @@ const PartsLubricantsPage = () => {
             </div>
           </div>
         </section>
-
-        <ServiceKitsSection />
 
         <section className="py-16 bg-gradient-to-br from-primary to-secondary">
           <div className="container mx-auto px-4 text-center">
