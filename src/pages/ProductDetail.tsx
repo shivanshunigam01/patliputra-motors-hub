@@ -11,6 +11,11 @@ import { getProducts, Product } from "@/services/products.service";
 import { getImageUrl } from "@/lib/imageUrl";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { BreadcrumbNav } from "@/components/seo/BreadcrumbNav";
+import { productSchema } from "@/seo/schema";
+import { SITE_URL } from "@/seo/siteConfig";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -39,12 +44,44 @@ export default function ProductDetail() {
     );
   }
 
+  const path = `/product/${product.id}`;
+  const description =
+    product.shortDescription ||
+    `${product.name} – ${product.brand} in Bihar. Price, EMI aur enquiry ke liye Patliputra.`;
+  const image = getImageUrl(product.images?.[0]);
+
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={`${product.name} Price Bihar | ${product.brand}`}
+        description={description}
+        path={path}
+        keywords={[product.name, `${product.brand} Bihar`, `${product.name} EMI`]}
+        image={image}
+        type="product"
+      />
+      <JsonLd
+        data={productSchema({
+          name: product.name,
+          description,
+          image,
+          brand: product.brand,
+          sku: product.id,
+          price: product.price,
+          url: `${SITE_URL}${path}`,
+        })}
+      />
       <Navbar />
 
       <main className="pt-20">
         <div className="container mx-auto px-4 py-12">
+          <BreadcrumbNav
+            className="mb-6"
+            items={[
+              { name: product.brand || "Products", path: "/" },
+              { name: product.name },
+            ]}
+          />
 
           {/* Back Button */}
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground mb-6">

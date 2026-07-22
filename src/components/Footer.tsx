@@ -30,9 +30,22 @@ export function Footer() {
     { name: t("nav.offers"), path: "/offers" },
     { name: t("nav.serviceWarranty"), path: "/service-warranty" },
     { name: t("nav.partsLubricants"), path: "/parts-lubricants" },
+    { name: "EMI Calculator", path: "/emi-calculator" },
+    { name: "FAQ", path: "/faq" },
+    { name: "Loan", path: "/loan" },
+    { name: "Blogs", path: "/blogs" },
     { name: t("nav.about"), path: "/about" },
     { name: t("nav.contact"), path: "/contact" },
     { name: t("nav.careers"), path: "/careers" },
+  ];
+
+  const districtSeoLinks = [
+    { name: "JCB Patna", path: "/jcb/patna" },
+    { name: "JCB Muzaffarpur", path: "/jcb/muzaffarpur" },
+    { name: "Ashok Leyland Patna", path: "/ashok-leyland/patna" },
+    { name: "Used JCB Patna", path: "/used-jcb/patna" },
+    { name: "Switch Patna", path: "/switch/patna" },
+    { name: "JCB Gaya", path: "/jcb/gaya" },
   ];
 
    const { settings } = useAdminSettings();
@@ -177,9 +190,31 @@ export function Footer() {
             </ul>
           </div>
         </div>
-      </div>
 
-      {/* Bottom Bar */}
+        {/* Hyperlocal SEO links */}
+        <div className="mt-10 pt-8 border-t border-primary-foreground/10">
+          <h3 className="text-sm font-semibold mb-3 text-primary-foreground/90">
+            Bihar District Pages
+          </h3>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {districtSeoLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-primary-foreground/60 hover:text-jcb transition-colors text-xs"
+              >
+                {link.name}
+              </Link>
+            ))}
+            <Link
+              to="/jcb/patna"
+              className="text-primary-foreground/60 hover:text-jcb transition-colors text-xs"
+            >
+              + 152 location pages
+            </Link>
+          </div>
+        </div>
+      </div>
       <div className="border-t border-primary-foreground/10">
         <div className="container mx-auto px-4 py-4 pr-28 lg:pr-40">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-primary-foreground/60">

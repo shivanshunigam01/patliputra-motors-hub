@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://patliputraautos.com/sitemap.xml
+
+# Optional: also discover via API
+# Sitemap: https://api.patliputragroup.com/seo/sitemap.xml

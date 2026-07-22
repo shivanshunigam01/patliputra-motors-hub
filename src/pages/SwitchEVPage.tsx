@@ -27,6 +27,11 @@ import { CompareFloatingBar } from "@/components/CompareFloatingBar";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { DistrictGrid } from "@/components/seo/DistrictGrid";
+import { FAQAccordion } from "@/components/seo/FAQAccordion";
+import { getFaqsForCategory } from "@/seo/faqs";
+import { SEO_CATEGORIES } from "@/seo/categories";
 
 import switchEvBus from "@/assets/switch-ev-bus.jpg";
 
@@ -134,6 +139,12 @@ const SwitchEVPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Switch Mobility Bihar | Electric Bus & EV LCV"
+        description="Electric bus aur electric LCV Bihar – Switch Mobility. EV price, charging, fleet ROI aur subsidy guidance. Patliputra authorized partner."
+        path="/switch-ev"
+        keywords={SEO_CATEGORIES.switch.primaryKeywords}
+      />
       <Navbar />
       <main>
         {/* Hero Banner */}
@@ -336,6 +347,13 @@ const SwitchEVPage = () => {
           </div>
         </section>
       </main>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <FAQAccordion faqs={getFaqsForCategory("switch")} />
+        </div>
+      </section>
+      <DistrictGrid categorySlug="switch" title="Switch Mobility in every Bihar district" />
 
       <Footer />
       <FloatingCTA />

@@ -27,6 +27,13 @@ import { CompareFloatingBar } from "@/components/CompareFloatingBar";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { DistrictGrid } from "@/components/seo/DistrictGrid";
+import { FAQAccordion } from "@/components/seo/FAQAccordion";
+import { getFaqsForCategory } from "@/seo/faqs";
+import { SEO_CATEGORIES } from "@/seo/categories";
+import { webPageSchema } from "@/seo/schema";
 
 import heroJcb from "@/assets/hero-jcb.jpg";
 
@@ -146,6 +153,19 @@ const JCBPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="JCB Dealer Bihar | Price, EMI, Excavator & 3DX"
+        description="Bihar mein JCB dealer – Backhoe Loader, Excavator, Telehandler. JCB price, EMI finance, genuine parts aur service. District-wise support across Patna, Muzaffarpur, Gaya aur more."
+        path="/jcb"
+        keywords={SEO_CATEGORIES.jcb.primaryKeywords}
+      />
+      <JsonLd
+        data={webPageSchema({
+          title: "JCB Dealer Bihar | Price, EMI, Excavator & 3DX",
+          description: "Authorized JCB dealer in Bihar – price, EMI and service.",
+          path: "/jcb",
+        })}
+      />
       <Navbar />
 
       <main>
@@ -319,6 +339,14 @@ const JCBPage = () => {
             </div>
           </div>
         </section>
+
+        <section className="py-12">
+          <div className="container mx-auto px-4">
+            <FAQAccordion faqs={getFaqsForCategory("jcb")} />
+          </div>
+        </section>
+
+        <DistrictGrid categorySlug="jcb" title="JCB in every Bihar district" />
       </main>
 
       <Footer />

@@ -10,6 +10,10 @@ import { FloatingCTA } from '@/components/FloatingCTA';
 import { EMICalculator } from '@/components/EMICalculator';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminSettings } from "@/context/AdminSettingsContext";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { FAQAccordion } from "@/components/seo/FAQAccordion";
+import { getFaqsForCategory } from "@/seo/faqs";
+import { Link } from "react-router-dom";
 
 const partners = [
   "State Bank of India (SBI)",
@@ -127,6 +131,12 @@ const FinancePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Truck & JCB Finance Bihar | EMI, Loan & Partners"
+        description="JCB finance aur truck EMI Bihar. Easy loan, bank/NBFC partners, down payment guidance aur EMI calculator – Patliputra Finance."
+        path="/finance"
+        keywords={["Truck Finance", "JCB Finance", "Truck EMI", "JCB on EMI", "Vehicle loan Bihar"]}
+      />
       <Navbar />
 
       <main className="pt-20">
@@ -318,6 +328,17 @@ const FinancePage = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="py-12">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <div className="flex flex-wrap gap-3 justify-center mb-8">
+              <Link to="/emi-calculator" className="text-sm px-3 py-2 rounded-full border border-border hover:border-primary/40">EMI Calculator</Link>
+              <Link to="/loan" className="text-sm px-3 py-2 rounded-full border border-border hover:border-primary/40">Loan Guide</Link>
+              <Link to="/faq" className="text-sm px-3 py-2 rounded-full border border-border hover:border-primary/40">FAQ</Link>
+            </div>
+            <FAQAccordion faqs={[...getFaqsForCategory("jcb").slice(1, 4), ...getFaqsForCategory("ashok-leyland").slice(0, 3)]} />
           </div>
         </section>
 

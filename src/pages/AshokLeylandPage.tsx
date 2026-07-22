@@ -27,6 +27,11 @@ import { CompareFloatingBar } from "@/components/CompareFloatingBar";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { DistrictGrid } from "@/components/seo/DistrictGrid";
+import { FAQAccordion } from "@/components/seo/FAQAccordion";
+import { getFaqsForCategory } from "@/seo/faqs";
+import { SEO_CATEGORIES } from "@/seo/categories";
 
 import leylandTrucks from "@/assets/leyland-trucks.jpg";
 
@@ -134,6 +139,12 @@ const AshokLeylandPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Ashok Leyland Dealer Bihar | Truck Price, Tipper & Finance"
+        description="Ashok Leyland trucks, tippers, buses, LCV/ICV/HCV in Bihar. Price, truck EMI finance aur service – Patliputra Motors."
+        path="/ashok-leyland"
+        keywords={SEO_CATEGORIES["ashok-leyland"].primaryKeywords}
+      />
       <Navbar />
       <main>
         {/* Hero Banner */}
@@ -306,6 +317,13 @@ const AshokLeylandPage = () => {
           </div>
         </section>
       </main>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <FAQAccordion faqs={getFaqsForCategory("ashok-leyland")} />
+        </div>
+      </section>
+      <DistrictGrid categorySlug="ashok-leyland" title="Ashok Leyland in every Bihar district" />
 
       <Footer />
       <FloatingCTA />

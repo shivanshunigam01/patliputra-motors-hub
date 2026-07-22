@@ -26,6 +26,11 @@ import { CompareFloatingBar } from "@/components/CompareFloatingBar";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/services/api";
+import { SEOHead } from "@/components/seo/SEOHead";
+import { DistrictGrid } from "@/components/seo/DistrictGrid";
+import { FAQAccordion } from "@/components/seo/FAQAccordion";
+import { getFaqsForCategory } from "@/seo/faqs";
+import { SEO_CATEGORIES } from "@/seo/categories";
 
 import usedVehiclesImg from "@/assets/hero-jcb.jpg";
 import { getImageUrl } from "@/lib/imageUrl";
@@ -110,6 +115,12 @@ const UsedVehiclesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Used JCB Bihar | Second Hand Excavator & Certified Machines"
+        description="Used JCB Bihar – second hand excavator, tipper aur certified pre-owned machines. Inspection, RC transfer guidance aur finance support."
+        path="/used-vehicles"
+        keywords={SEO_CATEGORIES["used-jcb"].primaryKeywords}
+      />
       <Navbar />
 
       <main>
@@ -220,6 +231,13 @@ const UsedVehiclesPage = () => {
           </div>
         </section>
       </main>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <FAQAccordion faqs={getFaqsForCategory("used-jcb")} />
+        </div>
+      </section>
+      <DistrictGrid categorySlug="used-jcb" title="Used JCB in every Bihar district" />
 
       <Footer />
       <FloatingCTA />
