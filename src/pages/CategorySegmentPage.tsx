@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Phone, MessageCircle, ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -13,13 +13,16 @@ import { DistrictGrid } from "@/components/seo/DistrictGrid";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { useSeoRouteParams } from "@/hooks/useSeoRouteParams";
 import { getSeoCategory, getSubcategory } from "@/seo/categories";
 import { getFaqsForCategory } from "@/seo/faqs";
 import { webPageSchema } from "@/seo/schema";
 import NotFound from "@/pages/NotFound";
 
-export default function CategorySegmentPage() {
-  const { category, district: segment } = useParams<{ category: string; district: string }>();
+type Props = { categorySlug?: string };
+
+export default function CategorySegmentPage({ categorySlug }: Props) {
+  const { category, district: segment } = useSeoRouteParams(categorySlug);
   const { language } = useLanguage();
   const { settings } = useAdminSettings();
 
@@ -82,12 +85,20 @@ export default function CategorySegmentPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Button size="lg" variant="outline" className="gap-2 border-primary-foreground/30 text-primary-foreground">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="gap-2 border-primary-foreground/30 text-primary-foreground"
+                  >
                     <MessageCircle className="h-5 w-5" /> WhatsApp
                   </Button>
                 </a>
                 <Link to={cat.hubPath}>
-                  <Button size="lg" variant="outline" className="gap-2 border-primary-foreground/30 text-primary-foreground">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="gap-2 border-primary-foreground/30 text-primary-foreground"
+                  >
                     View all {cat.name} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

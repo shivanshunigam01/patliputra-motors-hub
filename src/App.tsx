@@ -42,6 +42,7 @@ import InsurancePage from "./pages/seo/InsurancePage";
 import RtoPage from "./pages/seo/RtoPage";
 import GovernmentSchemesPage from "./pages/seo/GovernmentSchemesPage";
 import BlogsHubPage from "./pages/seo/BlogsHubPage";
+import BlogPostPage from "./pages/seo/BlogPostPage";
 import { JsonLd } from "./components/seo/JsonLd";
 import { organizationSchema, localBusinessSchema } from "./seo/schema";
 
@@ -69,10 +70,16 @@ const App = () => (
                 <Route path="/certified-refurbished" element={<Navigate to="/used-vehicles" replace />} />
 
                 {/* Hyperlocal SEO: /jcb/patna, /ashok-leyland/gaya, /switch/patna, /used-jcb/patna */}
-                <Route path="/jcb/:district" element={<DistrictLandingPage />} />
-                <Route path="/ashok-leyland/:district" element={<DistrictLandingPage />} />
-                <Route path="/switch/:district" element={<DistrictLandingPage />} />
-                <Route path="/used-jcb/:district" element={<DistrictLandingPage />} />
+                <Route path="/jcb/:district" element={<DistrictLandingPage categorySlug="jcb" />} />
+                <Route
+                  path="/ashok-leyland/:district"
+                  element={<DistrictLandingPage categorySlug="ashok-leyland" />}
+                />
+                <Route path="/switch/:district" element={<DistrictLandingPage categorySlug="switch" />} />
+                <Route
+                  path="/used-jcb/:district"
+                  element={<DistrictLandingPage categorySlug="used-jcb" />}
+                />
 
                 {/* SEO architecture layers */}
                 <Route path="/emi-calculator" element={<EmiCalculatorPage />} />
@@ -81,6 +88,7 @@ const App = () => (
                 <Route path="/rto" element={<RtoPage />} />
                 <Route path="/government-schemes" element={<GovernmentSchemesPage />} />
                 <Route path="/blogs" element={<BlogsHubPage />} />
+                <Route path="/blogs/:slug" element={<BlogPostPage />} />
                 <Route path="/faq" element={<FaqPage />} />
                 <Route path="/spare-parts" element={<Navigate to="/parts-lubricants" replace />} />
                 <Route path="/service" element={<Navigate to="/service-warranty" replace />} />

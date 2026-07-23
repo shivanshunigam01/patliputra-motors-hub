@@ -56,11 +56,28 @@ const staticPaths = [
   "/product-finder",
 ];
 
+const blogSlugs = [
+  "jcb-se-mahine-mein-kitni-earning",
+  "bihar-mein-contractor-business-kaise-shuru-karein",
+  "road-contractor-ke-liye-best-jcb",
+  "truck-business-kaise-shuru-karein-bihar",
+  "sand-transport-ke-liye-kaunsa-tipper",
+  "electric-bus-profitable-hai-bihar",
+  "certified-used-jcb-buying-guide",
+  "jcb-loan-bina-income-proof",
+  "machine-maintenance-checklist-bihar",
+  "cement-transport-business-bihar",
+];
+
 const now = new Date().toISOString();
 const urls = [];
 
 for (const p of staticPaths) {
   urls.push({ loc: `${SITE}${p}`, priority: p === "/" ? "1.0" : "0.8" });
+}
+
+for (const slug of blogSlugs) {
+  urls.push({ loc: `${SITE}/blogs/${slug}`, priority: "0.65" });
 }
 
 for (const [cat, subs] of Object.entries(SUBS)) {

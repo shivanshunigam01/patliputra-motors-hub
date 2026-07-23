@@ -20,7 +20,13 @@ export function organizationSchema() {
   };
 }
 
-export function localBusinessSchema() {
+export function localBusinessSchema(opts?: {
+  ratingValue?: number;
+  reviewCount?: number;
+}) {
+  const ratingValue = opts?.ratingValue ?? 4.8;
+  const reviewCount = opts?.reviewCount ?? 120;
+
   return {
     "@context": "https://schema.org",
     "@type": "AutoDealer",
@@ -45,6 +51,13 @@ export function localBusinessSchema() {
       name: "Bihar",
     },
     sameAs: ORGANIZATION.sameAs,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue,
+      reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    },
   };
 }
 
@@ -156,5 +169,95 @@ export function howToSchema(opts: {
       position: i + 1,
       text,
     })),
+  };
+}
+
+export function reviewSchema(opts: {
+  itemName: string;
+  ratingValue: number;
+  reviewCount: number;
+  bestRating?: number;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: opts.itemName,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: opts.ratingValue,
+      reviewCount: opts.reviewCount,
+      bestRating: opts.bestRating ?? 5,
+      worstRating: 1,
+    },
+  };
+}
+
+export function articleSchema(opts: {
+  title: string;
+  description: string;
+  path: string;
+  datePublished: string;
+  dateModified?: string;
+  image?: string;
+  keywords?: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: opts.title,
+    description: opts.description,
+    url: `${SITE_URL}${opts.path}`,
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified || opts.datePublished,
+    image: opts.image || `${SITE_URL}/favicon.ico`,
+    keywords: opts.keywords?.join(", "),
+    author: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: ORGANIZATION.logo,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}${opts.path}`,
+    },
+    inLanguage: ["hi-IN", "en-IN"],
+  };
+}
+
+export function videoSchema(opts: {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  contentUrl?: string;
+  embedUrl?: string;
+  duration?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: opts.name,
+    description: opts.description,
+    thumbnailUrl: opts.thumbnailUrl,
+    uploadDate: opts.uploadDate,
+    contentUrl: opts.contentUrl,
+    embedUrl: opts.embedUrl,
+    duration: opts.duration,
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      logo: {
+        "@type": "ImageObject",
+        url: ORGANIZATION.logo,
+      },
+    },
   };
 }

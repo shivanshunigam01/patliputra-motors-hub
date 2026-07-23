@@ -33,7 +33,7 @@ export type SeoLandingPageData = {
   relatedDistricts?: { slug: string; name: string; nameHi: string; path: string }[];
 };
 
-function buildLocalFallback(category: string, district: string): SeoLandingPageData {
+export function buildLocalFallback(category: string, district: string): SeoLandingPageData {
   const cat = getSeoCategory(category)!;
   const d = getDistrictBySlug(district)!;
   const faqs = getFaqsForCategory(category);

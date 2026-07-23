@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Phone,
@@ -23,30 +23,48 @@ import { DistrictGrid } from "@/components/seo/DistrictGrid";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useAdminSettings } from "@/context/AdminSettingsContext";
 import { getWhatsAppUrl } from "@/lib/whatsapp";
+import { useSeoRouteParams } from "@/hooks/useSeoRouteParams";
 import { getSeoCategory } from "@/seo/categories";
 import { getDistrictBySlug, isDistrictSlug } from "@/seo/districts";
 import { localBusinessSchema, webPageSchema, howToSchema } from "@/seo/schema";
-import { fetchSeoLandingPage, type SeoLandingPageData } from "@/services/seo.service";
+import {
+  buildLocalFallback,
+  fetchSeoLandingPage,
+  type SeoLandingPageData,
+} from "@/services/seo.service";
 import NotFound from "@/pages/NotFound";
 import CategorySegmentPage from "@/pages/CategorySegmentPage";
 
-export default function DistrictLandingPage() {
-  const { category, district } = useParams<{ category: string; district: string }>();
+type Props = { categorySlug?: string };
+
+export default function DistrictLandingPage({ categorySlug }: Props) {
+  const { category, district } = useSeoRouteParams(categorySlug);
   const { language } = useLanguage();
   const { settings } = useAdminSettings();
-  const [page, setPage] = useState<SeoLandingPageData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const cat = getSeoCategory(category);
   const isDistrict = isDistrictSlug(district);
 
+  const [page, setPage] = useState<SeoLandingPageData | null>(() => {
+    if (category && district && getSeoCategory(category) && isDistrictSlug(district)) {
+      return buildLocalFallback(category, district);
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    if (!category || !district || !cat || !isDistrict) {
+    if (!category || !district || !getSeoCategory(category) || !isDistrictSlug(district)) {
+      setPage(null);
       setLoading(false);
       return;
     }
-    let cancelled = false;
+
+    // Instant local content, then enrich from API if available
+    setPage(buildLocalFallback(category, district));
     setLoading(true);
+
+    let cancelled = false;
     fetchSeoLandingPage(category, district).then((data) => {
       if (!cancelled) {
         setPage(data);
@@ -56,22 +74,24 @@ export default function DistrictLandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [category, district, cat, isDistrict]);
+  }, [category, district]);
 
   // Subcategory route: /jcb/backhoe-loader (not a district)
   if (cat && district && !isDistrict) {
-    return <CategorySegmentPage />;
+    return <CategorySegmentPage categorySlug={cat.slug} />;
   }
 
   if (!cat || !district || !getDistrictBySlug(district)) {
     return <NotFound />;
   }
 
-  if (loading || !page) {
+  if (!page) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="pt-32 pb-20 text-center text-muted-foreground">Loading…</div>
+        <div className="pt-32 pb-20 text-center text-muted-foreground">
+          {loading ? "Loading…" : "Page not found"}
+        </div>
         <Footer />
       </div>
     );
@@ -205,9 +225,7 @@ export default function DistrictLandingPage() {
 
               {cat.subcategories.length > 0 && (
                 <div className="pt-4">
-                  <h3 className="font-semibold mb-3 text-foreground">
-                    {language === "hi" ? "Popular categories" : "Popular categories"}
-                  </h3>
+                  <h3 className="font-semibold mb-3 text-foreground">Popular categories</h3>
                   <div className="flex flex-wrap gap-2">
                     {cat.subcategories.map((sub) => (
                       <Link
